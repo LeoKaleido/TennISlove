@@ -782,3 +782,8 @@ textarea.input {
   font-size: 22px;
   line-height: 1.2;
 }
+
+[data-theme='dark'] .btn-dark {
+  background: #c6eedb;
+  color: #0b1a24;
+}

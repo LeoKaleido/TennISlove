@@ -3,7 +3,8 @@ import { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { api } from '../api';
 import { MatchRow } from '../components/MatchRow';
-import { Avatar, BackButton, ErrorState, Loading } from '../components/ui';
+import { Avatar, BackButton, ErrorState, Loading, useToast } from '../components/ui';
+import { compressImage, uploadImage } from '../photos';
 import { isMine, opponentOf, playerIndex, useMe, useSeason, ZONE_STYLE } from '../data';
 import { getTheme, setTheme, type Theme } from '../theme';
 
@@ -15,6 +16,16 @@ export function ProfilePage() {
   const queryClient = useQueryClient();
   const [tab, setTab] = useState<'next' | 'played'>('next');
   const [theme, setThemeState] = useState<Theme>(getTheme());
+
+  const toast = useToast();
+  const uploadPhoto = useMutation({
+    mutationFn: async (file: File) => uploadImage('/api/me/photo', await compressImage(file, 800)),
+    onSuccess: () => {
+      queryClient.invalidateQueries();
+      toast('Foto profilo aggiornata');
+    },
+    onError: (e) => toast(e.message),
+  });
 
   const logout = useMutation({
     mutationFn: () => api('/api/auth/logout', { method: 'POST' }),
@@ -112,9 +123,21 @@ export function ProfilePage() {
           </span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-          <div style={{ borderRadius: 28, boxShadow: '0 0 0 3px #C6EEDB', overflow: 'hidden' }}>
-            <Avatar player={p} size={92} />
-          </div>
+          {isMe ? (
+            <label style={{ position: 'relative', cursor: 'pointer', flex: 'none' }} aria-label="Cambia la tua foto">
+              <input type="file" accept="image/*" hidden onChange={(e) => e.target.files?.[0] && uploadPhoto.mutate(e.target.files[0])} />
+              <div style={{ borderRadius: '50%', boxShadow: '0 0 0 3px #C6EEDB', opacity: uploadPhoto.isPending ? 0.5 : 1 }}>
+                <Avatar player={p} size={92} />
+              </div>
+              <span style={{ position: 'absolute', bottom: -8, left: '50%', transform: 'translateX(-50%)', whiteSpace: 'nowrap', padding: '2px 8px', borderRadius: 99, background: '#C6EEDB', color: '#0B1A24', fontSize: 10.5, fontWeight: 800 }}>
+                {uploadPhoto.isPending ? 'Carico…' : p.photoUrl ? 'Cambia' : '+ Foto'}
+              </span>
+            </label>
+          ) : (
+            <div style={{ borderRadius: '50%', boxShadow: '0 0 0 3px #C6EEDB', flex: 'none' }}>
+              <Avatar player={p} size={92} />
+            </div>
+          )}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6, minWidth: 0 }}>
             <span className="display" style={{ fontSize: 34 }}>
               {p.firstName}

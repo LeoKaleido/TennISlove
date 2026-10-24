@@ -21,6 +21,7 @@ Registro cronologico di eventi, decisioni e domande aperte. Le voci nuove si agg
 | 24/10/2026 | Mockup accettato ed esportato in `design/mockup/`. Si passa allo sviluppo, tutto su Docker (D-027, D-028, D-029). |
 | 24/10/2026 | Rilascio 1 in sviluppo, funzionante in locale: motore di punteggio (47 test, classifica identica all'Excel), API (login magic link, stagione, programmazione con email e .ics, risultato, conferma/contestazione, conferma automatica, admin minimo), frontend (login, home, classifica, calendario, scheda partita, programmazione, inserimento risultato, conferma, profilo, admin). Mancano: selfie e gallery, gestione tornei/circoli/calendario da admin, import Excel, fase finale, deploy. |
 | 24/10/2026 | Vocale del responsabile (trascritto in locale): l'admin crea i tornei, iscrive gli atleti con nome, cognome ed email, a loro arriva un'email per entrare; dentro vedono calendario e classifica e caricano la foto dell'incontro; il punteggio segue la formula di Giuseppe. Confronto con lo stato: mancano creazione tornei, iscrizione/invito giocatori dal gestionale, foto. |
+| 24/10/2026 | Completati i tre punti del vocale: giocatori con invito, tornei (procedura in 4 passi, in programma/in corso/archivio) e circoli, foto (selfie multipli, copertina, gallery, foto profilo, moderazione dal gestionale). App e gestionale separati (D-036). |
 
 ## Decisioni
 
@@ -62,6 +63,8 @@ Registro cronologico di eventi, decisioni e domande aperte. Le voci nuove si agg
 | D-034 | 24/10/2026 | Correzioni dei risultati solo dal **gestionale**, con un pannello desktop; i risultati inseriti da lì sono subito confermati (`PUT /api/admin/matches/:id/result`). Dall'app mobile inseriscono e correggono solo i due giocatori della partita | Il gestionale non deve rimandare a schermate mobili | Accettata |
 | D-035 | 24/10/2026 | Account **creati dall'admin** nel gestionale (nome, cognome, nome breve, email) con pulsante **Invita**: arriva un'email con il link per entrare (magic link con validità più lunga, 7 giorni). Gli accessi successivi restano via magic link (D-014). Niente password | Allineato al vocale del responsabile (account preparato dall'admin, email per entrare) senza gestire password | Accettata |
 | D-036 | 24/10/2026 | **Nessun passaggio tra app e gestionale**: l'app (mobile) non ha link al gestionale e il gestionale (desktop) non ha link all'app, ha solo "Esci". Il gestionale si apre dal suo indirizzo `/admin`; un account solo admin dopo il login atterra lì | Sono due prodotti con contesti d'uso diversi (telefono vs computer) | Accettata |
+| D-037 | 24/10/2026 | Un solo torneo **in corso** alla volta. Un torneo creato mentre un altro è in corso resta **in programma** e si avvia dopo aver chiuso quello attuale; alla chiusura passa in archivio con il campione (primo in classifica, se da solo) | Evita ambiguità su cosa vedono i giocatori; consente di preparare la stagione successiva | Accettata |
+| D-038 | 24/10/2026 | Foto su **disco del server** (cartella `uploads/`, volume Docker incluso nel backup), servite solo a utenti con login. Il telefono le riduce a 2000 px in JPEG prima dell'invio (via anche i metadati GPS); limite 8 MB; foto profilo a 800 px | Semplice, nessun servizio esterno, volumi minimi (circa 100 MB a stagione) | Accettata |
 
 ## Domande aperte
 

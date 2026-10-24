@@ -10,6 +10,7 @@ import { LoginPage } from './pages/Login';
 import { MatchPage } from './pages/Match';
 import { ProfilePage } from './pages/Profile';
 import { ResultPage } from './pages/Result';
+import { SelfiePage } from './pages/Selfie';
 import { StandingsPage } from './pages/Standings';
 import { VerifyPage } from './pages/Verify';
 
@@ -62,6 +63,7 @@ export function App() {
           <Route path="/partite/:id" element={<MatchPage />} />
           <Route path="/partite/:id/risultato" element={<ResultPage />} />
           <Route path="/partite/:id/conferma" element={<ConfirmPage />} />
+          <Route path="/partite/:id/foto" element={<SelfiePage />} />
         </Route>
       </Route>
       <Route element={<RequireLogin admin />}>

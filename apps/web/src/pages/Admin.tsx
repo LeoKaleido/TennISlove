@@ -5,12 +5,13 @@ import { formatDayWithWeekday, formatScore, romeDay } from '@tentennis/shared';
 import { api, type Match, type SeasonOverview } from '../api';
 import { AdminResultEditor } from '../components/AdminResultEditor';
 import { AdminClubs } from './AdminClubs';
+import { AdminPhotos } from './AdminPhotos';
 import { AdminPlayers } from './AdminPlayers';
 import { AdminSeasons } from './AdminSeasons';
 import { ErrorState, Loading, Logo, StatusPill, useToast } from '../components/ui';
 import { matchInfo, playerIndex, useSeason } from '../data';
 
-type Tab = 'dash' | 'seasons' | 'players' | 'clubs' | 'results';
+type Tab = 'dash' | 'seasons' | 'players' | 'clubs' | 'results' | 'photos';
 
 const TABS: { key: Tab; label: string }[] = [
   { key: 'dash', label: 'Dashboard' },
@@ -18,6 +19,7 @@ const TABS: { key: Tab; label: string }[] = [
   { key: 'players', label: 'Giocatori' },
   { key: 'clubs', label: 'Circoli' },
   { key: 'results', label: 'Risultati' },
+  { key: 'photos', label: 'Foto' },
 ];
 
 export function AdminPage() {
@@ -80,6 +82,7 @@ export function AdminPage() {
         {tab === 'players' && <AdminPlayers />}
         {tab === 'seasons' && <AdminSeasons />}
         {tab === 'clubs' && <AdminClubs />}
+        {tab === 'photos' && <AdminPhotos data={data} />}
       </main>
       {editingMatch && <AdminResultEditor key={editingMatch.id} match={editingMatch} players={playerIndex(data.players)} onClose={() => setEditing(null)} />}
     </div>

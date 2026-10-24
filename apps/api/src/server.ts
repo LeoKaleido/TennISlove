@@ -8,6 +8,7 @@ import { adminRoutes } from './routes/admin';
 import { adminPlayerRoutes } from './routes/admin-players';
 import { adminSeasonRoutes } from './routes/admin-seasons';
 import { matchRoutes } from './routes/matches';
+import { photoRoutes } from './routes/photos';
 import { seasonRoutes } from './routes/season';
 
 const app = Fastify({ logger: { level: process.env.LOG_LEVEL ?? 'info' } });
@@ -25,6 +26,7 @@ await app.register(cookie);
 await app.register(authPlugin);
 await app.register(seasonRoutes);
 await app.register(matchRoutes);
+await app.register(photoRoutes);
 await app.register(adminRoutes);
 await app.register(adminPlayerRoutes);
 await app.register(adminSeasonRoutes);

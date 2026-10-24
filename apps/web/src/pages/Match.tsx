@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useState } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { formatDayWithWeekday, romeDay, romeTime } from '@tentennis/shared';
 import { api, type MatchDetail } from '../api';
@@ -14,6 +15,7 @@ export function MatchPage() {
   const detail = useQuery({ queryKey: ['match', id], queryFn: () => api<MatchDetail>(`/api/matches/${id}`) });
   const queryClient = useQueryClient();
   const toast = useToast();
+  const [openPhoto, setOpenPhoto] = useState<string | null>(null);
 
   const postpone = useMutation({
     mutationFn: () => api(`/api/matches/${id}/postpone`, { method: 'POST' }),
@@ -92,6 +94,14 @@ export function MatchPage() {
         <div style={{ position: 'absolute', top: 14, left: 14 }}>
           <BackButton />
         </div>
+        {mine && (
+          <Link
+            to={`/partite/${m.id}/foto`}
+            style={{ position: 'absolute', top: 14, right: 14, height: 42, padding: '0 14px', borderRadius: 99, background: 'rgba(11,26,36,.72)', color: '#fff', fontWeight: 700, fontSize: 13, display: 'flex', alignItems: 'center', textDecoration: 'none' }}
+          >
+            + Foto
+          </Link>
+        )}
         <div style={{ position: 'absolute', left: 14, bottom: 40, padding: '6px 11px', borderRadius: 99, background: '#C6EEDB', color: '#0B1A24', fontSize: 12, fontWeight: 800 }}>
           Giornata {round.number}, {roundRange(round)}
         </div>
@@ -162,6 +172,47 @@ export function MatchPage() {
           </div>
         </div>
       </div>
+
+      {(detail.data.photos.length > 0 || mine) && (
+        <section style={{ padding: '22px 14px 0', display: 'flex', flexDirection: 'column', gap: 10 }}>
+          <div className="section-head">
+            <h2 className="title">Foto della partita</h2>
+            <span className="faint" style={{ fontSize: 12.5 }}>
+              {detail.data.photos.length === 1 ? '1 foto' : `${detail.data.photos.length} foto`}
+            </span>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6 }}>
+            {detail.data.photos.map((p) => (
+              <button
+                key={p.id}
+                aria-label="Apri foto"
+                onClick={() => setOpenPhoto(p.url)}
+                style={{ aspectRatio: '1', borderRadius: 14, border: 0, padding: 0, background: `var(--surface2) url(${p.url}) center/cover`, position: 'relative' }}
+              >
+                {m.coverPhotoUrl === p.url && (
+                  <span style={{ position: 'absolute', left: 6, top: 6, padding: '2px 6px', borderRadius: 6, background: '#0B1A24', color: '#C6EEDB', fontSize: 10, fontWeight: 700 }}>Copertina</span>
+                )}
+              </button>
+            ))}
+            {mine && (
+              <Link
+                to={`/partite/${m.id}/foto`}
+                style={{ aspectRatio: '1', borderRadius: 14, border: '1.5px dashed var(--line2)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 4, color: 'var(--ink2)', textDecoration: 'none' }}
+              >
+                <span style={{ fontSize: 24, lineHeight: 1 }}>+</span>
+                <span style={{ fontSize: 12, fontWeight: 700 }}>Aggiungi</span>
+              </Link>
+            )}
+          </div>
+        </section>
+      )}
+
+      {openPhoto && (
+        <div className="modal-wrap" role="dialog" aria-modal="true" aria-label="Foto" onClick={() => setOpenPhoto(null)}>
+          <div className="modal-backdrop" style={{ background: 'rgba(0,0,0,.88)' }} />
+          <img src={openPhoto} alt="Foto della partita" style={{ position: 'relative', maxWidth: '100%', maxHeight: 'calc(100dvh - 40px)', borderRadius: 12 }} />
+        </div>
+      )}
 
       {sheetOpen && (
         <ScheduleSheet
