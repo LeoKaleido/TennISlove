@@ -1,19 +1,23 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { formatDayWithWeekday, formatScore, romeDay } from '@tentennis/shared';
 import { api, type Match, type SeasonOverview } from '../api';
 import { AdminResultEditor } from '../components/AdminResultEditor';
+import { AdminClubs } from './AdminClubs';
 import { AdminPlayers } from './AdminPlayers';
+import { AdminSeasons } from './AdminSeasons';
 import { ErrorState, Loading, Logo, StatusPill, useToast } from '../components/ui';
 import { matchInfo, playerIndex, useSeason } from '../data';
 
-type Tab = 'dash' | 'results' | 'players';
+type Tab = 'dash' | 'seasons' | 'players' | 'clubs' | 'results';
 
 const TABS: { key: Tab; label: string }[] = [
   { key: 'dash', label: 'Dashboard' },
-  { key: 'results', label: 'Risultati' },
+  { key: 'seasons', label: 'Tornei' },
   { key: 'players', label: 'Giocatori' },
+  { key: 'clubs', label: 'Circoli' },
+  { key: 'results', label: 'Risultati' },
 ];
 
 export function AdminPage() {
@@ -67,15 +71,15 @@ export function AdminPage() {
             </button>
           ))}
         </div>
-        <Link to="/" style={{ height: 40, padding: '0 12px', border: '1px solid rgba(255,255,255,.18)', borderRadius: 11, color: '#fff', fontWeight: 600, fontSize: 13, display: 'flex', alignItems: 'center', textDecoration: 'none', marginTop: 8 }}>
-          Torna all'app
-        </Link>
+        <LogoutButton />
       </nav>
 
       <main className="admin-main">
         {tab === 'dash' && <Dashboard data={data} onEdit={setEditing} />}
         {tab === 'results' && <Results data={data} onEdit={setEditing} />}
         {tab === 'players' && <AdminPlayers />}
+        {tab === 'seasons' && <AdminSeasons />}
+        {tab === 'clubs' && <AdminClubs />}
       </main>
       {editingMatch && <AdminResultEditor key={editingMatch.id} match={editingMatch} players={playerIndex(data.players)} onClose={() => setEditing(null)} />}
     </div>
@@ -275,5 +279,25 @@ function Results({ data, onEdit }: { data: SeasonOverview; onEdit: (id: string) 
         })}
       </div>
     </>
+  );
+}
+
+function LogoutButton() {
+  const queryClient = useQueryClient();
+  const navigate = useNavigate();
+  const logout = useMutation({
+    mutationFn: () => api('/api/auth/logout', { method: 'POST' }),
+    onSuccess: () => {
+      queryClient.clear();
+      navigate('/login', { replace: true });
+    },
+  });
+  return (
+    <button
+      onClick={() => logout.mutate()}
+      style={{ height: 40, padding: '0 12px', border: '1px solid rgba(255,255,255,.18)', borderRadius: 11, background: 'transparent', color: '#fff', fontWeight: 600, fontSize: 13, textAlign: 'left', marginTop: 8 }}
+    >
+      Esci
+    </button>
   );
 }

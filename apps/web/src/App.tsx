@@ -20,6 +20,8 @@ function RequireLogin({ admin = false }: { admin?: boolean }) {
   if (me.isLoading) return <Loading />;
   if (!me.data) return <Navigate to="/login" replace state={{ from: location.pathname }} />;
   if (admin && !me.data.isAdmin) return <Navigate to="/" replace />;
+  // App e gestionale sono separati: un account solo amministratore vive nel gestionale
+  if (!admin && !me.data.playerId) return <Navigate to={me.data.isAdmin ? '/admin' : '/login'} replace />;
   return <Outlet />;
 }
 

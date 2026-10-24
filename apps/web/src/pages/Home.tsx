@@ -61,11 +61,6 @@ export function HomePage() {
             {data.season.subtitle}
           </span>
         </div>
-        {me.data?.isAdmin && (
-          <Link to="/admin" className="pill" style={{ border: '1px solid var(--line2)', color: 'var(--ink)', textDecoration: 'none', padding: '7px 11px' }}>
-            Admin
-          </Link>
-        )}
         {myPlayer && (
           <Link to="/profilo" aria-label="Il tuo profilo">
             <Avatar player={myPlayer} size={38} />

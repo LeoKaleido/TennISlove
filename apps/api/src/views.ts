@@ -91,7 +91,7 @@ export async function seasonOverview(season: Season) {
     }),
     db.round.findMany({ where: { seasonId: season.id }, orderBy: [{ phase: 'asc' }, { number: 'asc' }] }),
     db.match.findMany({ where: { seasonId: season.id }, include: matchInclude, orderBy: { code: 'asc' } }),
-    db.seasonClub.findMany({ where: { seasonId: season.id }, include: { club: true } }),
+    db.seasonClub.findMany({ where: { seasonId: season.id, club: { active: true } }, include: { club: true }, orderBy: { club: { name: 'asc' } } }),
   ]);
 
   const views = matches.map(toView);

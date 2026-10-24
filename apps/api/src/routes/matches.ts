@@ -58,6 +58,10 @@ async function loadForAction(id: string, user: CurrentUser, reply: FastifyReply)
     reply.code(403).send({ error: 'Puoi agire solo sulle tue partite' });
     return null;
   }
+  if (m.season.status !== 'ACTIVE') {
+    reply.code(409).send({ error: 'Il torneo non è in corso' });
+    return null;
+  }
   return m;
 }
 
@@ -168,6 +172,7 @@ export async function matchRoutes(app: FastifyInstance) {
     if (!m) return reply.code(404).send({ error: 'Partita non trovata' });
     // Dall'app inseriscono solo i due giocatori; l'admin corregge dal gestionale
     if (!isPlayerOf(user, m)) return reply.code(403).send({ error: 'Puoi inserire solo il risultato delle tue partite' });
+    if (m.season.status !== 'ACTIVE') return reply.code(409).send({ error: 'Il torneo non è in corso' });
     if (m.result?.status === 'CONFIRMED') {
       return reply.code(409).send({ error: 'Il risultato è già confermato: per correggerlo serve un amministratore' });
     }
@@ -200,7 +205,7 @@ export async function matchRoutes(app: FastifyInstance) {
       reply.code(404).send({ error: 'Nessun risultato da confermare' });
       return null;
     }
-    if (m.result.status !== 'PENDING') {
+    if (m.result.status !== 'PENDING' || m.season.status !== 'ACTIVE') {
       reply.code(409).send({ error: 'Il risultato non è più in attesa di conferma' });
       return null;
     }

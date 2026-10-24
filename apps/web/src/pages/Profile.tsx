@@ -61,11 +61,6 @@ export function ProfilePage() {
           <div className="sub">{me.data?.email}</div>
         </div>
         <div style={{ padding: '0 14px', display: 'flex', flexDirection: 'column', gap: 8 }}>
-          {me.data?.isAdmin && (
-            <Link to="/admin" className="btn btn-primary">
-              Vai al gestionale
-            </Link>
-          )}
           {themeButton}
           {logoutButton}
         </div>
@@ -208,11 +203,6 @@ export function ProfilePage() {
 
       {isMe && (
         <div style={{ padding: '0 14px', display: 'flex', flexDirection: 'column', gap: 8 }}>
-          {me.data?.isAdmin && (
-            <Link to="/admin" className="btn btn-outline" style={{ height: 50, fontSize: 14.5 }}>
-              Gestionale
-            </Link>
-          )}
           {themeButton}
           {logoutButton}
         </div>

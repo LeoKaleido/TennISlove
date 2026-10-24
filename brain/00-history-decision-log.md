@@ -61,6 +61,7 @@ Registro cronologico di eventi, decisioni e domande aperte. Le voci nuove si agg
 | D-033 | 24/10/2026 | L'app scarica in una sola chiamata (`GET /api/season`) tutta la stagione: giocatori, giornate, partite con stato e punti, classifica. Le schermate derivano i dati da lì | 66 partite = pochi KB; codice più semplice, navigazione istantanea | Accettata |
 | D-034 | 24/10/2026 | Correzioni dei risultati solo dal **gestionale**, con un pannello desktop; i risultati inseriti da lì sono subito confermati (`PUT /api/admin/matches/:id/result`). Dall'app mobile inseriscono e correggono solo i due giocatori della partita | Il gestionale non deve rimandare a schermate mobili | Accettata |
 | D-035 | 24/10/2026 | Account **creati dall'admin** nel gestionale (nome, cognome, nome breve, email) con pulsante **Invita**: arriva un'email con il link per entrare (magic link con validità più lunga, 7 giorni). Gli accessi successivi restano via magic link (D-014). Niente password | Allineato al vocale del responsabile (account preparato dall'admin, email per entrare) senza gestire password | Accettata |
+| D-036 | 24/10/2026 | **Nessun passaggio tra app e gestionale**: l'app (mobile) non ha link al gestionale e il gestionale (desktop) non ha link all'app, ha solo "Esci". Il gestionale si apre dal suo indirizzo `/admin`; un account solo admin dopo il login atterra lì | Sono due prodotti con contesti d'uso diversi (telefono vs computer) | Accettata |
 
 ## Domande aperte
 
