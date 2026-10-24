@@ -1,0 +1,1289 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+html,body{margin:0;padding:0;background:#DCE3E0}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+button,input,textarea,select{font:inherit;color:inherit}
+a{color:#1F6F54}a:hover{color:#0B1A24}
+:root{--bg:#F3F6F5;--surface:#FFFFFF;--surface2:#E9EFEC;--ink:#0B1A24;--ink2:#4F5F68;--ink3:#86959C;--line:#E0E7E4;--line2:#C7D2CD;--night:#0B1A24;--mint:#C6EEDB;--accent:#1F6F54;--onAccent:#FFFFFF;--mintInk:#0B1A24;--warnBg:#FBEFD2;--warnFg:#7A4F00;--recBg:#FCE2CE;--recFg:#8E3D10;--errBg:#FBE0DC;--errFg:#A8231B;--desk:#DCE3E0;--hero:#0B1A24;--ph1:#DCE6E1;--ph2:#D0DDD7;--phInk:#4F5F68}
+[data-theme="dark"]{--bg:#071118;--surface:#0E1E29;--surface2:#16303D;--ink:#EEF4F1;--ink2:#A6B7BE;--ink3:#6E838C;--line:#1A3140;--line2:#2B4757;--accent:#7FDDB5;--onAccent:#0B1A24;--warnBg:#3A2D0E;--warnFg:#F2C86B;--recBg:#3D2414;--recFg:#F3A672;--errBg:#3C1916;--errFg:#F49A90;--desk:#02080C;--hero:#102C33;--ph1:#142A35;--ph2:#10232D;--phInk:#A6B7BE}
+@keyframes sheetUp{from{transform:translateY(100%)}to{transform:none}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+</style>
+</helmet>
+<div data-theme="{{ theme }}" style="box-sizing:border-box;height:100vh;overflow:auto;background:var(--desk);display:flex;justify-content:center;align-items:safe center;gap:56px;font-family:'Archivo',system-ui,sans-serif;color:var(--ink);font-variant-numeric:tabular-nums;padding:{{ rootPad }}">
+
+<sc-if value="{{ showIndex }}" hint-placeholder-val="{{ false }}">
+<div style="width:250px;flex:none;display:flex;flex-direction:column;gap:22px;color:var(--ink)">
+  <div style="display:flex;align-items:center;gap:12px">
+    <svg width="44" height="44" viewBox="0 0 40 40" style="flex:none"><rect width="40" height="40" rx="11" fill="#0B1A24"></rect><ellipse cx="17" cy="15" rx="7.5" ry="9.5" transform="rotate(-35 17 15)" fill="none" stroke="#C6EEDB" stroke-width="2.6"></ellipse><line x1="22.4" y1="22.8" x2="28" y2="30.6" stroke="#C6EEDB" stroke-width="3.4" stroke-linecap="round"></line><circle cx="31" cy="10" r="3" fill="#C6EEDB"></circle><circle cx="10.5" cy="31.5" r="3" fill="#C6EEDB"></circle></svg>
+    <div style="display:flex;flex-direction:column;gap:3px"><span style="font-weight:800;font-stretch:72%;font-size:20px;text-transform:uppercase;line-height:1">ATP Umbria Tournament</span><span style="font-size:12px;color:var(--ink2)">Mockup, stagione 2026/27</span></div>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:2px">
+    <div style="font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ink3);padding:0 10px 6px">Schermate</div>
+    <sc-for list="{{ indexItems }}" as="it" hint-placeholder-count="12">
+      <button onClick="{{ it.go }}" style="display:flex;align-items:center;gap:10px;padding:8px 10px;border:0;border-radius:10px;cursor:pointer;text-align:left;font-size:14px;font-weight:600;background:{{ it.bg }};color:{{ it.fg }}"><span style="font-family:'JetBrains Mono',monospace;font-size:11px;opacity:.6;width:18px">{{ it.n }}</span>{{ it.label }}</button>
+    </sc-for>
+  </div>
+  <p style="margin:0;font-size:12.5px;line-height:1.5;color:var(--ink2);text-wrap:pretty">Sei Giuseppe De Francesca (giocatore e admin). Oggi è mercoledì 28 ottobre. Tema, layout classifica e cornice si cambiano dal pannello Tweaks.</p>
+</div>
+</sc-if>
+
+<div style="{{ frameStyle }}">
+<div ref="{{ scrollRef }}" style="position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;background:var(--bg);display:flex;flex-direction:column">
+
+<!-- LOGIN -->
+<sc-if value="{{ isLogin }}" hint-placeholder-val="{{ true }}">
+<div data-screen-label="01 Login" style="flex:1 0 auto;display:flex;flex-direction:column;background:#0B1A24;color:#fff;min-height:100%">
+  <div style="flex:1 0 auto;display:flex;flex-direction:column;justify-content:center;padding:40px 28px 24px;gap:28px;position:relative;overflow:hidden">
+    <div style="position:absolute;right:-60px;top:-40px;width:260px;height:380px;border:2px solid rgba(198,238,219,.14);border-radius:6px"></div>
+    <div style="position:absolute;right:-60px;top:150px;width:260px;height:0;border-top:2px solid rgba(198,238,219,.14)"></div>
+    <svg width="72" height="72" viewBox="0 0 40 40" style="flex:none"><rect width="40" height="40" rx="11" fill="#C6EEDB"></rect><ellipse cx="17" cy="15" rx="7.5" ry="9.5" transform="rotate(-35 17 15)" fill="none" stroke="#0B1A24" stroke-width="2.6"></ellipse><line x1="22.4" y1="22.8" x2="28" y2="30.6" stroke="#0B1A24" stroke-width="3.4" stroke-linecap="round"></line><circle cx="31" cy="10" r="3" fill="#1F6F54"></circle><circle cx="10.5" cy="31.5" r="3" fill="#1F6F54"></circle></svg>
+    <div style="display:flex;flex-direction:column;gap:10px;position:relative">
+      <div style="font-weight:900;font-stretch:66%;font-size:58px;line-height:.88;text-transform:uppercase">ATP Umbria<br>Tournament</div>
+      <div style="font-size:15px;color:#C6EEDB;font-weight:600">Amici Tennis, Pre-cena, 2026/27</div>
+    </div>
+  </div>
+  <div style="background:var(--surface);color:var(--ink);border-radius:28px 28px 0 0;padding:26px 22px 30px;display:flex;flex-direction:column;gap:16px">
+    <sc-if value="{{ notSent }}" hint-placeholder-val="{{ true }}">
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <div style="font-weight:800;font-stretch:75%;font-size:26px;text-transform:uppercase">Accedi</div>
+        <div style="font-size:14.5px;color:var(--ink2);line-height:1.45">Niente password: inserisci la tua email e ti mandiamo un link per entrare.</div>
+      </div>
+      <label style="display:flex;flex-direction:column;gap:6px">
+        <span style="font-size:12.5px;font-weight:700;color:var(--ink2)">Email</span>
+        <input type="email" value="{{ email }}" onChange="{{ onEmail }}" onKeyDown="{{ onEmailKey }}" placeholder="nome@email.it" style="height:54px;border-radius:16px;border:1.5px solid {{ emailBorder }};background:var(--bg);padding:0 16px;font-size:16px;outline:none">
+      </label>
+      <sc-if value="{{ hasLoginErr }}" hint-placeholder-val="{{ false }}"><div style="font-size:13px;color:var(--errFg);font-weight:600;margin-top:-6px">{{ loginErr }}</div></sc-if>
+      <button onClick="{{ sendLink }}" style="height:56px;border-radius:16px;border:0;background:var(--accent);color:var(--onAccent);font-weight:800;font-size:16px;cursor:pointer">Inviami il link</button>
+      <div style="font-size:12.5px;color:var(--ink3);text-align:center">App privata: accedono solo i 12 giocatori del torneo.</div>
+    </sc-if>
+    <sc-if value="{{ loginSent }}" hint-placeholder-val="{{ false }}">
+      <div style="width:56px;height:56px;border-radius:18px;background:var(--mint);display:grid;place-items:center"><svg width="28" height="28" viewBox="0 0 28 28" style="flex:none"><rect x="3" y="6" width="22" height="16" rx="3" fill="none" stroke="#0B1A24" stroke-width="2.2"></rect><path d="M4 8l10 7 10-7" fill="none" stroke="#0B1A24" stroke-width="2.2" stroke-linejoin="round"></path></svg></div>
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <div style="font-weight:800;font-stretch:75%;font-size:26px;text-transform:uppercase">Controlla la tua email</div>
+        <div style="font-size:14.5px;color:var(--ink2);line-height:1.45">Abbiamo inviato il link di accesso a <strong style="color:var(--ink)">{{ email }}</strong>. Aprilo da questo telefono: il link vale 15 minuti.</div>
+      </div>
+      <button onClick="{{ enterApp }}" style="height:56px;border-radius:16px;border:0;background:var(--accent);color:var(--onAccent);font-weight:800;font-size:16px;cursor:pointer">Ho aperto il link (demo)</button>
+      <div style="display:flex;justify-content:space-between;font-size:13.5px">
+        <button onClick="{{ resetLogin }}" style="border:0;background:none;padding:6px 0;cursor:pointer;color:var(--ink2);font-weight:600">Usa un'altra email</button>
+        <button onClick="{{ resend }}" style="border:0;background:none;padding:6px 0;cursor:pointer;color:var(--accent);font-weight:700">Invia di nuovo</button>
+      </div>
+    </sc-if>
+  </div>
+</div>
+</sc-if>
+
+<!-- HOME -->
+<sc-if value="{{ isHome }}" hint-placeholder-val="{{ false }}">
+<div data-screen-label="02 Home" style="display:flex;flex-direction:column;gap:24px;padding-bottom:24px">
+  <div style="display:flex;align-items:center;gap:10px;padding:14px 16px 0">
+    <svg width="38" height="38" viewBox="0 0 40 40" style="flex:none"><rect width="40" height="40" rx="11" fill="#0B1A24"></rect><ellipse cx="17" cy="15" rx="7.5" ry="9.5" transform="rotate(-35 17 15)" fill="none" stroke="#C6EEDB" stroke-width="2.6"></ellipse><line x1="22.4" y1="22.8" x2="28" y2="30.6" stroke="#C6EEDB" stroke-width="3.4" stroke-linecap="round"></line><circle cx="31" cy="10" r="3" fill="#C6EEDB"></circle><circle cx="10.5" cy="31.5" r="3" fill="#C6EEDB"></circle></svg>
+    <div style="display:flex;flex-direction:column;gap:3px;min-width:0;flex:1;overflow:hidden"><span style="font-weight:800;font-stretch:72%;font-size:17px;text-transform:uppercase;line-height:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">ATP Umbria Tournament</span><span style="font-size:11.5px;color:var(--ink2)">Amici Tennis, Pre-cena</span></div>
+    <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
+      <button onClick="{{ goAdmin }}" style="height:32px;padding:0 11px;border-radius:99px;border:1px solid var(--line2);background:transparent;font-size:12px;font-weight:700;cursor:pointer">Admin</button>
+      <button onClick="{{ goMe }}" style="width:38px;height:38px;border-radius:50%;border:0;background:{{ me.av }};color:{{ me.avFg }};font-weight:800;font-size:13px;cursor:pointer">{{ me.init }}</button>
+    </div>
+  </div>
+
+  <div style="margin:0 10px;background:var(--hero);color:#fff;border-radius:28px;padding:20px 16px 16px;display:flex;flex-direction:column;gap:16px;position:relative;overflow:hidden">
+    <div style="position:absolute;right:-30px;top:-30px;width:150px;height:200px;border:2px solid rgba(198,238,219,.12);border-radius:4px"></div>
+    <div style="display:flex;flex-direction:column;gap:6px;padding:0 4px;position:relative">
+      <div style="font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:#C6EEDB;font-weight:700">Giornata in corso</div>
+      <div style="font-weight:900;font-stretch:66%;font-size:60px;line-height:.86;text-transform:uppercase">Giornata {{ cur.n }}</div>
+      <div style="font-size:14px;color:rgba(255,255,255,.8)">{{ cur.range }}, Stagione 2026/27</div>
+      <div style="display:flex;gap:4px;margin-top:8px">
+        <sc-for list="{{ segs }}" as="sg" hint-placeholder-count="11"><div style="flex:1;height:4px;border-radius:2px;background:{{ sg.bg }}"></div></sc-for>
+      </div>
+    </div>
+    <div style="background:#C6EEDB;color:#0B1A24;border-radius:22px;padding:16px;display:flex;flex-direction:column;gap:14px">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <span style="font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase">La tua partita</span>
+        <span style="padding:4px 10px;border-radius:99px;background:#0B1A24;color:#C6EEDB;font-size:11.5px;font-weight:700">{{ my.st.l }}</span>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:8px">
+        <div style="display:flex;flex-direction:column;align-items:flex-start;gap:8px"><div style="width:52px;height:52px;border-radius:50%;background:#0B1A24;color:#C6EEDB;display:grid;place-items:center;font-weight:800;font-size:17px">{{ me.init }}</div><div style="font-weight:800;font-size:16px;line-height:1.1">Tu<br><span style="font-weight:500;font-size:12.5px">{{ me.posLabel }}</span></div></div>
+        <div style="font-weight:900;font-stretch:66%;font-size:30px;text-transform:uppercase;opacity:.5">vs</div>
+        <button onClick="{{ my.openOpp }}" style="display:flex;flex-direction:column;align-items:flex-end;gap:8px;border:0;background:none;padding:0;cursor:pointer;text-align:right;color:#0B1A24"><div style="width:52px;height:52px;border-radius:50%;background:{{ my.opp.av }};color:{{ my.opp.avFg }};display:grid;place-items:center;font-weight:800;font-size:17px;box-shadow:0 0 0 2px #0B1A24">{{ my.opp.init }}</div><div style="font-weight:800;font-size:16px;line-height:1.1">{{ my.opp.name }}<br><span style="font-weight:500;font-size:12.5px">{{ my.oppPos }}</span></div></button>
+      </div>
+      <div style="font-size:13.5px;line-height:1.4;font-weight:600">{{ my.line }}</div>
+      <button onClick="{{ my.cta }}" style="height:54px;border-radius:16px;border:0;background:#0B1A24;color:#C6EEDB;font-weight:800;font-size:16px;cursor:pointer">{{ my.ctaLabel }}</button>
+      <button onClick="{{ my.open }}" style="border:0;background:none;padding:0;font-size:13px;font-weight:700;cursor:pointer;color:#1F6F54;margin-top:-4px">Dettagli partita</button>
+    </div>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:10px;padding:0 14px">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;padding:0 2px"><span style="font-weight:800;font-stretch:75%;font-size:22px;text-transform:uppercase">Questa settimana</span><button onClick="{{ goCal }}" style="border:0;background:none;color:var(--accent);font-weight:700;font-size:13px;cursor:pointer">Calendario</button></div>
+    <div style="background:var(--surface);border:1px solid var(--line);border-radius:20px;overflow:hidden">
+      <sc-for list="{{ others }}" as="m" hint-placeholder-count="5">
+        <button onClick="{{ m.open }}" style="width:100%;display:flex;align-items:center;gap:12px;padding:13px 14px;border:0;border-top:{{ m.sep }};background:none;text-align:left;cursor:pointer">
+          <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px"><span style="font-weight:700;font-size:15px">{{ m.a.short }} vs {{ m.b.short }}</span><span style="font-size:12.5px;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ m.info }}</span></div>
+          <span style="padding:4px 9px;border-radius:99px;font-size:11.5px;font-weight:700;white-space:nowrap;background:{{ m.st.bg }};color:{{ m.st.fg }};border:{{ m.st.bd }}">{{ m.st.l }}</span>
+        </button>
+      </sc-for>
+    </div>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:10px;padding:0 14px">
+    <div style="padding:0 2px;font-weight:800;font-stretch:75%;font-size:22px;text-transform:uppercase">Ultimi risultati</div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <sc-for list="{{ recent }}" as="m" hint-placeholder-count="4">
+        <button onClick="{{ m.open }}" style="display:flex;flex-direction:column;gap:8px;padding:12px 14px;border-radius:18px;border:1px solid var(--line);background:var(--surface);cursor:pointer;text-align:left">
+          <div style="display:flex;justify-content:space-between;font-size:11.5px;color:var(--ink3);font-weight:600"><span>{{ m.round }}, {{ m.dateShort }}</span><span style="color:{{ m.st.fg2 }}">{{ m.st.l }}</span></div>
+          <sc-for list="{{ m.rows }}" as="r" hint-placeholder-count="2">
+            <div style="display:grid;grid-template-columns:minmax(0,1fr) 26px 26px 30px 40px;align-items:center;gap:4px">
+              <span style="font-size:15px;font-weight:{{ r.fw }};display:flex;align-items:center;gap:7px;min-width:0"><span style="width:6px;height:6px;border-radius:50%;flex:none;background:{{ r.dot }}"></span><span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ r.name }}</span></span>
+              <span style="text-align:center;font-size:15px;font-weight:{{ r.fw }}">{{ r.s1 }}</span>
+              <span style="text-align:center;font-size:15px;font-weight:{{ r.fw }}">{{ r.s2 }}</span>
+              <span style="text-align:center;font-size:13px;color:var(--ink2)">{{ r.s3 }}</span>
+              <span style="justify-self:end;min-width:36px;text-align:center;padding:3px 0;border-radius:8px;font-weight:800;font-size:14px;background:{{ r.ptsBg }};color:{{ r.ptsFg }}">{{ r.pts }}</span>
+            </div>
+          </sc-for>
+        </button>
+      </sc-for>
+    </div>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:10px;padding:0 14px">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;padding:0 2px"><span style="font-weight:800;font-stretch:75%;font-size:22px;text-transform:uppercase">Classifica</span><button onClick="{{ goClass }}" style="border:0;background:none;color:var(--accent);font-weight:700;font-size:13px;cursor:pointer">Completa</button></div>
+    <div style="background:var(--surface);border:1px solid var(--line);border-radius:20px;overflow:hidden">
+      <sc-for list="{{ top5 }}" as="r" hint-placeholder-count="5">
+        <button onClick="{{ r.open }}" style="width:100%;display:flex;align-items:center;gap:12px;padding:10px 14px;border:0;border-top:{{ r.sep }};background:{{ r.meBg }};cursor:pointer;text-align:left">
+          <span style="width:20px;font-weight:900;font-stretch:70%;font-size:20px">{{ r.pos }}</span>
+          <span style="width:32px;height:32px;border-radius:50%;background:{{ r.av }};color:{{ r.avFg }};display:grid;place-items:center;font-weight:800;font-size:12px;flex:none">{{ r.init }}</span>
+          <span style="flex:1;font-weight:600;font-size:15px">{{ r.name }}</span>
+          <span style="font-weight:900;font-stretch:70%;font-size:22px">{{ r.pts }}</span>
+        </button>
+      </sc-for>
+    </div>
+  </div>
+</div>
+</sc-if>
+
+<!-- CLASSIFICA -->
+<sc-if value="{{ isClass }}" hint-placeholder-val="{{ false }}">
+<div data-screen-label="03 Classifica" style="display:flex;flex-direction:column;gap:16px;padding-bottom:24px">
+  <div style="padding:18px 16px 0;display:flex;flex-direction:column;gap:4px">
+    <div style="font-weight:900;font-stretch:66%;font-size:44px;line-height:.9;text-transform:uppercase">Classifica</div>
+    <div style="font-size:13.5px;color:var(--ink2)">{{ playedLabel }}</div>
+  </div>
+  <div style="padding:0 16px;display:flex;gap:6px;overflow-x:auto">
+    <sc-for list="{{ seasons }}" as="se" hint-placeholder-count="3"><button onClick="{{ se.pick }}" style="flex:none;height:34px;padding:0 14px;border-radius:99px;font-weight:700;font-size:13px;cursor:pointer;background:{{ se.bg }};color:{{ se.fg }};border:{{ se.bd }}">{{ se.label }}</button></sc-for>
+  </div>
+  <sc-if value="{{ isArchive }}" hint-placeholder-val="{{ false }}">
+    <div style="margin:0 16px;padding:16px 18px;border-radius:22px;background:var(--hero);color:#fff;display:flex;flex-direction:column;gap:6px">
+      <span style="font-size:11.5px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#C6EEDB">Campione {{ archSeason }}</span>
+      <span style="font-weight:900;font-stretch:66%;font-size:34px;line-height:.95;text-transform:uppercase">{{ archChamp }}</span>
+      <span style="font-size:13px;color:rgba(255,255,255,.78)">{{ archFinal }}</span>
+    </div>
+  </sc-if>
+  <div style="padding:0 16px;display:flex;flex-direction:column;gap:10px">
+    
+    
+  </div>
+
+  
+
+  <sc-if value="{{ isCards }}" hint-placeholder-val="{{ false }}">
+    <div style="padding:0 16px;display:flex;flex-direction:column;gap:8px">
+      <sc-for list="{{ standings }}" as="r" hint-placeholder-count="12">
+        <div style="background:{{ r.rowBg }};border:1px solid var(--line);border-radius:18px;overflow:hidden">
+          <button onClick="{{ r.toggle }}" style="width:100%;display:flex;align-items:center;gap:12px;padding:12px 14px;border:0;background:none;cursor:pointer;text-align:left">
+            <span style="width:24px;font-weight:900;font-stretch:70%;font-size:24px">{{ r.pos }}</span>
+            <span style="width:36px;height:36px;border-radius:50%;background:{{ r.av }};color:{{ r.avFg }};display:grid;place-items:center;font-weight:800;font-size:12px;flex:none">{{ r.init }}</span>
+            <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:4px"><span style="font-weight:700;font-size:15px">{{ r.name }}</span><span><span style="padding:2px 8px;border-radius:99px;font-size:10.5px;font-weight:700;background:{{ r.z.bg }};color:{{ r.z.fg }};border:{{ r.z.bd }}">{{ r.z.l }}</span></span></span>
+            <span style="display:flex;flex-direction:column;align-items:flex-end"><span style="font-weight:900;font-stretch:70%;font-size:28px;line-height:1">{{ r.pts }}</span><span style="font-size:10.5px;color:var(--ink3);font-weight:700;text-transform:uppercase">punti</span></span>
+          </button>
+          <sc-if value="{{ r.expanded }}" hint-placeholder-val="{{ false }}">
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);border-top:1px solid var(--line)">
+              <sc-for list="{{ r.stats }}" as="s" hint-placeholder-count="8"><div style="background:var(--surface);padding:10px 8px;display:flex;flex-direction:column;gap:2px;align-items:center"><span style="font-weight:800;font-size:17px">{{ s.v }}</span><span style="font-size:10.5px;color:var(--ink3);text-align:center">{{ s.l }}</span></div></sc-for>
+            </div>
+            <button onClick="{{ r.open }}" style="width:100%;height:42px;border:0;border-top:1px solid var(--line);background:var(--surface);color:var(--accent);font-weight:700;font-size:13px;cursor:pointer">Apri profilo</button>
+          </sc-if>
+        </div>
+        <sc-if value="{{ r.cut }}" hint-placeholder-val="{{ false }}"><div style="display:flex;align-items:center;gap:10px;padding:4px 2px;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--accent)"><span style="flex:1;border-top:2px solid var(--accent)"></span>Linea di taglio<span style="flex:1;border-top:2px solid var(--accent)"></span></div></sc-if>
+      </sc-for>
+    </div>
+  </sc-if>
+
+  <div style="margin:4px 16px 0;padding:18px;border-radius:22px;background:var(--hero);color:#fff;display:flex;flex-direction:column;gap:12px">
+    <div style="font-weight:800;font-stretch:75%;font-size:22px;text-transform:uppercase;color:#C6EEDB">Come si fanno i punti</div>
+    <div style="display:flex;flex-direction:column;gap:9px;font-size:13.5px;line-height:1.4">
+      <div style="display:flex;justify-content:space-between;gap:12px"><span>Vittoria in 2 set</span><strong style="white-space:nowrap">game + 3</strong></div>
+      <div style="display:flex;justify-content:space-between;gap:12px"><span>Vittoria al super tie break</span><strong style="text-align:right">game + 2 + 1 + comp.</strong></div>
+      <div style="display:flex;justify-content:space-between;gap:12px"><span>Sconfitta o tempo scaduto</span><strong style="white-space:nowrap">solo game</strong></div>
+    </div>
+    <div style="font-size:12.5px;line-height:1.45;color:rgba(255,255,255,.75);border-top:1px solid rgba(255,255,255,.14);padding-top:10px">Compensazione: se chi vince al STB ha fatto meno game, riceve la differenza. Es. 0-6 6-4 10-8 → vincitore 13, sconfitto 10. Partite da 2 ore; i primi 8 vanno ai quarti.</div>
+  </div>
+</div>
+</sc-if>
+
+<!-- CALENDARIO -->
+<sc-if value="{{ isCal }}" hint-placeholder-val="{{ false }}">
+<div data-screen-label="04 Calendario" style="display:flex;flex-direction:column;gap:14px;padding-bottom:24px">
+  <div style="padding:18px 16px 0;display:flex;flex-direction:column;gap:4px">
+    <div style="font-weight:900;font-stretch:66%;font-size:44px;line-height:.9;text-transform:uppercase">Calendario</div>
+    <div style="font-size:13.5px;color:var(--ink2)">11 giornate, 66 partite, giorno, ora e circolo li decidete voi</div>
+  </div>
+  <div style="padding:0 16px">
+    <div style="display:grid;grid-template-columns:1fr 1fr;background:var(--surface2);border-radius:14px;padding:4px;gap:4px">
+      <button onClick="{{ calSetAll }}" style="height:36px;border:0;border-radius:10px;font-weight:700;font-size:14px;cursor:pointer;background:{{ sgAll.bg }};color:{{ sgAll.fg }};box-shadow:{{ sgAll.sh }}">Tutte</button>
+      <button onClick="{{ calSetMine }}" style="height:36px;border:0;border-radius:10px;font-weight:700;font-size:14px;cursor:pointer;background:{{ sgMine.bg }};color:{{ sgMine.fg }};box-shadow:{{ sgMine.sh }}">Le mie</button>
+    </div>
+  </div>
+  <div style="padding:0 16px;display:flex;flex-direction:column;gap:10px">
+    <sc-for list="{{ calRounds }}" as="rd" hint-placeholder-count="6">
+      <div style="background:var(--surface);border:{{ rd.border }};border-radius:20px;overflow:hidden">
+        <button onClick="{{ rd.toggle }}" style="width:100%;display:flex;align-items:center;gap:12px;padding:12px 14px;border:0;background:none;cursor:pointer;text-align:left">
+          <span style="width:40px;height:40px;border-radius:12px;background:{{ rd.badgeBg }};color:{{ rd.badgeFg }};display:grid;place-items:center;font-weight:900;font-stretch:70%;font-size:20px;flex:none">{{ rd.n }}</span>
+          <span style="flex:1;display:flex;flex-direction:column;gap:2px"><span style="font-weight:800;font-stretch:80%;font-size:17px;text-transform:uppercase">Giornata {{ rd.n }}</span><span style="font-size:12.5px;color:var(--ink2)">{{ rd.range }}</span></span>
+          <span style="font-size:12px;font-weight:700;color:{{ rd.tagFg }}">{{ rd.tag }}</span>
+          <span style="width:22px;text-align:center;font-size:18px;color:var(--ink3)">{{ rd.chev }}</span>
+        </button>
+        <sc-if value="{{ rd.open }}" hint-placeholder-val="{{ false }}">
+          <div style="border-top:1px solid var(--line)">
+            <sc-for list="{{ rd.matches }}" as="m" hint-placeholder-count="6">
+              <button onClick="{{ m.open }}" style="width:100%;display:flex;align-items:center;gap:10px;padding:11px 14px;border:0;border-top:{{ m.sep }};background:{{ m.mineBg }};text-align:left;cursor:pointer">
+                <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px"><span style="font-weight:700;font-size:14.5px">{{ m.a.short }} vs {{ m.b.short }}</span><span style="font-size:12px;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ m.info }}</span></div>
+                <span style="padding:4px 9px;border-radius:99px;font-size:11px;font-weight:700;white-space:nowrap;background:{{ m.st.bg }};color:{{ m.st.fg }};border:{{ m.st.bd }}">{{ m.st.l }}</span>
+              </button>
+            </sc-for>
+          </div>
+        </sc-if>
+      </div>
+      <sc-if value="{{ rd.pauseAfter }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;align-items:center;gap:10px;padding:8px 4px;color:var(--ink2)"><span style="flex:1;border-top:1.5px dashed var(--line2)"></span><span style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.08em">Pausa natalizia, 19 dic - 10 gen</span><span style="flex:1;border-top:1.5px dashed var(--line2)"></span></div>
+      </sc-if>
+    </sc-for>
+    <div style="display:flex;align-items:center;gap:10px;padding:8px 4px;color:var(--ink2)"><span style="flex:1;border-top:1.5px solid var(--line2)"></span><span style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.08em">Poi: quarti di finale, Top 8</span><span style="flex:1;border-top:1.5px solid var(--line2)"></span></div>
+  </div>
+</div>
+</sc-if>
+
+<!-- SCHEDA PARTITA -->
+<sc-if value="{{ isMatch }}" hint-placeholder-val="{{ false }}">
+<div data-screen-label="05 Scheda partita" style="display:flex;flex-direction:column;padding-bottom:28px">
+  <div style="position:relative;height:310px;flex:none;background:{{ pm.coverBg }};overflow:hidden">
+    <sc-if value="{{ pm.noCover }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px">
+        <div style="position:absolute;left:50%;top:50%;width:200px;height:400px;transform:translate(-50%,-50%) rotate(-12deg);border:2px solid rgba(198,238,219,.13)"></div>
+        <svg width="92" height="92" viewBox="0 0 40 40" style="flex:none;position:relative"><rect width="40" height="40" rx="11" fill="#C6EEDB"></rect><ellipse cx="17" cy="15" rx="7.5" ry="9.5" transform="rotate(-35 17 15)" fill="none" stroke="#0B1A24" stroke-width="2.6"></ellipse><line x1="22.4" y1="22.8" x2="28" y2="30.6" stroke="#0B1A24" stroke-width="3.4" stroke-linecap="round"></line><circle cx="31" cy="10" r="3" fill="#1F6F54"></circle><circle cx="10.5" cy="31.5" r="3" fill="#1F6F54"></circle></svg>
+        <div style="position:relative;font-weight:900;font-stretch:66%;font-size:26px;text-transform:uppercase;color:#C6EEDB">ATP Umbria Tournament</div>
+      </div>
+    </sc-if>
+    <sc-if value="{{ pm.phCover }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute;inset:0;display:grid;place-items:center"><span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--phInk);background:var(--surface);padding:6px 10px;border-radius:8px">selfie di copertina</span></div>
+    </sc-if>
+    <button onClick="{{ back }}" style="position:absolute;top:14px;left:14px;width:42px;height:42px;border-radius:50%;border:0;background:rgba(11,26,36,.72);color:#fff;cursor:pointer;display:grid;place-items:center"><svg width="18" height="18" viewBox="0 0 18 18" style="flex:none"><path d="M11 3L5 9l6 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path></svg></button>
+    <button onClick="{{ pm.goSelfie }}" style="position:absolute;top:14px;right:14px;height:42px;padding:0 14px;border-radius:99px;border:0;background:rgba(11,26,36,.72);color:#fff;cursor:pointer;font-weight:700;font-size:13px">+ Foto</button>
+    <div style="position:absolute;left:14px;bottom:40px;padding:6px 11px;border-radius:99px;background:#C6EEDB;color:#0B1A24;font-size:12px;font-weight:800">{{ pm.round }}, {{ pm.range }}</div>
+  </div>
+
+  <div style="margin:-26px 10px 0;position:relative;background:var(--surface);border-radius:24px;border:1px solid var(--line);padding:18px 16px 16px;display:flex;flex-direction:column;gap:16px">
+    <div style="display:grid;grid-template-columns:1fr auto 1fr;align-items:start;gap:8px">
+      <button onClick="{{ pm.openA }}" style="display:flex;flex-direction:column;align-items:center;gap:8px;border:0;background:none;padding:0;cursor:pointer;text-align:center"><span style="width:58px;height:58px;border-radius:50%;background:{{ pm.a.av }};color:{{ pm.a.avFg }};display:grid;place-items:center;font-weight:800;font-size:18px">{{ pm.a.init }}</span><span style="font-weight:700;font-size:14px;line-height:1.2">{{ pm.a.name }}</span></button>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:8px;padding-top:6px">
+        <span style="padding:4px 10px;border-radius:99px;font-size:11.5px;font-weight:700;white-space:nowrap;background:{{ pm.st.bg }};color:{{ pm.st.fg }};border:{{ pm.st.bd }}">{{ pm.statusLong }}</span>
+        <span style="font-weight:900;font-stretch:66%;font-size:40px;line-height:1">{{ pm.center }}</span>
+      </div>
+      <button onClick="{{ pm.openB }}" style="display:flex;flex-direction:column;align-items:center;gap:8px;border:0;background:none;padding:0;cursor:pointer;text-align:center"><span style="width:58px;height:58px;border-radius:50%;background:{{ pm.b.av }};color:{{ pm.b.avFg }};display:grid;place-items:center;font-weight:800;font-size:18px">{{ pm.b.init }}</span><span style="font-weight:700;font-size:14px;line-height:1.2">{{ pm.b.name }}</span></button>
+    </div>
+
+    <sc-if value="{{ pm.played }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;flex-direction:column;border-radius:16px;background:var(--bg);padding:6px 12px">
+        <div style="display:grid;grid-template-columns:minmax(0,1fr) 30px 30px 34px 52px;gap:4px;font-size:10.5px;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.06em;padding:6px 0"><span></span><span style="text-align:center">1° set</span><span style="text-align:center">2° set</span><span style="text-align:center">STB</span><span style="text-align:right">Punti</span></div>
+        <sc-for list="{{ pm.rows }}" as="r" hint-placeholder-count="2">
+          <div style="display:grid;grid-template-columns:minmax(0,1fr) 30px 30px 34px 52px;gap:4px;align-items:center;padding:8px 0;border-top:1px solid var(--line)">
+            <span style="font-weight:{{ r.fw }};font-size:15px;display:flex;align-items:center;gap:7px;min-width:0"><span style="width:7px;height:7px;border-radius:50%;flex:none;background:{{ r.dot }}"></span><span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ r.name }}</span></span>
+            <span style="text-align:center;font-size:20px;font-weight:{{ r.fw }}">{{ r.s1 }}</span>
+            <span style="text-align:center;font-size:20px;font-weight:{{ r.fw }}">{{ r.s2 }}</span>
+            <span style="text-align:center;font-size:16px;color:var(--ink2)">{{ r.s3 }}</span>
+            <span style="justify-self:end;min-width:44px;text-align:center;padding:4px 0;border-radius:10px;font-weight:900;font-stretch:72%;font-size:20px;background:{{ r.ptsBg }};color:{{ r.ptsFg }}">{{ r.pts }}</span>
+          </div>
+        </sc-for>
+      </div>
+      
+    </sc-if>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line);border-radius:16px;overflow:hidden;border:1px solid var(--line)">
+      <div style="background:var(--surface);padding:10px 12px;display:flex;flex-direction:column;gap:2px"><span style="font-size:11px;color:var(--ink3);font-weight:700;text-transform:uppercase;letter-spacing:.06em">Settimana</span><span style="font-weight:700;font-size:14px">{{ pm.range }}</span></div>
+      <div style="background:var(--surface);padding:10px 12px;display:flex;flex-direction:column;gap:2px"><span style="font-size:11px;color:var(--ink3);font-weight:700;text-transform:uppercase;letter-spacing:.06em">Data</span><span style="font-weight:700;font-size:14px">{{ pm.dateStr }}</span></div>
+      <div style="background:var(--surface);padding:10px 12px;display:flex;flex-direction:column;gap:2px"><span style="font-size:11px;color:var(--ink3);font-weight:700;text-transform:uppercase;letter-spacing:.06em">Ora</span><span style="font-weight:700;font-size:14px">{{ pm.timeStr }}</span></div>
+      <div style="background:var(--surface);padding:10px 12px;display:flex;flex-direction:column;gap:2px"><span style="font-size:11px;color:var(--ink3);font-weight:700;text-transform:uppercase;letter-spacing:.06em">Circolo</span><span style="font-weight:700;font-size:14px">{{ pm.clubStr }}</span></div>
+    </div>
+
+    <sc-if value="{{ pm.hasNote }}" hint-placeholder-val="{{ false }}"><div style="font-size:13px;line-height:1.45;padding:10px 12px;border-radius:14px;background:{{ pm.noteBg }};color:{{ pm.noteFg }};font-weight:600">{{ pm.note }}</div></sc-if>
+
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <sc-if value="{{ pm.hasPrimary }}" hint-placeholder-val="{{ false }}"><button onClick="{{ pm.primary.go }}" style="height:54px;border-radius:16px;border:0;background:var(--accent);color:var(--onAccent);font-weight:800;font-size:16px;cursor:pointer">{{ pm.primary.label }}</button></sc-if>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <sc-for list="{{ pm.secondary }}" as="b" hint-placeholder-count="2"><button onClick="{{ b.go }}" style="flex:1 1 140px;height:46px;border-radius:14px;border:1.5px solid var(--line2);background:var(--surface);font-weight:700;font-size:14px;cursor:pointer">{{ b.label }}</button></sc-for>
+      </div>
+    </div>
+  </div>
+
+  <div style="padding:22px 14px 0;display:flex;flex-direction:column;gap:10px">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;padding:0 2px"><span style="font-weight:800;font-stretch:75%;font-size:22px;text-transform:uppercase">Foto della partita</span><span style="font-size:12.5px;color:var(--ink3)">{{ pm.photoCount }}</span></div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px">
+      <sc-for list="{{ pm.photos }}" as="ph" hint-placeholder-count="2">
+        <div style="aspect-ratio:1;border-radius:14px;background:{{ ph.bg }};position:relative;overflow:hidden;display:grid;place-items:center">
+          <sc-if value="{{ ph.isPh }}" hint-placeholder-val="{{ true }}"><span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--phInk)">selfie</span></sc-if>
+          <sc-if value="{{ ph.isCover }}" hint-placeholder-val="{{ false }}"><span style="position:absolute;left:6px;top:6px;padding:2px 6px;border-radius:6px;background:#0B1A24;color:#C6EEDB;font-size:10px;font-weight:700">Copertina</span></sc-if>
+        </div>
+      </sc-for>
+      <button onClick="{{ pm.goSelfie }}" style="aspect-ratio:1;border-radius:14px;border:1.5px dashed var(--line2);background:transparent;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;color:var(--ink2)"><span style="font-size:24px;line-height:1">+</span><span style="font-size:12px;font-weight:700">Aggiungi</span></button>
+    </div>
+  </div>
+</div>
+</sc-if>
+
+<!-- INSERISCI RISULTATO -->
+<sc-if value="{{ isResult }}" hint-placeholder-val="{{ false }}">
+<div data-screen-label="07 Inserisci risultato" style="display:flex;flex-direction:column;flex:1">
+  <div style="position:sticky;top:0;z-index:6;background:var(--bg);display:flex;align-items:center;gap:12px;padding:12px 14px">
+    <button onClick="{{ back }}" style="width:42px;height:42px;border-radius:50%;border:1px solid var(--line);background:var(--surface);cursor:pointer;display:grid;place-items:center;flex:none"><svg width="18" height="18" viewBox="0 0 18 18" style="flex:none"><path d="M11 3L5 9l6 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path></svg></button>
+    <div style="display:flex;flex-direction:column;gap:1px;min-width:0"><span style="font-weight:800;font-stretch:75%;font-size:21px;text-transform:uppercase">Inserisci risultato</span><span style="font-size:12.5px;color:var(--ink2)">{{ rs.sub }}</span></div>
+  </div>
+  <div style="padding:4px 14px 20px;display:flex;flex-direction:column;gap:12px">
+    
+    <sc-for list="{{ rs.sets }}" as="st" hint-placeholder-count="2">
+      <div style="background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:12px 14px;display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-weight:800;font-stretch:75%;font-size:18px;text-transform:uppercase">{{ st.label }}</span><span style="font-size:12px;color:var(--ink3)">{{ st.hint }}</span></div>
+        <sc-for list="{{ st.rows }}" as="r" hint-placeholder-count="2">
+          <div style="display:flex;align-items:center;gap:10px">
+            <span style="flex:1;min-width:0;font-weight:700;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ r.name }}</span>
+            <button onClick="{{ r.dec }}" style="width:52px;height:52px;border-radius:16px;border:1.5px solid var(--line2);background:var(--bg);font-size:26px;font-weight:500;cursor:pointer;opacity:{{ r.decOp }}">−</button>
+            <span style="width:44px;text-align:center;font-weight:900;font-stretch:70%;font-size:38px;line-height:1">{{ r.val }}</span>
+            <button onClick="{{ r.inc }}" style="width:52px;height:52px;border-radius:16px;border:0;background:var(--accent);color:var(--onAccent);font-size:26px;font-weight:500;cursor:pointer;opacity:{{ r.incOp }}">+</button>
+          </div>
+        </sc-for>
+      </div>
+    </sc-for>
+    <button onClick="{{ rs.toggleTo }}" style="display:flex;align-items:center;gap:12px;padding:14px;border-radius:18px;border:1.5px solid {{ rs.toBd }};background:var(--surface);cursor:pointer;text-align:left">
+      <span style="width:28px;height:28px;border-radius:9px;flex:none;display:grid;place-items:center;font-size:16px;font-weight:900;color:var(--onAccent);background:{{ rs.toBg }};border:{{ rs.toBox }}">{{ rs.toTick }}</span>
+      <span style="display:flex;flex-direction:column;gap:2px"><span style="font-weight:800;font-size:15px">Tempo scaduto</span><span style="font-size:12.5px;color:var(--ink2);line-height:1.4">Le 2 ore sono finite senza un vincitore: ognuno prende solo i game vinti</span></span>
+    </button>
+    <div style="font-size:13px;line-height:1.45;padding:11px 14px;border-radius:14px;font-weight:600;background:{{ rs.msgBg }};color:{{ rs.msgFg }}">{{ rs.msg }}</div>
+    <div style="font-size:12px;color:var(--ink3);line-height:1.45;padding:0 4px">Dopo l'invio {{ rs.oppName }} riceve il risultato da confermare. Se non risponde, si conferma automaticamente tra 2 giorni.</div>
+  </div>
+  <div style="position:sticky;bottom:0;margin-top:auto;background:var(--surface);border-top:1px solid var(--line);padding:12px 14px 16px;display:flex;flex-direction:column;gap:10px;z-index:6">
+    <div style="display:flex;align-items:baseline;justify-content:space-between;gap:10px">
+      <span style="font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--ink3)">Anteprima punti</span>
+      <span style="font-weight:900;font-stretch:70%;font-size:24px">{{ rs.preview }}</span>
+    </div>
+    <button onClick="{{ rs.submit }}" style="height:54px;border-radius:16px;border:0;font-weight:800;font-size:16px;cursor:{{ rs.cur }};background:{{ rs.btnBg }};color:{{ rs.btnFg }}">{{ rs.btnLabel }}</button>
+  </div>
+</div>
+</sc-if>
+
+<!-- CONFERMA -->
+<sc-if value="{{ isConfirm }}" hint-placeholder-val="{{ false }}">
+<div data-screen-label="08 Conferma risultato" style="display:flex;flex-direction:column;flex:1">
+  <div style="background:#0B1A24;color:#C6EEDB;font-size:12px;font-weight:700;padding:8px 14px;display:flex;justify-content:space-between;gap:10px"><span>Vista di {{ cf.viewer }} (demo)</span><button onClick="{{ back }}" style="border:0;background:none;color:#fff;font-weight:700;font-size:12px;cursor:pointer;padding:0">Torna a Giuseppe</button></div>
+  <div style="padding:20px 16px;display:flex;flex-direction:column;gap:14px">
+    <div style="display:flex;flex-direction:column;gap:4px">
+      <span style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--accent)">{{ cf.round }}</span>
+      <span style="font-weight:900;font-stretch:66%;font-size:40px;line-height:.92;text-transform:uppercase">Confermi il risultato?</span>
+      <span style="font-size:14px;color:var(--ink2)">{{ cf.by }} ha inserito il risultato {{ cf.when }}.</span>
+    </div>
+    <div style="background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:6px 14px">
+      <div style="display:grid;grid-template-columns:minmax(0,1fr) 30px 30px 34px 52px;gap:4px;font-size:10.5px;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.06em;padding:8px 0"><span></span><span style="text-align:center">1°</span><span style="text-align:center">2°</span><span style="text-align:center">STB</span><span style="text-align:right">Punti</span></div>
+      <sc-for list="{{ cf.rows }}" as="r" hint-placeholder-count="2">
+        <div style="display:grid;grid-template-columns:minmax(0,1fr) 30px 30px 34px 52px;gap:4px;align-items:center;padding:10px 0;border-top:1px solid var(--line)">
+          <span style="font-weight:{{ r.fw }};font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ r.name }}</span>
+          <span style="text-align:center;font-size:20px;font-weight:{{ r.fw }}">{{ r.s1 }}</span>
+          <span style="text-align:center;font-size:20px;font-weight:{{ r.fw }}">{{ r.s2 }}</span>
+          <span style="text-align:center;font-size:16px;color:var(--ink2)">{{ r.s3 }}</span>
+          <span style="justify-self:end;min-width:44px;text-align:center;padding:4px 0;border-radius:10px;font-weight:900;font-stretch:72%;font-size:20px;background:{{ r.ptsBg }};color:{{ r.ptsFg }}">{{ r.pts }}</span>
+        </div>
+      </sc-for>
+    </div>
+    <sc-if value="{{ cf.ask }}" hint-placeholder-val="{{ true }}">
+      <div style="display:flex;gap:10px;align-items:center;padding:12px 14px;border-radius:16px;background:var(--surface2)"><span style="width:10px;height:10px;border-radius:50%;background:var(--accent);flex:none"></span><span style="font-size:13.5px;line-height:1.4"><strong>Si conferma automaticamente tra 2 giorni</strong><br><span style="color:var(--ink2)">{{ cf.auto }}</span></span></div>
+      <button onClick="{{ cf.confirm }}" style="height:56px;border-radius:16px;border:0;background:var(--accent);color:var(--onAccent);font-weight:800;font-size:16px;cursor:pointer">Conferma</button>
+      <button onClick="{{ cf.contest }}" style="height:52px;border-radius:16px;border:1.5px solid var(--errFg);background:transparent;color:var(--errFg);font-weight:800;font-size:15px;cursor:pointer">Contesta</button>
+    </sc-if>
+    <sc-if value="{{ cf.contesting }}" hint-placeholder-val="{{ false }}">
+      <label style="display:flex;flex-direction:column;gap:6px"><span style="font-size:13px;font-weight:700">Cosa non torna?</span>
+        <textarea value="{{ cf.note }}" onChange="{{ cf.onNote }}" rows="4" placeholder="Es. il secondo set è finito 6-3, non 6-4" style="border-radius:16px;border:1.5px solid var(--line2);background:var(--surface);padding:12px 14px;font-size:15px;resize:none;outline:none"></textarea></label>
+      <div style="font-size:12.5px;color:var(--ink2);line-height:1.4">La partita passa in stato Contestata e l'admin decide il risultato finale.</div>
+      <div style="display:flex;gap:8px">
+        <button onClick="{{ cf.cancel }}" style="flex:1;height:52px;border-radius:16px;border:1.5px solid var(--line2);background:var(--surface);font-weight:700;font-size:15px;cursor:pointer">Annulla</button>
+        <button onClick="{{ cf.send }}" style="flex:1.4;height:52px;border-radius:16px;border:0;background:var(--errFg);color:var(--surface);font-weight:800;font-size:15px;cursor:pointer;opacity:{{ cf.sendOp }}">Invia contestazione</button>
+      </div>
+    </sc-if>
+    <sc-if value="{{ cf.done }}" hint-placeholder-val="{{ false }}">
+      <div style="padding:16px;border-radius:18px;background:{{ cf.doneBg }};color:{{ cf.doneFg }};display:flex;flex-direction:column;gap:4px"><strong style="font-size:16px">{{ cf.doneTitle }}</strong><span style="font-size:13.5px;line-height:1.4">{{ cf.doneText }}</span></div>
+      <button onClick="{{ cf.goMatch }}" style="height:52px;border-radius:16px;border:1.5px solid var(--line2);background:var(--surface);font-weight:700;font-size:15px;cursor:pointer">Vai alla partita</button>
+    </sc-if>
+  </div>
+</div>
+</sc-if>
+
+<!-- SELFIE -->
+<sc-if value="{{ isSelfie }}" hint-placeholder-val="{{ false }}">
+<div data-screen-label="09 Carica selfie" style="display:flex;flex-direction:column;flex:1">
+  <div style="position:sticky;top:0;z-index:6;background:var(--bg);display:flex;align-items:center;gap:12px;padding:12px 14px">
+    <button onClick="{{ back }}" style="width:42px;height:42px;border-radius:50%;border:1px solid var(--line);background:var(--surface);cursor:pointer;display:grid;place-items:center;flex:none"><svg width="18" height="18" viewBox="0 0 18 18" style="flex:none"><path d="M11 3L5 9l6 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path></svg></button>
+    <div style="display:flex;flex-direction:column;gap:1px;min-width:0"><span style="font-weight:800;font-stretch:75%;font-size:21px;text-transform:uppercase">Foto della partita</span><span style="font-size:12.5px;color:var(--ink2)">{{ sf.sub }}</span></div>
+  </div>
+  <div style="padding:4px 14px 20px;display:flex;flex-direction:column;gap:14px">
+    <input ref="{{ camRef }}" type="file" accept="image/*" capture="user" onChange="{{ sf.onFiles }}" style="display:none">
+    <input ref="{{ galRef }}" type="file" accept="image/*" multiple="{{ true }}" onChange="{{ sf.onFiles }}" style="display:none">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <button onClick="{{ sf.openCam }}" style="height:112px;border-radius:22px;border:0;background:#0B1A24;color:#C6EEDB;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px"><svg width="34" height="34" viewBox="0 0 34 34" style="flex:none"><rect x="3" y="9" width="28" height="20" rx="5" fill="none" stroke="currentColor" stroke-width="2.4"></rect><circle cx="17" cy="19" r="5.5" fill="none" stroke="currentColor" stroke-width="2.4"></circle><rect x="12" y="5" width="10" height="5" rx="2" fill="currentColor"></rect></svg><span style="font-weight:800;font-size:15px">Scatta selfie</span></button>
+      <button onClick="{{ sf.openGal }}" style="height:112px;border-radius:22px;border:1.5px solid var(--line2);background:var(--surface);cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px"><svg width="34" height="34" viewBox="0 0 34 34" style="flex:none"><rect x="4" y="6" width="26" height="22" rx="5" fill="none" stroke="currentColor" stroke-width="2.4"></rect><circle cx="12" cy="13" r="3" fill="currentColor"></circle><path d="M5 25l8-7 6 5 4-3 7 6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"></path></svg><span style="font-weight:800;font-size:15px">Dalla galleria</span></button>
+    </div>
+    <button onClick="{{ sf.addDemo }}" style="align-self:center;border:0;background:none;color:var(--accent);font-weight:700;font-size:13px;cursor:pointer">Aggiungi una foto di prova</button>
+    <div style="display:flex;justify-content:space-between;align-items:baseline;padding:0 2px"><span style="font-weight:800;font-stretch:75%;font-size:18px;text-transform:uppercase">Anteprima</span><span style="font-size:12.5px;color:var(--ink3)">Tocca la stella per la copertina</span></div>
+    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px">
+      <sc-for list="{{ sf.items }}" as="it" hint-placeholder-count="2">
+        <div style="aspect-ratio:3/4;border-radius:18px;background:{{ it.bg }};position:relative;overflow:hidden;box-shadow:{{ it.ring }};display:grid;place-items:center">
+          <sc-if value="{{ it.isPh }}" hint-placeholder-val="{{ true }}"><span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--phInk)">{{ it.label }}</span></sc-if>
+          <button onClick="{{ it.setCover }}" style="position:absolute;left:8px;bottom:8px;height:32px;padding:0 10px;border-radius:99px;border:0;cursor:pointer;font-size:12px;font-weight:800;background:{{ it.cBg }};color:{{ it.cFg }}">{{ it.cLabel }}</button>
+          <sc-if value="{{ it.isNew }}" hint-placeholder-val="{{ false }}"><button onClick="{{ it.remove }}" style="position:absolute;right:8px;top:8px;width:32px;height:32px;border-radius:50%;border:0;background:rgba(11,26,36,.75);color:#fff;cursor:pointer;font-size:16px">×</button></sc-if>
+          <sc-if value="{{ it.isOld }}" hint-placeholder-val="{{ false }}"><span style="position:absolute;right:8px;top:8px;padding:3px 7px;border-radius:6px;background:rgba(11,26,36,.75);color:#fff;font-size:10.5px;font-weight:700">Già caricata</span></sc-if>
+        </div>
+      </sc-for>
+    </div>
+    <sc-if value="{{ sf.empty }}" hint-placeholder-val="{{ false }}"><div style="padding:24px;border-radius:18px;border:1.5px dashed var(--line2);text-align:center;font-size:13.5px;color:var(--ink2)">Nessuna foto ancora. Un selfie a fine partita, e diventa la copertina.</div></sc-if>
+  </div>
+  <div style="position:sticky;bottom:0;margin-top:auto;background:var(--surface);border-top:1px solid var(--line);padding:12px 14px 16px;z-index:6">
+    <button onClick="{{ sf.save }}" style="width:100%;height:54px;border-radius:16px;border:0;font-weight:800;font-size:16px;cursor:pointer;background:{{ sf.btnBg }};color:{{ sf.btnFg }}">{{ sf.saveLabel }}</button>
+  </div>
+</div>
+</sc-if>
+
+<!-- GALLERY -->
+<sc-if value="{{ isGallery }}" hint-placeholder-val="{{ false }}">
+<div data-screen-label="10 Gallery" style="display:flex;flex-direction:column;gap:14px;padding-bottom:24px">
+  <div style="padding:18px 16px 0;display:flex;flex-direction:column;gap:4px">
+    <div style="font-weight:900;font-stretch:66%;font-size:44px;line-height:.9;text-transform:uppercase">Gallery</div>
+    <div style="font-size:13.5px;color:var(--ink2)">{{ gal.count }}, tocca una foto per aprire la partita</div>
+  </div>
+  <div style="padding:0 16px">
+    <div style="display:grid;grid-template-columns:1fr 1fr;background:var(--surface2);border-radius:14px;padding:4px;gap:4px">
+      <button onClick="{{ gal.setAll }}" style="height:36px;border:0;border-radius:10px;font-weight:700;font-size:14px;cursor:pointer;background:{{ gal.sgA.bg }};color:{{ gal.sgA.fg }};box-shadow:{{ gal.sgA.sh }}">Tutte</button>
+      <button onClick="{{ gal.setMine }}" style="height:36px;border:0;border-radius:10px;font-weight:700;font-size:14px;cursor:pointer;background:{{ gal.sgM.bg }};color:{{ gal.sgM.fg }};box-shadow:{{ gal.sgM.sh }}">Le mie partite</button>
+    </div>
+  </div>
+  <div style="padding:0 10px;display:grid;grid-template-columns:repeat(3,1fr);gap:4px">
+    <sc-for list="{{ gal.items }}" as="ph" hint-placeholder-count="9">
+      <button onClick="{{ ph.open }}" style="aspect-ratio:1;border:0;padding:0;border-radius:10px;background:{{ ph.bg }};position:relative;overflow:hidden;cursor:pointer;display:grid;place-items:center">
+        <sc-if value="{{ ph.isPh }}" hint-placeholder-val="{{ true }}"><span style="font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--phInk)">selfie</span></sc-if>
+        <span style="position:absolute;left:5px;right:5px;bottom:5px;padding:3px 6px;border-radius:6px;background:rgba(11,26,36,.78);color:#fff;font-size:10px;font-weight:700;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ ph.label }}</span>
+      </button>
+    </sc-for>
+  </div>
+</div>
+</sc-if>
+
+<!-- PROFILO -->
+<sc-if value="{{ isProfile }}" hint-placeholder-val="{{ false }}">
+<div data-screen-label="11 Profilo" style="display:flex;flex-direction:column;gap:18px;padding-bottom:24px">
+  <div style="background:var(--hero);color:#fff;padding:16px 16px 22px;display:flex;flex-direction:column;gap:16px;border-radius:0 0 28px 28px">
+    <div style="display:flex;justify-content:space-between;align-items:center;min-height:42px">
+      <sc-if value="{{ pf.canBack }}" hint-placeholder-val="{{ false }}"><button onClick="{{ back }}" style="width:42px;height:42px;border-radius:50%;border:0;background:rgba(255,255,255,.12);color:#fff;cursor:pointer;display:grid;place-items:center"><svg width="18" height="18" viewBox="0 0 18 18" style="flex:none"><path d="M11 3L5 9l6 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path></svg></button></sc-if>
+      <span style="font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#C6EEDB">{{ pf.kicker }}</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:16px">
+      <div style="width:92px;height:92px;border-radius:28px;flex:none;background:repeating-linear-gradient(135deg,#16303D 0 10px,#10232D 10px 20px);display:grid;place-items:center;position:relative;box-shadow:0 0 0 3px #C6EEDB"><span style="font-weight:900;font-stretch:70%;font-size:32px;color:#C6EEDB">{{ pf.init }}</span><span style="position:absolute;bottom:-9px;font-family:'JetBrains Mono',monospace;font-size:9px;background:#0B1A24;color:#A6B7BE;padding:2px 5px;border-radius:4px">foto</span></div>
+      <div style="display:flex;flex-direction:column;gap:6px;min-width:0">
+        <span style="font-weight:900;font-stretch:66%;font-size:34px;line-height:.9;text-transform:uppercase">{{ pf.name }}</span>
+        <span style="font-size:13.5px;color:rgba(255,255,255,.8)">{{ pf.posLine }}</span>
+        <span><span style="padding:3px 9px;border-radius:99px;font-size:11px;font-weight:700;background:#C6EEDB;color:#0B1A24">{{ pf.zone }}</span></span>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px">
+      <sc-for list="{{ pf.stats }}" as="s" hint-placeholder-count="4"><div style="background:rgba(255,255,255,.08);border-radius:14px;padding:10px 6px;display:flex;flex-direction:column;align-items:center;gap:2px"><span style="font-weight:900;font-stretch:70%;font-size:24px">{{ s.v }}</span><span style="font-size:10.5px;color:rgba(255,255,255,.7);text-align:center">{{ s.l }}</span></div></sc-for>
+    </div>
+  </div>
+  <div style="padding:0 14px;display:flex;flex-direction:column;gap:10px">
+    <div style="display:grid;grid-template-columns:1fr 1fr;background:var(--surface2);border-radius:14px;padding:4px;gap:4px">
+      <button onClick="{{ pf.setNext }}" style="height:42px;border:0;border-radius:10px;font-weight:700;font-size:14px;cursor:pointer;background:{{ pf.sgN.bg }};color:{{ pf.sgN.fg }};box-shadow:{{ pf.sgN.sh }};display:flex;align-items:center;justify-content:center;gap:8px">Da giocare<span style="min-width:24px;height:22px;padding:0 7px;border-radius:99px;display:grid;place-items:center;font-size:12px;font-weight:800;background:{{ pf.bN.bg }};color:{{ pf.bN.fg }}">{{ pf.nNext }}</span></button>
+      <button onClick="{{ pf.setPlayed }}" style="height:42px;border:0;border-radius:10px;font-weight:700;font-size:14px;cursor:pointer;background:{{ pf.sgP.bg }};color:{{ pf.sgP.fg }};box-shadow:{{ pf.sgP.sh }};display:flex;align-items:center;justify-content:center;gap:8px">Giocate<span style="min-width:24px;height:22px;padding:0 7px;border-radius:99px;display:grid;place-items:center;font-size:12px;font-weight:800;background:{{ pf.bP.bg }};color:{{ pf.bP.fg }}">{{ pf.nPlayed }}</span></button>
+    </div>
+    <div style="background:var(--surface);border:1px solid var(--line);border-radius:20px;overflow:hidden">
+      <sc-for list="{{ pf.list }}" as="m" hint-placeholder-count="4">
+        <button onClick="{{ m.open }}" style="width:100%;display:flex;align-items:center;gap:12px;padding:12px 14px;border:0;border-top:{{ m.sep }};background:none;text-align:left;cursor:pointer">
+          <span style="width:34px;height:34px;border-radius:10px;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-weight:900;font-stretch:70%;font-size:15px;flex:none">G{{ m.g }}</span>
+          <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px"><span style="font-weight:700;font-size:14.5px">vs {{ m.oppName }}</span><span style="font-size:12px;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ m.info }}</span></div>
+          <span style="padding:4px 9px;border-radius:99px;font-size:11px;font-weight:700;white-space:nowrap;background:{{ m.st.bg }};color:{{ m.st.fg }};border:{{ m.st.bd }}">{{ m.st.l }}</span>
+        </button>
+      </sc-for>
+      <sc-if value="{{ pf.emptyList }}" hint-placeholder-val="{{ false }}"><div style="padding:20px;text-align:center;font-size:13.5px;color:var(--ink2)">Nessuna partita giocata finora.</div></sc-if>
+    </div>
+  </div>
+  <div style="padding:0 14px;display:flex;flex-direction:column;gap:10px">
+    <div style="padding:0 2px;font-weight:800;font-stretch:75%;font-size:22px;text-transform:uppercase">Scontri diretti</div>
+    <div style="background:var(--surface);border:1px solid var(--line);border-radius:20px;overflow:hidden">
+      <sc-for list="{{ pf.h2h }}" as="h" hint-placeholder-count="11">
+        <button onClick="{{ h.open }}" style="width:100%;display:flex;align-items:center;gap:12px;padding:9px 14px;border:0;border-top:{{ h.sep }};background:none;text-align:left;cursor:pointer">
+          <span style="width:30px;height:30px;border-radius:50%;background:{{ h.av }};color:{{ h.avFg }};display:grid;place-items:center;font-weight:800;font-size:11px;flex:none">{{ h.init }}</span>
+          <span style="flex:1;font-weight:600;font-size:14.5px">{{ h.name }}</span>
+          <span style="font-size:12.5px;font-weight:700;color:{{ h.fg }};white-space:nowrap">{{ h.res }}</span>
+        </button>
+      </sc-for>
+    </div>
+  </div>
+  <sc-if value="{{ pf.isMe }}" hint-placeholder-val="{{ false }}">
+    <div style="padding:0 14px;display:flex;flex-direction:column;gap:8px">
+      <button onClick="{{ toggleTheme }}" style="height:50px;border-radius:16px;border:1px solid var(--line);background:var(--surface);font-weight:700;font-size:14.5px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;padding:0 16px"><span>Tema</span><span style="color:var(--ink2)">{{ themeLabel }}</span></button>
+      <button onClick="{{ logout }}" style="height:50px;border-radius:16px;border:1px solid var(--line);background:var(--surface);font-weight:700;font-size:14.5px;cursor:pointer;color:var(--errFg)">Esci</button>
+    </div>
+  </sc-if>
+</div>
+</sc-if>
+
+<!-- ADMIN -->
+<sc-if value="{{ isAdmin }}" hint-placeholder-val="{{ false }}">
+<div data-screen-label="12 Admin" style="{{ ad.wrap }}">
+  <div style="{{ ad.nav }}">
+    <div style="display:flex;align-items:center;gap:10px;padding:4px 6px 14px;flex:none">
+      <svg width="34" height="34" viewBox="0 0 40 40" style="flex:none"><rect width="40" height="40" rx="11" fill="#C6EEDB"></rect><ellipse cx="17" cy="15" rx="7.5" ry="9.5" transform="rotate(-35 17 15)" fill="none" stroke="#0B1A24" stroke-width="2.6"></ellipse><line x1="22.4" y1="22.8" x2="28" y2="30.6" stroke="#0B1A24" stroke-width="3.4" stroke-linecap="round"></line><circle cx="31" cy="10" r="3" fill="#1F6F54"></circle><circle cx="10.5" cy="31.5" r="3" fill="#1F6F54"></circle></svg>
+      <div style="display:flex;flex-direction:column;gap:2px;color:#fff"><span style="font-weight:800;font-stretch:72%;font-size:17px;text-transform:uppercase;line-height:1">ATP Umbria</span><span style="font-family:'JetBrains Mono',monospace;font-size:10.5px;color:#C6EEDB">/admin, 2026/27</span></div>
+    </div>
+    <sc-for list="{{ ad.tabs }}" as="t" hint-placeholder-count="6">
+      <button onClick="{{ t.go }}" style="flex:none;display:flex;align-items:center;justify-content:space-between;gap:8px;height:40px;padding:0 12px;border:0;border-radius:11px;cursor:pointer;font-weight:700;font-size:14px;white-space:nowrap;background:{{ t.bg }};color:{{ t.fg }}">{{ t.label }}<sc-if value="{{ t.hasCount }}" hint-placeholder-val="{{ false }}"><span style="min-width:20px;height:20px;padding:0 6px;border-radius:99px;background:#F49A90;color:#0B1A24;font-size:11px;display:grid;place-items:center">{{ t.count }}</span></sc-if></button>
+    </sc-for>
+    <button onClick="{{ ad.exit }}" style="flex:none;height:40px;padding:0 12px;border:1px solid rgba(255,255,255,.18);border-radius:11px;background:transparent;color:#fff;cursor:pointer;font-weight:600;font-size:13px;white-space:nowrap;margin-top:{{ ad.exitMt }}">Torna all'app</button>
+  </div>
+
+  <div style="padding:{{ ad.pad }};display:flex;flex-direction:column;gap:18px;min-width:0;max-width:1080px;width:100%">
+    <div style="display:flex;flex-direction:column;gap:4px">
+      <span style="font-weight:900;font-stretch:66%;font-size:40px;line-height:.92;text-transform:uppercase">{{ ad.title }}</span>
+      <span style="font-size:13.5px;color:var(--ink2)">{{ ad.sub }}</span>
+    </div>
+
+    <sc-if value="{{ ad.isDash }}" hint-placeholder-val="{{ true }}">
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px">
+        <sc-for list="{{ ad.tiles }}" as="t" hint-placeholder-count="4"><div style="background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:14px 16px;display:flex;flex-direction:column;gap:4px"><span style="font-weight:900;font-stretch:66%;font-size:36px;line-height:1;color:{{ t.fg }}">{{ t.v }}</span><span style="font-size:12.5px;color:var(--ink2);font-weight:600">{{ t.l }}</span></div></sc-for>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,360px),1fr));gap:16px;align-items:start">
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <span style="font-weight:800;font-stretch:75%;font-size:20px;text-transform:uppercase">Contestazioni aperte</span>
+          <sc-for list="{{ ad.contested }}" as="c" hint-placeholder-count="1">
+            <div style="background:var(--surface);border:1.5px solid var(--errFg);border-radius:20px;padding:14px 16px;display:flex;flex-direction:column;gap:10px">
+              <div style="display:flex;justify-content:space-between;gap:8px;align-items:baseline"><span style="font-weight:800;font-size:16px">{{ c.a.short }} vs {{ c.b.short }}</span><span style="font-size:12px;color:var(--ink3)">{{ c.round }}</span></div>
+              <div style="font-weight:900;font-stretch:70%;font-size:26px">{{ c.sc }}</div>
+              <div style="font-size:12.5px;color:var(--ink2)">{{ c.meta }}</div>
+              <div style="font-size:13.5px;line-height:1.45;padding:10px 12px;border-radius:12px;background:var(--errBg);color:var(--errFg);font-weight:600">“{{ c.note }}”</div>
+              <div style="display:flex;gap:8px;flex-wrap:wrap">
+                <button onClick="{{ c.edit }}" style="flex:1 1 120px;height:42px;border-radius:12px;border:1.5px solid var(--line2);background:var(--surface);font-weight:700;font-size:13.5px;cursor:pointer">Modifica risultato</button>
+                <button onClick="{{ c.force }}" style="flex:1 1 120px;height:42px;border-radius:12px;border:0;background:var(--accent);color:var(--onAccent);font-weight:800;font-size:13.5px;cursor:pointer">Forza conferma</button>
+              </div>
+            </div>
+          </sc-for>
+          <sc-if value="{{ ad.noContested }}" hint-placeholder-val="{{ false }}"><div style="padding:18px;border-radius:18px;border:1.5px dashed var(--line2);font-size:13.5px;color:var(--ink2)">Nessuna contestazione aperta.</div></sc-if>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <span style="font-weight:800;font-stretch:75%;font-size:20px;text-transform:uppercase">Da recuperare e rinviate</span>
+          <div style="background:var(--surface);border:1px solid var(--line);border-radius:20px;overflow:hidden">
+            <sc-for list="{{ ad.recover }}" as="m" hint-placeholder-count="4">
+              <div style="display:flex;align-items:center;gap:10px;padding:12px 14px;border-top:{{ m.sep }}">
+                <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px"><span style="font-weight:700;font-size:14.5px">{{ m.a.short }} vs {{ m.b.short }}</span><span style="font-size:12px;color:var(--ink2)">{{ m.round }}, {{ m.info }}</span></div>
+                <span style="padding:4px 9px;border-radius:99px;font-size:11px;font-weight:700;white-space:nowrap;background:{{ m.st.bg }};color:{{ m.st.fg }};border:{{ m.st.bd }}">{{ m.st.l }}</span>
+                <button onClick="{{ m.nudge }}" style="height:34px;padding:0 12px;border-radius:10px;border:1.5px solid var(--line2);background:var(--surface);font-weight:700;font-size:12.5px;cursor:pointer">Sollecita</button>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ ad.isPlayers }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;justify-content:flex-end"><button onClick="{{ ad.add }}" style="height:42px;padding:0 16px;border-radius:12px;border:0;background:var(--accent);color:var(--onAccent);font-weight:800;font-size:14px;cursor:pointer">+ Nuovo giocatore</button></div>
+      <div style="background:var(--surface);border:1px solid var(--line);border-radius:20px;overflow:hidden">
+        <sc-for list="{{ ad.players }}" as="p" hint-placeholder-count="12">
+          <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;border-top:{{ p.sep }};flex-wrap:wrap">
+            <span style="width:34px;height:34px;border-radius:50%;background:{{ p.av }};color:{{ p.avFg }};display:grid;place-items:center;font-weight:800;font-size:12px;flex:none">{{ p.init }}</span>
+            <div style="flex:1 1 180px;min-width:0;display:flex;flex-direction:column;gap:2px"><span style="font-weight:700;font-size:14.5px">{{ p.name }}</span><span style="font-size:12px;color:var(--ink2);font-family:'JetBrains Mono',monospace">{{ p.email }}</span></div>
+            <span style="padding:3px 9px;border-radius:99px;font-size:11px;font-weight:700;background:{{ p.roleBg }};color:{{ p.roleFg }}">{{ p.role }}</span>
+            <span style="font-size:12px;font-weight:600;color:{{ p.stFg }};width:110px">{{ p.status }}</span>
+            <button onClick="{{ p.resend }}" style="height:32px;padding:0 10px;border-radius:9px;border:1.5px solid var(--line2);background:var(--surface);font-weight:700;font-size:12px;cursor:pointer">Reinvia link</button>
+          </div>
+        </sc-for>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ ad.isClubs }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;justify-content:flex-end"><button onClick="{{ ad.add }}" style="height:42px;padding:0 16px;border-radius:12px;border:0;background:var(--accent);color:var(--onAccent);font-weight:800;font-size:14px;cursor:pointer">+ Nuovo circolo</button></div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px">
+        <sc-for list="{{ ad.clubs }}" as="c" hint-placeholder-count="5">
+          <div style="background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:14px 16px;display:flex;flex-direction:column;gap:6px">
+            <span style="font-weight:800;font-size:16px">{{ c.n }}</span>
+            <span style="font-size:13px;color:var(--ink2)">{{ c.c }}</span>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px"><span style="font-size:12px;font-weight:700;color:var(--accent)">{{ c.count }}</span><button onClick="{{ ad.add }}" style="border:0;background:none;font-weight:700;font-size:12.5px;cursor:pointer;color:var(--ink2)">Modifica</button></div>
+          </div>
+        </sc-for>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ ad.isCal }}" hint-placeholder-val="{{ false }}">
+      <div style="background:var(--surface);border:1px solid var(--line);border-radius:20px;overflow:hidden">
+        <sc-for list="{{ ad.rounds }}" as="r" hint-placeholder-count="11">
+          <div style="display:flex;align-items:center;gap:12px;padding:11px 14px;border-top:{{ r.sep }};flex-wrap:wrap">
+            <span style="width:36px;height:36px;border-radius:10px;background:{{ r.badgeBg }};color:{{ r.badgeFg }};display:grid;place-items:center;font-weight:900;font-stretch:70%;font-size:17px;flex:none">{{ r.n }}</span>
+            <div style="flex:1 1 160px;display:flex;flex-direction:column;gap:2px"><span style="font-weight:700;font-size:14.5px">Giornata {{ r.n }}, {{ r.range }}</span><span style="font-size:12px;color:var(--ink2)">{{ r.summary }}</span></div>
+            <button onClick="{{ ad.add }}" style="height:32px;padding:0 10px;border-radius:9px;border:1.5px solid var(--line2);background:var(--surface);font-weight:700;font-size:12px;cursor:pointer">Modifica</button>
+          </div>
+        </sc-for>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ ad.isRes }}" hint-placeholder-val="{{ false }}">
+      <div style="background:var(--surface);border:1px solid var(--line);border-radius:20px;overflow:hidden">
+        <sc-for list="{{ ad.results }}" as="m" hint-placeholder-count="8">
+          <div style="display:flex;align-items:center;gap:10px;padding:11px 14px;border-top:{{ m.sep }};flex-wrap:wrap">
+            <div style="flex:1 1 180px;min-width:0;display:flex;flex-direction:column;gap:3px"><span style="font-weight:700;font-size:14.5px">{{ m.a.short }} vs {{ m.b.short }} <span style="font-weight:500;color:var(--ink3);font-size:12px">, {{ m.round }}</span></span><span style="font-size:13px;font-weight:700">{{ m.sc }} <span style="font-weight:500;color:var(--ink2)">, {{ m.ptsLine }}</span></span></div>
+            <span style="padding:4px 9px;border-radius:99px;font-size:11px;font-weight:700;white-space:nowrap;background:{{ m.st.bg }};color:{{ m.st.fg }};border:{{ m.st.bd }}">{{ m.st.l }}</span>
+            <button onClick="{{ m.edit }}" style="height:32px;padding:0 10px;border-radius:9px;border:1.5px solid var(--line2);background:var(--surface);font-weight:700;font-size:12px;cursor:pointer">Modifica</button>
+            <sc-if value="{{ m.canForce }}" hint-placeholder-val="{{ false }}"><button onClick="{{ m.force }}" style="height:32px;padding:0 10px;border-radius:9px;border:0;background:var(--accent);color:var(--onAccent);font-weight:800;font-size:12px;cursor:pointer">Forza conferma</button></sc-if>
+          </div>
+        </sc-for>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ ad.isTornei }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;justify-content:flex-end"><button onClick="{{ ad.newT }}" style="height:42px;padding:0 16px;border-radius:12px;border:0;background:var(--accent);color:var(--onAccent);font-weight:800;font-size:14px;cursor:pointer">+ Nuovo torneo</button></div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr));gap:12px">
+        <sc-for list="{{ ad.tourn }}" as="t" hint-placeholder-count="3">
+          <div style="background:{{ t.bg }};color:{{ t.fg }};border:1px solid var(--line);border-radius:22px;padding:16px;display:flex;flex-direction:column;gap:10px">
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><span style="padding:3px 9px;border-radius:99px;font-size:11px;font-weight:800;background:{{ t.pillBg }};color:{{ t.pillFg }}">{{ t.status }}</span><span style="font-family:'JetBrains Mono',monospace;font-size:12px;opacity:.75">{{ t.season }}</span></div>
+            <span style="font-weight:900;font-stretch:68%;font-size:26px;line-height:.95;text-transform:uppercase">{{ t.name }}</span>
+            <span style="font-size:13px;opacity:.78;line-height:1.4">{{ t.info }}</span>
+            <sc-if value="{{ t.hasChamp }}" hint-placeholder-val="{{ false }}"><span style="font-size:13.5px">Campione: <strong>{{ t.champ }}</strong></span></sc-if>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px">
+              <button onClick="{{ t.open }}" style="flex:1 1 120px;height:40px;border-radius:12px;border:1.5px solid currentColor;background:transparent;color:inherit;font-weight:700;font-size:13px;cursor:pointer">{{ t.openLabel }}</button>
+              <sc-if value="{{ t.canClose }}" hint-placeholder-val="{{ false }}"><button onClick="{{ t.close }}" style="flex:1 1 120px;height:40px;border-radius:12px;border:0;background:#C6EEDB;color:#0B1A24;font-weight:800;font-size:13px;cursor:pointer">Chiudi e archivia</button></sc-if>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+      <div style="font-size:12.5px;color:var(--ink2);line-height:1.5;max-width:620px">Quando un torneo si chiude dopo la finale passa in archivio: classifica, risultati e foto restano consultabili da tutti i giocatori, che scelgono la stagione dalla Classifica.</div>
+    </sc-if>
+
+    <sc-if value="{{ ad.isNew }}" hint-placeholder-val="{{ false }}">
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">
+        <sc-for list="{{ wz.steps }}" as="s" hint-placeholder-count="4"><button onClick="{{ s.go }}" style="border:0;background:none;padding:0;cursor:pointer;display:flex;flex-direction:column;gap:6px;text-align:left"><span style="height:5px;border-radius:3px;width:100%;background:{{ s.bar }}"></span><span style="font-size:12px;font-weight:700;color:{{ s.fg }}">{{ s.n }}, {{ s.l }}</span></button></sc-for>
+      </div>
+
+      <sc-if value="{{ wz.s1 }}" hint-placeholder-val="{{ true }}">
+        <div style="background:var(--surface);border:1px solid var(--line);border-radius:22px;padding:18px;display:flex;flex-direction:column;gap:14px;max-width:640px">
+          <label style="display:flex;flex-direction:column;gap:6px"><span style="font-size:12.5px;font-weight:700;color:var(--ink2)">Nome del torneo</span><input value="{{ wz.name }}" onChange="{{ wz.onName }}" style="height:48px;border-radius:14px;border:1.5px solid var(--line2);background:var(--bg);padding:0 14px;font-size:15px;outline:none"></label>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px">
+            <label style="display:flex;flex-direction:column;gap:6px"><span style="font-size:12.5px;font-weight:700;color:var(--ink2)">Stagione</span><input value="{{ wz.season }}" onChange="{{ wz.onSeason }}" style="height:48px;border-radius:14px;border:1.5px solid var(--line2);background:var(--bg);padding:0 14px;font-size:15px;outline:none"></label>
+            <label style="display:flex;flex-direction:column;gap:6px"><span style="font-size:12.5px;font-weight:700;color:var(--ink2)">Sottotitolo</span><input value="{{ wz.sub }}" onChange="{{ wz.onSub }}" style="height:48px;border-radius:14px;border:1.5px solid var(--line2);background:var(--bg);padding:0 14px;font-size:15px;outline:none"></label>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:6px"><span style="font-size:12.5px;font-weight:700;color:var(--ink2)">Accedono alla fase finale</span>
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);background:var(--surface2);border-radius:14px;padding:4px;gap:4px;max-width:360px">
+              <sc-for list="{{ wz.tops }}" as="o" hint-placeholder-count="3"><button onClick="{{ o.pick }}" style="height:36px;border:0;border-radius:10px;font-weight:700;font-size:13.5px;cursor:pointer;background:{{ o.bg }};color:{{ o.fg }};box-shadow:{{ o.sh }}">{{ o.l }}</button></sc-for>
+            </div>
+          </div>
+          <div style="padding:12px 14px;border-radius:14px;background:var(--surface2);font-size:13px;line-height:1.5;color:var(--ink2)"><strong style="color:var(--ink)">Regolamento copiato dal 2026/27.</strong> Girone all'italiana di sola andata, partite da 2 ore, due set, STB a 10, vittoria in 2 set game + 3, al STB game + 2 + 1 + compensazione.</div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ wz.s2 }}" hint-placeholder-val="{{ false }}">
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:16px;align-items:start">
+          <div style="background:var(--surface);border:1px solid var(--line);border-radius:22px;overflow:hidden">
+            <div style="padding:14px 16px;display:flex;justify-content:space-between;align-items:baseline;gap:8px"><span style="font-weight:800;font-stretch:75%;font-size:18px;text-transform:uppercase">Giocatori</span><span style="font-size:12.5px;font-weight:700;color:var(--accent)">{{ wz.summary }}</span></div>
+            <sc-for list="{{ wz.players }}" as="p" hint-placeholder-count="12">
+              <button onClick="{{ p.toggle }}" style="width:100%;display:flex;align-items:center;gap:12px;padding:9px 16px;border:0;border-top:1px solid var(--line);background:none;cursor:pointer;text-align:left">
+                <span style="width:22px;height:22px;border-radius:7px;flex:none;display:grid;place-items:center;font-size:13px;font-weight:900;background:{{ p.boxBg }};color:var(--onAccent);border:{{ p.boxBd }}">{{ p.tick }}</span>
+                <span style="flex:1;font-weight:600;font-size:14.5px;color:{{ p.fg }}">{{ p.n }}</span>
+                <sc-if value="{{ p.isNew }}" hint-placeholder-val="{{ false }}"><span style="font-size:11px;font-weight:700;color:var(--warnFg)">invito da inviare</span></sc-if>
+              </button>
+            </sc-for>
+            <div style="display:flex;gap:8px;padding:12px 16px;border-top:1px solid var(--line)">
+              <input value="{{ wz.newEmail }}" onChange="{{ wz.onEmail }}" placeholder="email nuovo giocatore" style="flex:1;min-width:0;height:42px;border-radius:12px;border:1.5px solid var(--line2);background:var(--bg);padding:0 12px;font-size:14px;outline:none">
+              <button onClick="{{ wz.addPlayer }}" style="height:42px;padding:0 14px;border-radius:12px;border:0;background:var(--accent);color:var(--onAccent);font-weight:800;font-size:13.5px;cursor:pointer">Aggiungi</button>
+            </div>
+          </div>
+          <div style="background:var(--surface);border:1px solid var(--line);border-radius:22px;padding:14px 16px;display:flex;flex-direction:column;gap:10px">
+            <span style="font-weight:800;font-stretch:75%;font-size:18px;text-transform:uppercase">Circoli</span>
+            <div style="display:flex;flex-wrap:wrap;gap:6px">
+              <sc-for list="{{ wz.clubs }}" as="c" hint-placeholder-count="5"><button onClick="{{ c.toggle }}" style="height:38px;padding:0 12px;border-radius:12px;cursor:pointer;font-weight:700;font-size:13px;background:{{ c.bg }};color:{{ c.fg }};border:{{ c.bd }}">{{ c.n }}</button></sc-for>
+            </div>
+            <span style="font-size:12.5px;color:var(--ink2);line-height:1.45">Sono i circoli che i giocatori vedranno quando programmano una partita.</span>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ wz.s3 }}" hint-placeholder-val="{{ false }}">
+        <div style="background:var(--surface);border:1px solid var(--line);border-radius:22px;padding:18px;display:flex;flex-direction:column;gap:16px;max-width:640px">
+          <label style="display:flex;flex-direction:column;gap:6px;max-width:260px"><span style="font-size:12.5px;font-weight:700;color:var(--ink2)">Lunedì della prima giornata</span><input type="date" value="{{ wz.start }}" onChange="{{ wz.onStart }}" style="height:48px;border-radius:14px;border:1.5px solid var(--line2);background:var(--bg);padding:0 12px;font-size:15px;color-scheme:{{ colorScheme }}"></label>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <span style="font-size:12.5px;font-weight:700;color:var(--ink2)">Pause (nessuna giornata in questi giorni)</span>
+            <sc-for list="{{ wz.pauses }}" as="p" hint-placeholder-count="1">
+              <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:14px;background:var(--warnBg);color:var(--warnFg)"><span style="flex:1;font-weight:700;font-size:14px">{{ p.l }}</span><button onClick="{{ p.remove }}" style="border:0;background:none;color:inherit;font-weight:700;cursor:pointer;font-size:13px">Rimuovi</button></div>
+            </sc-for>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+              <input type="date" value="{{ wz.pa }}" onChange="{{ wz.onPa }}" style="height:42px;border-radius:12px;border:1.5px solid var(--line2);background:var(--bg);padding:0 10px;font-size:14px;color-scheme:{{ colorScheme }}">
+              <span style="color:var(--ink3)">-</span>
+              <input type="date" value="{{ wz.pb }}" onChange="{{ wz.onPb }}" style="height:42px;border-radius:12px;border:1.5px solid var(--line2);background:var(--bg);padding:0 10px;font-size:14px;color-scheme:{{ colorScheme }}">
+              <button onClick="{{ wz.addPause }}" style="height:42px;padding:0 14px;border-radius:12px;border:1.5px solid var(--line2);background:var(--surface);font-weight:700;font-size:13.5px;cursor:pointer">+ Aggiungi pausa</button>
+            </div>
+          </div>
+          <div style="padding:12px 14px;border-radius:14px;background:var(--mint);color:var(--mintInk);font-size:13.5px;line-height:1.5;font-weight:600">{{ wz.dateSummary }}</div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ wz.s4 }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between">
+          <span style="font-size:13.5px;color:var(--ink2);line-height:1.45;max-width:560px">Calendario generato in automatico: ognuno gioca una volta a settimana e incontra tutti una volta. Giorno, ora e circolo li sceglieranno i giocatori.</span>
+          <button onClick="{{ wz.shuffle }}" style="height:42px;padding:0 16px;border-radius:12px;border:1.5px solid var(--line2);background:var(--surface);font-weight:700;font-size:13.5px;cursor:pointer">Rimescola accoppiamenti</button>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,250px),1fr));gap:10px">
+          <sc-for list="{{ wz.rounds }}" as="r" hint-placeholder-count="6">
+            <div style="background:var(--surface);border:1px solid var(--line);border-radius:18px;overflow:hidden">
+              <div style="padding:10px 14px;display:flex;justify-content:space-between;align-items:baseline;gap:8px;background:var(--surface2)"><span style="font-weight:800;font-stretch:78%;font-size:16px;text-transform:uppercase">Giornata {{ r.n }}</span><span style="font-size:12px;font-weight:700;color:var(--ink2)">{{ r.range }}</span></div>
+              <sc-if value="{{ r.hasPause }}" hint-placeholder-val="{{ false }}"><div style="padding:6px 14px;font-size:11.5px;font-weight:700;background:var(--warnBg);color:var(--warnFg)">{{ r.pauseL }}</div></sc-if>
+              <sc-for list="{{ r.pairs }}" as="p" hint-placeholder-count="6"><div style="padding:7px 14px;font-size:13.5px;border-top:1px solid var(--line)">{{ p }}</div></sc-for>
+              <sc-if value="{{ r.hasBye }}" hint-placeholder-val="{{ false }}"><div style="padding:7px 14px;font-size:12.5px;color:var(--ink3);border-top:1px solid var(--line)">Riposa: {{ r.bye }}</div></sc-if>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+
+      <div style="display:flex;gap:8px;justify-content:space-between;flex-wrap:wrap;align-items:center;border-top:1px solid var(--line);padding-top:16px">
+        <button onClick="{{ wz.prev }}" style="height:46px;padding:0 18px;border-radius:12px;border:1.5px solid var(--line2);background:var(--surface);font-weight:700;font-size:14px;cursor:pointer">{{ wz.prevLabel }}</button>
+        <span style="font-size:12.5px;color:var(--errFg);font-weight:600">{{ wz.err }}</span>
+        <button onClick="{{ wz.next }}" style="height:46px;padding:0 20px;border-radius:12px;border:0;font-weight:800;font-size:14px;cursor:pointer;background:{{ wz.nextBg }};color:{{ wz.nextFg }}">{{ wz.nextLabel }}</button>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ ad.isImport }}" hint-placeholder-val="{{ false }}">
+      <input ref="{{ xlsRef }}" type="file" accept=".xlsx,.xls,.csv" onChange="{{ ad.onXls }}" style="display:none">
+      <sc-if value="{{ ad.imp0 }}" hint-placeholder-val="{{ true }}">
+        <div style="border:2px dashed var(--line2);border-radius:22px;padding:36px 20px;display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center;background:var(--surface)">
+          <span style="width:56px;height:56px;border-radius:16px;background:var(--mint);color:#0B1A24;display:grid;place-items:center;font-weight:900;font-stretch:70%;font-size:18px">XLS</span>
+          <span style="font-weight:800;font-size:17px">Trascina qui il file Excel del torneo</span>
+          <span style="font-size:13px;color:var(--ink2);max-width:380px;line-height:1.45">Fogli attesi: Giocatori, Circoli, Calendario, Risultati. Prima di applicare vedrai cosa cambia.</span>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center">
+            <button onClick="{{ ad.pickXls }}" style="height:44px;padding:0 16px;border-radius:12px;border:0;background:var(--accent);color:var(--onAccent);font-weight:800;font-size:14px;cursor:pointer">Scegli file</button>
+            <button onClick="{{ ad.sample }}" style="height:44px;padding:0 16px;border-radius:12px;border:1.5px solid var(--line2);background:var(--surface);font-weight:700;font-size:14px;cursor:pointer">Usa file di esempio</button>
+          </div>
+        </div>
+      </sc-if>
+      <sc-if value="{{ ad.imp1 }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:14px;background:var(--surface);border:1px solid var(--line);font-size:13px"><span style="font-family:'JetBrains Mono',monospace;font-weight:500">{{ ad.fileName }}</span><span style="color:var(--ink3)">, letto ora</span><button onClick="{{ ad.resetImp }}" style="margin-left:auto;border:0;background:none;color:var(--ink2);font-weight:700;cursor:pointer;font-size:13px">Cambia file</button></div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px">
+          <div style="border-radius:18px;padding:14px;background:var(--mint);color:#0B1A24;display:flex;flex-direction:column;gap:2px"><span style="font-weight:900;font-stretch:66%;font-size:34px;line-height:1">48</span><span style="font-size:12.5px;font-weight:700">Nuove</span></div>
+          <div style="border-radius:18px;padding:14px;background:var(--warnBg);color:var(--warnFg);display:flex;flex-direction:column;gap:2px"><span style="font-weight:900;font-stretch:66%;font-size:34px;line-height:1">3</span><span style="font-size:12.5px;font-weight:700">Modificate</span></div>
+          <div style="border-radius:18px;padding:14px;background:var(--errBg);color:var(--errFg);display:flex;flex-direction:column;gap:2px"><span style="font-weight:900;font-stretch:66%;font-size:34px;line-height:1">1</span><span style="font-size:12.5px;font-weight:700">In conflitto</span></div>
+        </div>
+        <div style="background:var(--surface);border:1.5px solid var(--errFg);border-radius:20px;padding:14px 16px;display:flex;flex-direction:column;gap:10px">
+          <span style="font-size:11.5px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--errFg)">In conflitto</span>
+          <span style="font-weight:700;font-size:15px">G2, Marco - Francesco</span>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:13px">
+            <div style="padding:10px 12px;border-radius:12px;background:var(--bg);display:flex;flex-direction:column;gap:3px"><span style="color:var(--ink3);font-weight:700;font-size:11px;text-transform:uppercase">Nell'app</span><strong>6-4 3-6 10-7</strong><span style="color:var(--errFg)">Contestata</span></div>
+            <div style="padding:10px 12px;border-radius:12px;background:var(--bg);display:flex;flex-direction:column;gap:3px"><span style="color:var(--ink3);font-weight:700;font-size:11px;text-transform:uppercase">Nel file</span><strong>6-4 3-6 8-10</strong><span style="color:var(--ink2)">Confermata</span></div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;background:var(--surface2);border-radius:12px;padding:3px;gap:3px">
+            <button onClick="{{ ad.keepApp }}" style="height:36px;border:0;border-radius:9px;font-weight:700;font-size:13px;cursor:pointer;background:{{ ad.sgApp.bg }};color:{{ ad.sgApp.fg }};box-shadow:{{ ad.sgApp.sh }}">Mantieni app</button>
+            <button onClick="{{ ad.useXls }}" style="height:36px;border:0;border-radius:9px;font-weight:700;font-size:13px;cursor:pointer;background:{{ ad.sgXls.bg }};color:{{ ad.sgXls.fg }};box-shadow:{{ ad.sgXls.sh }}">Usa Excel</button>
+          </div>
+        </div>
+        <div style="background:var(--surface);border:1px solid var(--line);border-radius:20px;overflow:hidden">
+          <div style="padding:12px 16px 4px;font-size:11.5px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--warnFg)">Modificate</div>
+          <sc-for list="{{ ad.diffMod }}" as="d" hint-placeholder-count="3">
+            <div style="display:flex;flex-wrap:wrap;gap:4px 10px;padding:10px 16px;border-top:1px solid var(--line);font-size:13.5px"><span style="font-weight:700;flex:1 1 180px">{{ d.what }}</span><span style="color:var(--ink3);text-decoration:line-through">{{ d.from }}</span><span style="font-weight:700">→ {{ d.to }}</span></div>
+          </sc-for>
+          <div style="padding:14px 16px 4px;font-size:11.5px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--accent)">Nuove, prime 5 di 48</div>
+          <sc-for list="{{ ad.diffNew }}" as="d" hint-placeholder-count="5">
+            <div style="display:flex;gap:10px;padding:10px 16px;border-top:1px solid var(--line);font-size:13.5px"><span style="font-weight:700;flex:1">{{ d.what }}</span><span style="color:var(--ink2)">{{ d.to }}</span></div>
+          </sc-for>
+        </div>
+        <div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap">
+          <button onClick="{{ ad.resetImp }}" style="height:46px;padding:0 18px;border-radius:12px;border:1.5px solid var(--line2);background:var(--surface);font-weight:700;font-size:14px;cursor:pointer">Annulla</button>
+          <button onClick="{{ ad.apply }}" style="height:46px;padding:0 18px;border-radius:12px;border:0;background:var(--accent);color:var(--onAccent);font-weight:800;font-size:14px;cursor:pointer">Applica 52 modifiche</button>
+        </div>
+      </sc-if>
+    </sc-if>
+  </div>
+</div>
+</sc-if>
+
+<!-- TAB BAR -->
+<sc-if value="{{ showTabs }}" hint-placeholder-val="{{ false }}">
+<div style="position:sticky;bottom:0;margin-top:auto;z-index:10;background:var(--surface);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(5,1fr);padding:6px 4px 10px">
+  <button onClick="{{ goHome }}" style="border:0;background:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 0;color:{{ tabC.home }}"><svg width="24" height="24" viewBox="0 0 24 24" style="flex:none"><path d="M4 11L12 4l8 7v9H4z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"></path></svg><span style="font-size:11px;font-weight:700">Home</span></button>
+  <button onClick="{{ goCal }}" style="border:0;background:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 0;color:{{ tabC.cal }}"><svg width="24" height="24" viewBox="0 0 24 24" style="flex:none"><rect x="4" y="5" width="16" height="15" rx="3" fill="none" stroke="currentColor" stroke-width="2.2"></rect><line x1="4" y1="10" x2="20" y2="10" stroke="currentColor" stroke-width="2.2"></line></svg><span style="font-size:11px;font-weight:700">Calendario</span></button>
+  <button onClick="{{ goClass }}" style="border:0;background:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 0;color:{{ tabC.class }}"><svg width="24" height="24" viewBox="0 0 24 24" style="flex:none"><rect x="3.5" y="12" width="4.5" height="8" rx="1" fill="currentColor"></rect><rect x="9.75" y="5" width="4.5" height="15" rx="1" fill="currentColor"></rect><rect x="16" y="9" width="4.5" height="11" rx="1" fill="currentColor"></rect></svg><span style="font-size:11px;font-weight:700">Classifica</span></button>
+  <button onClick="{{ goGallery }}" style="border:0;background:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 0;color:{{ tabC.gallery }}"><svg width="24" height="24" viewBox="0 0 24 24" style="flex:none"><rect x="4" y="4" width="16" height="16" rx="3.5" fill="none" stroke="currentColor" stroke-width="2.2"></rect><circle cx="12" cy="12" r="3.2" fill="currentColor"></circle></svg><span style="font-size:11px;font-weight:700">Gallery</span></button>
+  <button onClick="{{ goMeTab }}" style="border:0;background:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 0;color:{{ tabC.profile }}"><svg width="24" height="24" viewBox="0 0 24 24" style="flex:none"><circle cx="12" cy="8.5" r="4" fill="none" stroke="currentColor" stroke-width="2.2"></circle><path d="M4.5 20c1-4 4-5.5 7.5-5.5s6.5 1.5 7.5 5.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"></path></svg><span style="font-size:11px;font-weight:700">Profilo</span></button>
+</div>
+</sc-if>
+</div>
+
+<!-- SHEET PROGRAMMA -->
+<sc-if value="{{ sheetOpen }}" hint-placeholder-val="{{ false }}">
+<div data-screen-label="06 Programma partita" style="position:absolute;inset:0;z-index:40;display:flex;flex-direction:column;justify-content:flex-end">
+  <div onClick="{{ sh.close }}" style="position:absolute;inset:0;background:rgba(5,14,20,.55);animation:fadeIn .2s ease"></div>
+  <div style="position:relative;background:var(--surface);border-radius:28px 28px 0 0;padding:10px 16px 16px;max-height:92%;overflow-y:auto;animation:sheetUp .3s cubic-bezier(.2,.8,.2,1);display:flex;flex-direction:column;gap:16px">
+    <div style="width:40px;height:5px;border-radius:3px;background:var(--line2);align-self:center"></div>
+    <div style="display:flex;flex-direction:column;gap:3px">
+      <span style="font-weight:900;font-stretch:66%;font-size:32px;line-height:.95;text-transform:uppercase">Programma partita</span>
+      <span style="font-size:13.5px;color:var(--ink2)">{{ sh.sub }}</span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <span style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--ink3)">Giorno</span>
+      <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:5px">
+        <sc-for list="{{ sh.days }}" as="d" hint-placeholder-count="7">
+          <button onClick="{{ d.pick }}" style="height:60px;border-radius:14px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:0;background:{{ d.bg }};color:{{ d.fg }};border:{{ d.bd }}"><span style="font-size:11px;font-weight:700;text-transform:uppercase;opacity:.8">{{ d.wd }}</span><span style="font-weight:900;font-stretch:70%;font-size:22px;line-height:1">{{ d.dn }}</span></button>
+        </sc-for>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button onClick="{{ sh.toggleOther }}" style="height:40px;padding:0 14px;border-radius:12px;cursor:pointer;font-weight:700;font-size:13px;background:{{ sh.otherBg }};color:{{ sh.otherFg }};border:{{ sh.otherBd }}">Altra data</button>
+        <sc-if value="{{ sh.otherOn }}" hint-placeholder-val="{{ false }}"><input type="date" value="{{ sh.otherDate }}" onChange="{{ sh.onOther }}" style="flex:1;height:40px;border-radius:12px;border:1.5px solid var(--line2);background:var(--bg);padding:0 10px;font-size:14px;color-scheme:{{ colorScheme }}"></sc-if>
+      </div>
+      <sc-if value="{{ sh.hasWarn }}" hint-placeholder-val="{{ false }}"><div style="font-size:13px;line-height:1.4;padding:10px 12px;border-radius:12px;background:var(--warnBg);color:var(--warnFg);font-weight:600">{{ sh.warn }}</div></sc-if>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <span style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--ink3)">Ora</span>
+      <div style="display:flex;flex-wrap:wrap;gap:6px">
+        <sc-for list="{{ sh.times }}" as="t" hint-placeholder-count="7"><button onClick="{{ t.pick }}" style="height:40px;padding:0 13px;border-radius:12px;cursor:pointer;font-weight:700;font-size:14px;background:{{ t.bg }};color:{{ t.fg }};border:{{ t.bd }}">{{ t.l }}</button></sc-for>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <span style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--ink3)">Circolo</span>
+      <div style="display:flex;flex-direction:column;border:1px solid var(--line);border-radius:16px;overflow:hidden">
+        <sc-for list="{{ sh.clubs }}" as="c" hint-placeholder-count="5">
+          <button onClick="{{ c.pick }}" style="display:flex;align-items:center;gap:12px;padding:11px 14px;border:0;border-top:{{ c.sep }};background:{{ c.bg }};cursor:pointer;text-align:left">
+            <span style="width:20px;height:20px;border-radius:50%;flex:none;border:{{ c.ring }};background:var(--surface)"></span>
+            <span style="display:flex;flex-direction:column;gap:1px"><span style="font-weight:700;font-size:14.5px">{{ c.n }}</span><span style="font-size:12px;color:var(--ink2)">{{ c.c }}</span></span>
+          </button>
+        </sc-for>
+      </div>
+    </div>
+    <button onClick="{{ sh.save }}" style="height:54px;border-radius:16px;border:0;font-weight:800;font-size:16px;cursor:pointer;background:{{ sh.btnBg }};color:{{ sh.btnFg }}">{{ sh.btnLabel }}</button>
+  </div>
+</div>
+</sc-if>
+
+<sc-if value="{{ hasToast }}" hint-placeholder-val="{{ false }}">
+  <div style="position:absolute;left:16px;right:16px;bottom:96px;z-index:60;display:flex;justify-content:center;pointer-events:none"><div style="background:#0B1A24;color:#fff;padding:12px 16px;border-radius:14px;font-size:13.5px;font-weight:600;box-shadow:0 10px 30px rgba(0,0,0,.25);animation:fadeIn .2s ease;max-width:360px;text-align:center">{{ toast }}</div></div>
+</sc-if>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;tema&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;chiaro&quot;,&quot;scuro&quot;],&quot;default&quot;:&quot;chiaro&quot;,&quot;tsType&quot;:&quot;'chiaro'|'scuro'&quot;},&quot;classifica&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;tabella&quot;,&quot;schede&quot;],&quot;default&quot;:&quot;tabella&quot;,&quot;tsType&quot;:&quot;'tabella'|'schede'&quot;},&quot;cornice&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;}}">
+const ME='gdf', TODAY='2026-10-28', CUR=3;
+const PL=[['gdf','Giuseppe De Francesca','Giuseppe','GD',145,'giuseppe.defrancesca@gmail.com','Admin'],['alp','Alessio Panfili','Alessio','AP',200,'alessio.panfili@gmail.com','Admin'],['fpi','Federico Piccioni','Federico','FP',250,'federico.piccioni@gmail.com'],['mro','Marco Rondoni','Marco','MR',30,'marco.rondoni@libero.it'],['api','Alessandro Piccioni','Alessandro P.','AP',170,'ale.piccioni@gmail.com'],['mgi','Michele Giancarlo','Michele','MG',85,'michele.giancarlo@gmail.com'],['fri','Fabrizio Ricci','Fabrizio','FR',300,'fabrizio.ricci@outlook.it'],['lpa','Leonardo Panfili','Leonardo','LP',120,'leo.panfili@gmail.com'],['lce','Luca Ceccarelli','Luca','LC',230,'luca.ceccarelli@gmail.com'],['gca','Gennaro Carucci','Gennaro','GC',60,'gennaro.carucci@gmail.com'],['far','Francesco Artegiani','Francesco','FA',160,'f.artegiani@gmail.com'],['aco','Alessandro Cofanelli','Alessandro C.','AC',280,'a.cofanelli@gmail.com']].map(([id,n,s,init,h,email,role])=>({id,n,s,init,h,email,role:role||'Giocatore',av:`oklch(0.88 0.07 ${h})`,avFg:`oklch(0.3 0.08 ${h})`}));
+const PM=Object.fromEntries(PL.map(p=>[p.id,p]));
+const CLUBS=[{id:'ctp',n:'Circolo Tennis Perugia',c:'Perugia, 4 campi in terra rossa'},{id:'psg',n:'TC Ponte San Giovanni',c:'Ponte San Giovanni, 3 campi in sintetico'},{id:'tca',n:'Tennis Club Assisi',c:'Santa Maria degli Angeli, 2 campi in terra'},{id:'cbu',n:'CT Bastia Umbra',c:'Bastia Umbra, 3 campi in cemento'},{id:'pco',n:'Polisportiva Corciano',c:'Corciano, 2 campi in sintetico'}];
+const CM=Object.fromEntries(CLUBS.map(c=>[c.id,c]));
+const RD=[['2026-10-12','2026-10-18'],['2026-10-19','2026-10-25'],['2026-10-26','2026-11-01'],['2026-11-02','2026-11-08'],['2026-11-09','2026-11-15'],['2026-11-16','2026-11-22'],['2026-11-23','2026-11-29'],['2026-11-30','2026-12-06'],['2026-12-07','2026-12-13'],['2026-12-14','2026-12-18'],['2027-01-11','2027-01-17']];
+const MON=['gen','feb','mar','apr','mag','giu','lug','ago','set','ott','nov','dic'], WD=['dom','lun','mar','mer','gio','ven','sab'];
+const D=s=>{const[y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d)};
+const iso=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+const addDays=(s,n)=>{const d=D(s);d.setDate(d.getDate()+n);return iso(d)};
+const fd=s=>{const d=D(s);return `${d.getDate()} ${MON[d.getMonth()]}`};
+const fdw=s=>{const d=D(s);return `${WD[d.getDay()]} ${d.getDate()} ${MON[d.getMonth()]}`};
+const rng=i=>{const[a,b]=RD[i];const A=D(a),B=D(b);return A.getMonth()===B.getMonth()?`${A.getDate()} - ${B.getDate()} ${MON[B.getMonth()]}`:`${fd(a)} - ${fd(b)}`};
+const key=(a,b)=>[a,b].sort().join('|');
+const ST={dp:{l:'Da programmare',bg:'transparent',fg:'var(--ink2)',bd:'1px solid var(--line2)',fg2:'var(--ink2)'},prog:{l:'Programmata',bg:'var(--mint)',fg:'var(--mintInk)',bd:'1px solid transparent',fg2:'var(--accent)'},rinv:{l:'Rinviata',bg:'var(--warnBg)',fg:'var(--warnFg)',bd:'1px solid transparent',fg2:'var(--warnFg)'},rec:{l:'Da recuperare',bg:'var(--recBg)',fg:'var(--recFg)',bd:'1px solid transparent',fg2:'var(--recFg)'},prov:{l:'Provvisoria',bg:'transparent',fg:'var(--accent)',bd:'1.5px dashed var(--accent)',fg2:'var(--accent)'},conf:{l:'Confermata',bg:'var(--accent)',fg:'var(--onAccent)',bd:'1px solid transparent',fg2:'var(--ink3)'},cont:{l:'Contestata',bg:'var(--errBg)',fg:'var(--errFg)',bd:'1px solid transparent',fg2:'var(--errFg)'}};
+const ZN={top:{l:'Top 8 provv.',bg:'var(--mint)',fg:'var(--mintInk)',bd:'1px solid transparent'},tie:{l:'Parità al taglio',bg:'var(--warnBg)',fg:'var(--warnFg)',bd:'1px solid transparent'},out:{l:'Fuori Top 8',bg:'var(--surface2)',fg:'var(--ink2)',bd:'1px solid transparent'},tbd:{l:'Da definire',bg:'transparent',fg:'var(--ink2)',bd:'1px dashed var(--line2)'}};
+const TIMES=['18:00','18:30','19:00','19:30','20:00','20:30','21:00'];
+const SEG=on=>on?{bg:'var(--surface)',fg:'var(--ink)',sh:'0 1px 3px rgba(11,26,36,.14)'}:{bg:'transparent',fg:'var(--ink2)',sh:'none'};
+const PH="repeating-linear-gradient(135deg,var(--ph1) 0 10px,var(--ph2) 10px 20px)";
+
+function score(m){
+  if(!m.sets)return null;
+  const ga=m.sets[0][0]+m.sets[1][0],gb=m.sets[0][1]+m.sets[1][1];
+  if(m.timeout)return{pa:ga,pb:gb,ga,gb,w:null,ba:0,bb:0,how:'to'};
+  const sa=m.sets.filter(s=>s[0]>s[1]).length;
+  if(sa===2)return{pa:ga+3,pb:gb,ga,gb,w:'a',ba:3,bb:0,how:'2s'};
+  if(sa===0)return{pa:ga,pb:gb+3,ga,gb,w:'b',ba:0,bb:3,how:'2s'};
+  if(m.stb[0]>m.stb[1]){const c=Math.max(0,gb-ga);return{pa:ga+3+c,pb:gb,ga,gb,w:'a',ba:3+c,bb:0,comp:c,how:'stb'}}
+  const c=Math.max(0,ga-gb);return{pa:ga,pb:gb+3+c,ga,gb,w:'b',ba:0,bb:3+c,comp:c,how:'stb'};
+}
+function brk(s,side){
+  const g=side==='a'?s.ga:s.gb,p=side==='a'?s.pa:s.pb;
+  if(s.how==='to')return `tempo scaduto: ${g} game = ${p} punti`;
+  if(s.w!==side)return `${g} game = ${p} punti`;
+  if(s.how==='2s')return `${g} game + 3 (vittoria in 2 set) = ${p} punti`;
+  return `${g} game + 2 + 1 STB${s.comp?` + ${s.comp} compensazione`:''} = ${p} punti`;
+}
+const scoreStr=m=>m.sets.map(s=>`${s[0]}-${s[1]}`).join(' ')+(m.stb?` ${m.stb[0]}-${m.stb[1]}`:'');
+
+function genRounds(used){
+  let seed=20262027;const rnd=()=>(seed=(seed*48271)%2147483647)/2147483647;
+  const shuf=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(rnd()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+  const ids=PL.map(p=>p.id);
+  for(let t=0;t<400;t++){
+    const u=new Set(used),rounds=[];let nodes=0;
+    const solve=r=>{
+      if(r===8)return true;
+      const res=[];
+      const dfs=rem=>{
+        if(++nodes>40000)return false;
+        if(!rem.length){rounds.push(res.slice());res.forEach(([a,b])=>u.add(key(a,b)));if(solve(r+1))return true;res.forEach(([a,b])=>u.delete(key(a,b)));rounds.pop();return false}
+        const a=rem[0];
+        for(const b of shuf(rem.slice(1))){if(u.has(key(a,b)))continue;res.push([a,b]);if(dfs(rem.filter(x=>x!==a&&x!==b)))return true;res.pop();if(nodes>40000)return false}
+        return false};
+      return dfs(shuf(ids));
+    };
+    if(solve(0))return rounds;
+  }
+  return [];
+}
+function buildMatches(){
+  const FX=[[1,'gdf','lce','conf','2026-10-14','19:00','ctp',[[6,2],[6,2]]],[1,'far','lpa','conf','2026-10-15','18:30','psg',[[2,6],[6,4]],[10,5]],[1,'api','alp','conf','2026-10-16','19:30','cbu',[[4,6],[6,3]],[9,11]],[1,'fpi','mgi','conf','2026-10-13','19:00','ctp',[[6,2],[6,2]]],[1,'mro','fri','conf','2026-10-17','18:30','pco',[[6,3],[6,3]]],[1,'gca','aco','rec'],
+  [2,'lce','fpi','prov','2026-10-22','19:00','tca',[[0,6],[2,6]]],[2,'alp','gca','conf','2026-10-20','18:30','ctp',[[6,3],[6,2]]],[2,'api','aco','prov','2026-10-23','19:30','cbu',[[6,1],[6,2]]],[2,'mro','far','cont','2026-10-21','19:00','psg',[[6,4],[3,6]],[10,7]],[2,'gdf','fri','rinv','2026-11-05','19:00','ctp'],[2,'mgi','lpa','rec'],
+  [3,'gdf','fpi','dp'],[3,'mgi','gca','prog','2026-10-27','18:30','psg'],[3,'lce','lpa','prog','2026-10-30','19:30','tca'],[3,'mro','alp','prog','2026-10-31','18:00','ctp'],[3,'aco','fri','dp'],[3,'api','far','rinv','2026-11-04','19:00','cbu']];
+  const ms=FX.map((f,i)=>({id:'m'+(i+1),g:f[0],a:f[1],b:f[2],status:f[3],date:f[4]||null,time:f[5]||null,club:f[6]||null,sets:f[7]||null,stb:f[8]||null,timeout:false,by:f[7]?f[1]:null,cover:null}));
+  ms[9].contestBy='far';ms[9].note='Il super tie break l’ho vinto io 10-8, non 10-7 per Marco. Abbiamo anche il video.';
+  const used=new Set(ms.map(m=>key(m.a,m.b)));let n=ms.length;
+  genRounds(used).forEach((r,ri)=>r.forEach(([a,b])=>ms.push({id:'m'+(++n),g:4+ri,a,b,status:'dp',date:null,time:null,club:null,sets:null,stb:null,timeout:false,cover:null})));
+  return ms;
+}
+const ARCH={t25:{season:'2025/26',champ:'Alessio Panfili',final:'Finale: Alessio vs Federico 6-4 7-5',top:4,rows:[['alp',98,9,8],['fpi',95,9,7],['gdf',81,9,6],['api',77,9,5],['mro',70,9,5],['far',62,9,4],['lpa',55,9,3],['lce',47,9,3],['fri',41,9,2],['mgi',33,9,2]]},t24:{season:'2024/25',champ:'Federico Piccioni',final:'Finale: Federico vs Giuseppe 6-3 4-6 10-6',top:4,rows:[['fpi',72,7,6],['gdf',66,7,5],['alp',60,7,4],['mro',51,7,4],['api',44,7,3],['lce',39,7,3],['lpa',30,7,2],['far',26,7,1]]}};
+const fr=(a,b)=>{const A=D(a),B=D(b);return A.getMonth()===B.getMonth()?`${A.getDate()} - ${B.getDate()} ${MON[B.getMonth()]}`:`${fd(a)} - ${fd(b)}`};
+const nextMon=s=>{let d=addDays(s,1);while(D(d).getDay()!==1)d=addDays(d,1);return d};
+function circle(ids){const a=ids.slice();if(a.length%2)a.push(null);const n=a.length,R=[];for(let r=0;r<n-1;r++){const pr=[];for(let i=0;i<n/2;i++){const x=a[i],y=a[n-1-i];if(x&&y)pr.push(r%2?[y,x]:[x,y])}R.push(pr);a.splice(1,0,a.pop())}return R}
+function weeks(start,count,pauses){const out=[];let ws=start,guard=0;while(out.length<count&&guard++<200){let we=addDays(ws,6),hit=null;for(const p of pauses){if(p.a<=we&&p.b>=ws){hit=p;break}}if(!hit){out.push({a:ws,b:we});ws=addDays(ws,7);continue}if(hit.a>ws){out.push({a:ws,b:addDays(hit.a,-1),pause:hit})}else if(out.length){out[out.length-1].pause=out[out.length-1].pause||hit}ws=nextMon(hit.b)}return out}
+const newWiz=()=>({step:1,name:'ATP Umbria Tournament',season:'2027/28',sub:'Amici Tennis, Pre-cena',top:8,pl:PL.map(p=>({id:p.id,n:p.n,on:true})),clubs:CLUBS.map(c=>c.id),start:'2027-10-11',pauses:[{a:'2027-12-18',b:'2028-01-09'}],pa:'',pb:'',newEmail:'',seed:1});
+const initPhotos=()=>[['p1','m1'],['p2','m1'],['p3','m3'],['p4','m3'],['p5','m4'],['p6','m5'],['p7','m7'],['p8','m8'],['p9','m9'],['p10','m4']].map(([id,m],i)=>({id,m,url:null,t:i}));
+
+class Component extends DCLogic {
+  scrollRef=React.createRef(); camRef=React.createRef(); galRef=React.createRef(); xlsRef=React.createRef();
+  state={screen:'login',params:{},hist:[],theme:null,vw:typeof window!=='undefined'?window.innerWidth:390,email:'',loginSent:false,loginErr:'',matches:buildMatches(),photos:initPhotos(),sheet:null,res:null,cf:{phase:'ask',note:''},sel:[],selCover:null,calMine:false,openRounds:{3:true},classView:null,expanded:null,profTab:'next',galMine:false,adminTab:'dash',importStep:0,fileName:'',conflict:'app',toast:'',season:'t26',wiz:null,tournaments:[{id:'t26',name:'ATP Umbria Tournament',season:'2026/27',status:'In corso',info:'12 giocatori, Giornata 3 di 11, poi quarti di finale'},{id:'t25',name:'ATP Umbria Tournament',season:'2025/26',status:'Concluso',info:'10 giocatori, 45 partite, semifinali',champ:'Alessio Panfili'},{id:'t24',name:'ATP Umbria Tournament',season:'2024/25',status:'Concluso',info:'8 giocatori, 28 partite, semifinali',champ:'Federico Piccioni'}]};
+  componentDidMount(){this.onR=()=>this.setState({vw:window.innerWidth});this.onR();window.addEventListener('resize',this.onR);this.rt=setTimeout(this.onR,300)}
+  componentWillUnmount(){window.removeEventListener('resize',this.onR);clearTimeout(this.tt)}
+  m(id){return this.state.matches.find(x=>x.id===id)}
+  upd(id,patch){this.setState(s=>({matches:s.matches.map(x=>x.id===id?{...x,...patch}:x)}))}
+  toast(t){clearTimeout(this.tt);this.setState({toast:t});this.tt=setTimeout(()=>this.setState({toast:''}),2800)}
+  top(){requestAnimationFrame(()=>{const el=this.scrollRef.current;if(el)el.scrollTop=0})}
+  go(screen,params={},extra={}){this.setState(s=>({screen,params,hist:[...s.hist,{screen:s.screen,params:s.params}].slice(-30),sheet:null,...extra}));this.top()}
+  tab(screen,params={}){this.setState({screen,params,hist:[],sheet:null});this.top()}
+  back=()=>{const h=[...this.state.hist];const p=h.pop()||{screen:'home',params:{}};this.setState({screen:p.screen,params:p.params,hist:h,sheet:null});this.top()};
+  pv(id){const p=PM[id];return{id,name:p.n,short:p.s,init:p.init,av:p.av,avFg:p.avFg}}
+  opp(m,id){return m.a===id?m.b:m.a}
+
+  standings(){
+    const R={};PL.forEach(p=>R[p.id]={id:p.id,pts:0,g:0,v:0,p:0,se:0,gf:0,gs:0,bonus:0});
+    this.state.matches.filter(m=>m.status==='prov'||m.status==='conf').forEach(m=>{const s=score(m),A=R[m.a],B=R[m.b];A.g++;B.g++;A.pts+=s.pa;B.pts+=s.pb;A.gf+=s.ga;A.gs+=s.gb;B.gf+=s.gb;B.gs+=s.ga;A.bonus+=s.ba;B.bonus+=s.bb;if(s.w==='a'){A.v++;B.p++}else if(s.w==='b'){B.v++;A.p++}else{A.se++;B.se++}});
+    const arr=Object.values(R).sort((x,y)=>y.pts-x.pts||(y.gf-y.gs)-(x.gf-x.gs)||y.gf-x.gf);
+    const cut=arr[7].pts,tie=arr[8]&&arr[8].pts===cut;
+    arr.forEach((r,i)=>{r.pos=i+1;r.dgN=r.gf-r.gs;r.zk=r.g===0?'tbd':(tie&&r.pts===cut)?'tie':i<8?'top':'out'});
+    return arr;
+  }
+
+  mv(m,i=0){
+    const A=this.pv(m.a),B=this.pv(m.b),st=ST[m.status],s=score(m),club=CM[m.club];
+    const sc=s?scoreStr(m)+(m.timeout?', tempo scaduto':''):'';
+    let info;
+    if(m.status==='prov'||m.status==='conf')info=`${sc}, ${fdw(m.date)}`;
+    else if(m.status==='cont')info=`${sc}, in revisione`;
+    else if(m.status==='prog')info=`${fdw(m.date)}, ${m.time}, ${club?club.n:''}`;
+    else if(m.status==='rinv')info=`Rinviata a ${fdw(m.date)}, ${m.time}`;
+    else if(m.status==='rec')info='Settimana scaduta, da recuperare';
+    else info=`Da programmare entro ${fdw(RD[m.g-1][1])}`;
+    const mk=(P,side)=>{const k=side==='a'?0:1,win=!!s&&s.w===side;return{name:P.short,s1:s?m.sets[0][k]:'-',s2:s?m.sets[1][k]:'-',s3:s&&m.stb?m.stb[k]:'-',pts:s?(side==='a'?s.pa:s.pb):'-',fw:win?800:500,ptsBg:win?'var(--accent)':'var(--surface2)',ptsFg:win?'var(--onAccent)':'var(--ink)',dot:win?'var(--accent)':'transparent',brk:s?brk(s,side):''}};
+    return{id:m.id,g:m.g,a:A,b:B,st,info,sc,s,rows:[mk(A,'a'),mk(B,'b')],round:`Giornata ${m.g}`,range:rng(m.g-1),dateShort:m.date?fdw(m.date):'',sep:i>0?'1px solid var(--line)':'none',mineBg:(m.a===ME||m.b===ME)?'color-mix(in oklch, var(--mint) 28%, transparent)':'transparent',open:()=>this.go('match',{mid:m.id})};
+  }
+
+  openSheet(mid){const m=this.m(mid);const[a,b]=RD[m.g-1];const inW=m.date&&m.date>=a&&m.date<=b;this.setState({sheet:{mid,day:inW?m.date:null,other:!!(m.date&&!inW),otherDate:m.date&&!inW?m.date:'',time:m.time,club:m.club}})}
+  openResult(mid,admin){const m=this.m(mid);this.go('result',{mid,admin},{res:{mid,mode:m.timeout?'to':'concl',s:m.sets?m.sets.map(x=>[...x]):[[0,0],[0,0]],stb:m.stb?[...m.stb]:[0,0]}})}
+  openConfirm(mid){const m=this.m(mid);if(!m.sets)this.upd(mid,{sets:[[0,6],[6,4]],stb:[10,8],timeout:false,status:'prov',by:ME,date:m.date||TODAY,time:m.time||'19:00',club:m.club||'ctp'});this.go('confirm',{mid},{cf:{phase:m.status==='conf'?'done':'ask',note:''}})}
+  openSelfie(mid){const m=this.m(mid);const ex=this.state.photos.filter(p=>p.m===mid);this.go('selfie',{mid},{sel:[],selCover:m.cover||(ex[0]&&ex[0].id)||null})}
+
+  resCalc(r){
+    const valid=(x,y)=>{const mx=Math.max(x,y),mn=Math.min(x,y);return(mx===6&&mn<=4)||(mx===7&&(mn===5||mn===6))};
+    const[s1,s2]=r.s,to=r.mode==='to',v1=valid(...s1),v2=valid(...s2);
+    const split=v1&&v2&&((s1[0]>s1[1])!==(s2[0]>s2[1]));
+    const zero=s1[0]+s1[1]+s2[0]+s2[1]===0;
+    let ok=false,msg='',tone='n';
+    if(to){
+      if(zero)msg='Inserisci i game giocati prima dello scadere delle 2 ore.';
+      else if(!v1&&s2[0]+s2[1]>0){msg='Il 2° set può iniziare solo dopo un 1° set chiuso (6-4, 7-5, 7-6…).';tone='e'}
+      else if(v1&&v2&&!split){msg='Un giocatore ha vinto entrambi i set: la partita è conclusa, togli la spunta da Tempo scaduto.';tone='e'}
+      else{ok=true;msg='Tempo scaduto: nessun vincitore, ognuno prende i game vinti.';tone='o'}
+    }else{
+      const[x,y]=r.stb,mx=Math.max(x,y),mn=Math.min(x,y);
+      if(zero)msg='Inserisci i game dei due set.';
+      else if(!v1){msg='1° set non valido: un set finisce 6-0…6-4, 7-5 o 7-6.';tone='e'}
+      else if(!v2){msg='2° set non valido: un set finisce 6-0…6-4, 7-5 o 7-6.';tone='e'}
+      else if(split){
+        if(x+y===0)msg='Un set pari: inserisci il super tie break a 10.';
+        else if(mx<10){msg='Super tie break: si vince arrivando a 10.';tone='e'}
+        else if(mx-mn<2){msg='Super tie break: servono 2 punti di scarto.';tone='e'}
+        else if(mx>10&&mx-mn!==2){msg='Oltre il 10 si chiude appena c’è 2 punti di scarto (es. 12-10).';tone='e'}
+        else{ok=true;msg='Risultato valido, vittoria al super tie break.';tone='o'}
+      }else{ok=true;msg='Risultato valido, vittoria in 2 set.';tone='o'}
+    }
+    const showStb=split;
+    const s=ok?score({sets:r.s,stb:split?r.stb:null,timeout:to}):null;
+    return{ok,msg,tone,showStb,s,split,to};
+  }
+
+  renderVals(){
+    const S=this.state,P=this.props;
+    const theme=S.theme||(P.tema==='scuro'?'dark':'light');
+    const wide=S.vw>=860,admin=S.screen==='admin',frame=P.cornice!==false;
+    const scr=S.screen;
+    const stand=this.standings(),SM=Object.fromEntries(stand.map(r=>[r.id,r]));
+    const ms=S.matches;
+    let frameStyle;
+    if(admin&&wide)frameStyle={position:'relative',width:'100%',height:'100vh'};
+    else if(wide&&frame)frameStyle={position:'relative',width:390,height:'min(844px, calc(100vh - 68px))',borderRadius:48,overflow:'hidden',boxShadow:'0 0 0 10px #0B1A24, 0 30px 80px rgba(11,26,36,.35)',flex:'none'};
+    else if(wide)frameStyle={position:'relative',width:480,height:'100vh',flex:'none',boxShadow:'0 0 0 1px var(--line)'};
+    else frameStyle={position:'relative',width:'100%',height:'100dvh'};
+
+    const idxDefs=[['login','Login',()=>this.tab('login')],['home','Home',()=>this.tab('home')],['class','Classifica',()=>this.tab('class')],['cal','Calendario',()=>this.tab('cal')],['match','Scheda partita',()=>this.go('match',{mid:'m3'})],['sched','Programma partita',()=>{this.tab('home');this.openSheet('m13')}],['result','Inserisci risultato',()=>this.openResult('m13')],['confirm','Conferma (avversario)',()=>this.openConfirm('m13')],['selfie','Carica selfie',()=>this.openSelfie('m1')],['gallery','Gallery',()=>this.tab('gallery')],['profile','Profilo giocatore',()=>this.tab('profile',{pid:ME})],['admin','Admin',()=>this.tab('admin')]];
+    const curKey=S.sheet?'sched':scr;
+    const indexItems=idxDefs.map(([k,l,g],i)=>({n:String(i+1).padStart(2,'0'),label:l,go:g,bg:k===curKey?'var(--ink)':'transparent',fg:k===curKey?'var(--bg)':'var(--ink)'}));
+
+    const me={...this.pv(ME),posLabel:`${SM[ME].pos}°, ${SM[ME].pts} pt`};
+    const tabOn=k=>k===scr||(k==='profile'&&scr==='profile')?'var(--accent)':'var(--ink3)';
+    const v={theme,colorScheme:theme==='dark'?'dark':'light',rootPad:wide&&!admin?'24px':'0',showIndex:wide&&!admin,indexItems,frameStyle,scrollRef:this.scrollRef,camRef:this.camRef,galRef:this.galRef,xlsRef:this.xlsRef,
+      isLogin:scr==='login',isHome:scr==='home',isClass:scr==='class',isCal:scr==='cal',isMatch:scr==='match',isResult:scr==='result',isConfirm:scr==='confirm',isSelfie:scr==='selfie',isGallery:scr==='gallery',isProfile:scr==='profile',isAdmin:admin,
+      showTabs:['home','class','cal','gallery','profile'].includes(scr),tabC:{home:tabOn('home'),cal:tabOn('cal'),class:tabOn('class'),gallery:tabOn('gallery'),profile:scr==='profile'&&S.params.pid===ME?'var(--accent)':'var(--ink3)'},
+      goHome:()=>this.tab('home'),goCal:()=>this.tab('cal'),goClass:()=>this.tab('class'),goGallery:()=>this.tab('gallery'),goMeTab:()=>this.tab('profile',{pid:ME}),goMe:()=>this.go('profile',{pid:ME}),goAdmin:()=>this.go('admin'),
+      back:this.back,toast:S.toast,hasToast:!!S.toast,me,
+      themeLabel:theme==='dark'?'Scuro':'Chiaro',toggleTheme:()=>this.setState({theme:theme==='dark'?'light':'dark'}),logout:()=>this.setState({screen:'login',hist:[],loginSent:false}),
+      sheetOpen:!!S.sheet};
+
+    // login
+    const emailOk=/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(S.email);
+    const send=()=>{if(!emailOk){this.setState({loginErr:S.email?'Controlla l’indirizzo email.':'Inserisci la tua email.'});return}this.setState({loginSent:true,loginErr:''})};
+    Object.assign(v,{email:S.email,onEmail:e=>this.setState({email:e.target.value,loginErr:''}),onEmailKey:e=>{if(e.key==='Enter')send()},sendLink:send,loginErr:S.loginErr,hasLoginErr:!!S.loginErr,emailBorder:S.loginErr?'var(--errFg)':'var(--line2)',loginSent:S.loginSent,notSent:!S.loginSent,enterApp:()=>this.tab('home'),resetLogin:()=>this.setState({loginSent:false}),resend:()=>this.toast('Nuovo link inviato a '+S.email)});
+
+    // home
+    const cm=ms.filter(m=>m.g===CUR);
+    const myM=cm.find(m=>m.a===ME||m.b===ME);
+    const oppId=this.opp(myM,ME),opp=this.pv(oppId),oppN=PM[oppId].s;
+    let ctaLabel,cta,line;
+    const club=CM[myM.club];
+    if(myM.status==='prog'){ctaLabel='Inserisci risultato';cta=()=>this.openResult(myM.id);line=`${fdw(myM.date)}, ${myM.time}, ${club.n}`}
+    else if(myM.status==='rinv'){ctaLabel='Inserisci risultato';cta=()=>this.openResult(myM.id);line=`Rinviata a ${fdw(myM.date)}, ${myM.time}, ${club.n}`}
+    else if(myM.status==='prov'){ctaLabel='Carica selfie';cta=()=>this.openSelfie(myM.id);line=`${scoreStr(myM)}, in attesa della conferma di ${oppN} (automatica tra 2 giorni)`}
+    else if(myM.status==='conf'){ctaLabel='Vedi partita';cta=()=>this.go('match',{mid:myM.id});line=`${scoreStr(myM)}, risultato confermato`}
+    else if(myM.status==='cont'){ctaLabel='Vedi contestazione';cta=()=>this.go('match',{mid:myM.id});line=`${oppN} ha contestato il risultato`}
+    else{ctaLabel='Programma';cta=()=>this.openSheet(myM.id);line=`Accordatevi su giorno, ora e circolo entro ${fdw(RD[CUR-1][1])}.`}
+    const recentIds=['m7','m3','m2','m1'];
+    Object.assign(v,{cur:{n:CUR,range:rng(CUR-1)},segs:RD.map((_,i)=>({bg:i<CUR-1?'#C6EEDB':i===CUR-1?'#7FDDB5':'rgba(255,255,255,.18)'})),
+      my:{st:ST[myM.status],opp:{...opp,name:opp.name.split(' ')[0]+' '+opp.name.split(' ').slice(1).join(' ')},oppPos:`${SM[oppId].pos}°, ${SM[oppId].pts} pt`,line,ctaLabel,cta,open:()=>this.go('match',{mid:myM.id}),openOpp:()=>this.go('profile',{pid:oppId})},
+      others:cm.filter(m=>m!==myM).map((m,i)=>this.mv(m,i)),recent:recentIds.map(id=>this.mv(this.m(id))),
+      top5:stand.slice(0,5).map((r,i)=>({...this.pv(r.id),name:PM[r.id].s,pos:r.pos,pts:r.pts,sep:i?'1px solid var(--line)':'none',meBg:r.id===ME?'color-mix(in oklch, var(--mint) 35%, transparent)':'transparent',open:()=>this.go('profile',{pid:r.id})}))});
+
+    // classifica
+    const prov=ms.filter(m=>m.status==='prov');
+    const view='cards';
+    const playedN=ms.filter(m=>m.status==='prov'||m.status==='conf').length;
+    Object.assign(v,{playedLabel:`Dopo ${CUR-1} giornate, ${playedN} partite su 66, ordine: punti, diff. game`,hasProv:prov.length>0,provCount:prov.length,provNames:prov.map(m=>`${PM[m.a].s} vs ${PM[m.b].s}`).join(', ')+', in attesa di conferma',
+      isTable:view==='table',isCards:view==='cards',sgTable:SEG(view==='table'),sgCards:SEG(view==='cards'),setTable:()=>this.setState({classView:'table'}),setCards:()=>this.setState({classView:'cards'}),
+      standings:stand.map((r,i)=>({...this.pv(r.id),name:PM[r.id].s,pos:r.pos,pts:r.pts,g:r.g,v:r.v,p:r.p,se:r.se,gf:r.gf,gs:r.gs,dg:(r.dgN>0?'+':'')+r.dgN,dgFg:r.dgN>0?'var(--accent)':r.dgN<0?'var(--errFg)':'var(--ink2)',bonus:r.bonus,z:ZN[r.zk],cut:i===7,rowBorder:i===7?'2px solid var(--accent)':'1px solid var(--line)',rowBg:r.id===ME?'color-mix(in oklch, var(--mint) 30%, var(--surface))':'var(--surface)',expanded:S.expanded===r.id,toggle:()=>this.setState({expanded:S.expanded===r.id?null:r.id}),open:()=>this.go('profile',{pid:r.id}),
+        stats:[{l:'Giocate',v:r.g},{l:'Vinte',v:r.v},{l:'Perse',v:r.p},{l:'Senza esito',v:r.se},{l:'Game fatti',v:r.gf},{l:'Game subiti',v:r.gs},{l:'Diff. game',v:(r.dgN>0?'+':'')+r.dgN},{l:'Bonus e comp.',v:r.bonus}]}))});
+
+    // archivio stagioni
+    {const arch=ARCH[S.season];
+      v.seasons=S.tournaments.filter(t=>t.status!=='In programma').map(t=>{const on=t.id===S.season;return{label:t.season,bg:on?'var(--ink)':'var(--surface)',fg:on?'var(--bg)':'var(--ink)',bd:on?'1.5px solid var(--ink)':'1.5px solid var(--line2)',pick:()=>this.setState({season:t.id,expanded:null})}});
+      v.isArchive=!!arch;
+      if(arch){
+        v.archSeason=arch.season;v.archChamp=arch.champ;v.archFinal=arch.final;
+        v.playedLabel=`Stagione conclusa, ${arch.rows.length} giocatori, i primi ${arch.top} alla fase finale`;
+        const champId=PL.find(p=>p.n===arch.champ).id;
+        v.standings=arch.rows.map(([id,pts,g,w],i)=>{const k=S.season+id;const z=id===champId?{l:'Campione',bg:'var(--night)',fg:'#C6EEDB',bd:'1px solid transparent'}:i<arch.top?{...ZN.top,l:'Fase finale'}:{...ZN.out,l:'Eliminato'};
+          return{...this.pv(id),name:PM[id].s,pos:i+1,pts,z,cut:i===arch.top-1,rowBg:id===ME?'color-mix(in oklch, var(--mint) 30%, var(--surface))':'var(--surface)',expanded:S.expanded===k,toggle:()=>this.setState({expanded:S.expanded===k?null:k}),open:()=>this.go('profile',{pid:id}),stats:[{l:'Giocate',v:g},{l:'Vinte',v:w},{l:'Perse',v:g-w},{l:'Punti',v:pts}]}});
+      }}
+
+    // calendario
+    Object.assign(v,{sgAll:SEG(!S.calMine),sgMine:SEG(S.calMine),calSetAll:()=>this.setState({calMine:false}),calSetMine:()=>this.setState({calMine:true}),
+      calRounds:RD.map((_,i)=>{const n=i+1;let list=ms.filter(m=>m.g===n);if(S.calMine)list=list.filter(m=>m.a===ME||m.b===ME);const done=ms.filter(m=>m.g===n&&(m.status==='prov'||m.status==='conf')).length;const open=!!S.openRounds[n];const isCur=n===CUR;
+        return{n,range:rng(i),open,chev:open?'-':'+',matches:list.map((m,j)=>this.mv(m,j)),toggle:()=>this.setState(s=>({openRounds:{...s.openRounds,[n]:!s.openRounds[n]}})),pauseAfter:n===10,
+          border:isCur?'2px solid var(--accent)':'1px solid var(--line)',badgeBg:isCur?'var(--accent)':n<CUR?'var(--night)':'var(--surface2)',badgeFg:isCur?'var(--onAccent)':n<CUR?'#C6EEDB':'var(--ink)',tag:isCur?'In corso':n<CUR?`${done}/6 giocate`:'',tagFg:isCur?'var(--accent)':'var(--ink2)'}})});
+
+    // scheda partita
+    if(scr==='match'){
+      const m=this.m(S.params.mid)||this.m('m3');const b=this.mv(m);const phs=S.photos.filter(p=>p.m===m.id).sort((x,y)=>y.t-x.t);
+      const coverId=m.cover||(phs[0]&&phs[0].id);const cover=phs.find(p=>p.id===coverId);
+      const mine=m.a===ME||m.b===ME;const oId=mine?this.opp(m,ME):null;const played=['prov','conf','cont'].includes(m.status);
+      let primary=null,secondary=[],note='',noteBg='var(--surface2)',noteFg='var(--ink2)';
+      const addCal=()=>this.ics(m);
+      if(mine&&(m.status==='dp'||m.status==='rec')){primary={label:'Programma',go:()=>this.openSheet(m.id)};secondary=[{label:'Inserisci risultato',go:()=>this.openResult(m.id)}]}
+      else if(mine&&(m.status==='prog'||m.status==='rinv')){primary={label:'Inserisci risultato',go:()=>this.openResult(m.id)};secondary=[{label:'Aggiungi al calendario',go:addCal},{label:'Modifica',go:()=>this.openSheet(m.id)}]}
+      else if(!mine&&(m.status==='prog'||m.status==='rinv'))secondary=[{label:'Aggiungi al calendario',go:addCal}];
+      if(m.status==='prov'){note=m.by===ME?`In attesa della conferma di ${PM[oId].s}. Si conferma automaticamente tra 2 giorni.`:`Inserito da ${PM[m.by].s}. Si conferma automaticamente tra 2 giorni.`;noteBg='var(--surface2)';noteFg='var(--ink2)';if(mine&&m.by===ME)secondary=[{label:`Vedi come ${PM[oId].s} (demo)`,go:()=>this.openConfirm(m.id)}];if(mine&&m.by!==ME)primary={label:'Conferma o contesta',go:()=>this.openConfirm(m.id)}}
+      if(m.status==='cont'){note=`Contestata da ${PM[m.contestBy||oId||m.b].s}: “${m.note||'risultato non corretto'}”. Decide l’admin.`;noteBg='var(--errBg)';noteFg='var(--errFg)'}
+      if(m.status==='rinv'){note=`Fuori dalla settimana della ${b.round}: la partita risulta rinviata.`;noteBg='var(--warnBg)';noteFg='var(--warnFg)'}
+      if(m.status==='rec'){note='La settimana è passata senza giocare: da recuperare. Programmatela appena possibile.';noteBg='var(--recBg)';noteFg='var(--recFg)'}
+      if(played&&mine)secondary=[...secondary,{label:'Carica selfie',go:()=>this.openSelfie(m.id)}];
+      v.pm={...b,coverBg:cover?(cover.url?`url(${cover.url}) center/cover no-repeat`:PH):'#0B1A24',noCover:!cover,phCover:!!cover&&!cover.url,played:!!b.s,
+        statusLong:played&&m.status!=='cont'?`Giocata, ${b.st.l.toLowerCase()}`:b.st.l,center:b.s?`${b.rows[0].pts}-${b.rows[1].pts}`:'vs',
+        dateStr:m.date?fdw(m.date):'Da definire',timeStr:m.time||'Da definire',clubStr:m.club?CM[m.club].n:'Da definire',
+        hasNote:!!note,note,noteBg,noteFg,hasPrimary:!!primary,primary:primary||{label:'',go:()=>{}},secondary,
+        photos:phs.map(p=>({bg:p.url?`url(${p.url}) center/cover`:PH,isPh:!p.url,isCover:p.id===coverId})),photoCount:phs.length?`${phs.length} foto`:'Nessuna foto',
+        goSelfie:()=>this.openSelfie(m.id),openA:()=>this.go('profile',{pid:m.a}),openB:()=>this.go('profile',{pid:m.b})};
+    }
+
+    // risultato
+    if(scr==='result'&&S.res){
+      const r=S.res,m=this.m(r.mid),c=this.resCalc(r);
+      const nm=id=>id===ME&&!S.params.admin?'Tu':PM[id].s;
+      const setR=f=>this.setState(s=>{const n={...s.res,s:s.res.s.map(x=>[...x]),stb:[...s.res.stb]};f(n);return{res:n}});
+      const row=(si,k,max)=>{const val=si<2?r.s[si][k]:r.stb[k];return{name:nm(k?m.b:m.a),val,decOp:val<=0?.35:1,incOp:val>=max?.35:1,dec:()=>setR(n=>{if(si<2)n.s[si][k]=Math.max(0,n.s[si][k]-1);else n.stb[k]=Math.max(0,n.stb[k]-1)}),inc:()=>setR(n=>{if(si<2)n.s[si][k]=Math.min(max,n.s[si][k]+1);else n.stb[k]=Math.min(max,n.stb[k]+1)})}};
+      const sets=[{label:'1° set',hint:'game 0-7',rows:[row(0,0,7),row(0,1,7)]},{label:'2° set',hint:'game 0-7',rows:[row(1,0,7),row(1,1,7)]}];
+      if(c.showStb)sets.push({label:'Super tie break',hint:c.to?'facoltativo, non dà punti':'a 10, 2 punti di scarto',rows:[row(2,0,30),row(2,1,30)]});
+      const tones={n:['var(--surface2)','var(--ink2)'],e:['var(--errBg)','var(--errFg)'],o:['var(--mint)','var(--mintInk)']}[c.tone];
+      const oId=S.params.admin?null:this.opp(m,ME);
+      v.rs={sub:`${PM[m.a].s} vs ${PM[m.b].s}, Giornata ${m.g}, ${rng(m.g-1)}`,toggleTo:()=>setR(n=>{n.mode=n.mode==='to'?'concl':'to'}),toTick:c.to?'✓':'',toBg:c.to?'var(--accent)':'transparent',toBox:c.to?'1.5px solid var(--accent)':'1.5px solid var(--line2)',toBd:c.to?'var(--accent)':'var(--line)',sets,msg:c.msg,msgBg:tones[0],msgFg:tones[1],
+        oppName:oId?PM[oId].s:'l’avversario',preview:c.s?`${nm(m.a)} ${c.s.pa}, ${nm(m.b)} ${c.s.pb}`:'-',
+        btnBg:c.ok?'var(--accent)':'var(--surface2)',btnFg:c.ok?'var(--onAccent)':'var(--ink3)',cur:c.ok?'pointer':'not-allowed',btnLabel:S.params.admin?'Salva e conferma':'Invia risultato',
+        submit:()=>{if(!c.ok)return;const adm=S.params.admin;this.upd(m.id,{sets:r.s.map(x=>[...x]),stb:c.split?[...r.stb]:null,timeout:c.to,status:adm?'conf':'prov',by:adm?m.by||m.a:ME,date:m.date||TODAY,time:m.time||'19:00',club:m.club||'ctp'});
+          if(adm){this.tab('admin');this.toast('Risultato corretto e confermato')}else{this.setState(s=>({screen:'match',params:{mid:m.id},hist:s.hist}));this.top();this.toast(`Risultato inviato, ${PM[oId].s} ha 2 giorni per confermare`)}}};
+    }
+
+    // conferma
+    if(scr==='confirm'){
+      const m=this.m(S.params.mid);const b=this.mv(m);const by=m.by||m.a;const viewer=by===m.a?m.b:m.a;const ph=S.cf.phase;
+      const autoD=addDays(m.date||TODAY,2);
+      v.cf={viewer:PM[viewer].n,round:`${b.round}, ${b.range}`,by:PM[by].s,when:m.date?`dopo la partita di ${fdw(m.date)}`:'',rows:b.rows,auto:`Se non fai nulla, il risultato diventa definitivo ${fdw(autoD)} alle ${m.time||'21:00'}.`,
+        ask:ph==='ask',contesting:ph==='contest',done:ph==='done'||ph==='contested',note:S.cf.note,onNote:e=>this.setState({cf:{...S.cf,note:e.target.value}}),sendOp:S.cf.note.trim()?1:.4,
+        confirm:()=>{this.upd(m.id,{status:'conf'});this.setState({cf:{phase:'done',note:''}})},contest:()=>this.setState({cf:{phase:'contest',note:''}}),cancel:()=>this.setState({cf:{phase:'ask',note:''}}),
+        send:()=>{if(!S.cf.note.trim())return;this.upd(m.id,{status:'cont',contestBy:viewer,note:S.cf.note.trim()});this.setState({cf:{phase:'contested',note:S.cf.note}})},
+        doneBg:ph==='contested'?'var(--errBg)':'var(--mint)',doneFg:ph==='contested'?'var(--errFg)':'var(--mintInk)',doneTitle:ph==='contested'?'Contestazione inviata':'Risultato confermato',doneText:ph==='contested'?'L’admin vedrà la tua nota e deciderà il risultato. Fino ad allora la partita non conta in classifica.':'I punti sono definitivi in classifica.',goMatch:()=>this.go('match',{mid:m.id})};
+    }
+
+    // selfie
+    if(scr==='selfie'){
+      const m=this.m(S.params.mid);const ex=S.photos.filter(p=>p.m===m.id);
+      const all=[...S.sel.map(p=>({...p,isNew:true})),...ex.map(p=>({...p,isNew:false}))];
+      const onFiles=e=>{const fs=[...(e.target.files||[])];if(!fs.length)return;const add=fs.map((f,i)=>({id:'n'+Date.now()+i,url:URL.createObjectURL(f)}));this.setState(s=>({sel:[...add,...s.sel],selCover:s.selCover||add[0].id}));e.target.value=''};
+      v.sf={sub:`${PM[m.a].s} vs ${PM[m.b].s}, Giornata ${m.g}`,onFiles,openCam:()=>this.camRef.current&&this.camRef.current.click(),openGal:()=>this.galRef.current&&this.galRef.current.click(),
+        addDemo:()=>this.setState(s=>{const id='n'+Date.now();return{sel:[{id,url:null},...s.sel],selCover:s.selCover||id}}),
+        items:all.map(p=>{const cov=p.id===S.selCover;return{bg:p.url?`url(${p.url}) center/cover`:PH,isPh:!p.url,label:p.isNew?'nuova foto':'selfie',isNew:p.isNew,isOld:!p.isNew,ring:cov?'0 0 0 3px var(--accent)':'none',cBg:cov?'var(--accent)':'rgba(11,26,36,.75)',cFg:cov?'var(--onAccent)':'#fff',cLabel:cov?'★ Copertina':'☆ Copertina',setCover:()=>this.setState({selCover:p.id}),remove:()=>this.setState(s=>({sel:s.sel.filter(x=>x.id!==p.id),selCover:s.selCover===p.id?null:s.selCover}))}}),
+        empty:all.length===0,btnBg:S.sel.length||S.selCover!==m.cover?'var(--accent)':'var(--surface2)',btnFg:S.sel.length||S.selCover!==m.cover?'var(--onAccent)':'var(--ink3)',
+        saveLabel:S.sel.length?`Salva ${S.sel.length} foto`:'Salva copertina',
+        save:()=>{const n=S.sel.length;if(!n&&S.selCover===m.cover)return;const t0=Date.now();this.setState(s=>({photos:[...s.photos,...s.sel.map((p,i)=>({id:p.id,m:m.id,url:p.url,t:t0+i}))],sel:[]}));this.upd(m.id,{cover:S.selCover});this.back();this.toast(n?`${n} foto aggiunte alla partita`:'Copertina aggiornata')}};
+    }
+
+    // gallery
+    {const list=S.photos.filter(p=>{const m=this.m(p.m);return !S.galMine||m.a===ME||m.b===ME}).sort((x,y)=>y.t-x.t);
+      v.gal={count:`${list.length} foto`,sgA:SEG(!S.galMine),sgM:SEG(S.galMine),setAll:()=>this.setState({galMine:false}),setMine:()=>this.setState({galMine:true}),
+        items:list.map(p=>{const m=this.m(p.m);return{bg:p.url?`url(${p.url}) center/cover`:PH,isPh:!p.url,label:`G${m.g}, ${PM[m.a].s.split(' ')[0]} vs ${PM[m.b].s.split(' ')[0]}`,open:()=>this.go('match',{mid:m.id})}})};}
+
+    // profilo
+    if(scr==='profile'){
+      const pid=S.params.pid||ME,r=SM[pid],p=PM[pid];
+      const mine=ms.filter(m=>m.a===pid||m.b===pid).sort((x,y)=>x.g-y.g);
+      const isPlayed=m=>['prov','conf','cont'].includes(m.status);
+      const next=mine.filter(m=>!isPlayed(m)),played=mine.filter(isPlayed);
+      const list=(S.profTab==='next'?next:played).map((m,i)=>({...this.mv(m,i),oppName:PM[this.opp(m,pid)].s}));
+      v.pf={name:p.n,init:p.init,canBack:S.hist.length>0,kicker:pid===ME?'Il tuo profilo':'Giocatore',posLine:`${r.pos}° in classifica, ${r.pts} punti`,zone:ZN[r.zk].l,
+        stats:[{l:'Giocate',v:r.g},{l:'Vinte',v:r.v},{l:'Diff. game',v:(r.dgN>0?'+':'')+r.dgN},{l:'Bonus',v:r.bonus}],
+        sgN:SEG(S.profTab==='next'),sgP:SEG(S.profTab==='played'),setNext:()=>this.setState({profTab:'next'}),setPlayed:()=>this.setState({profTab:'played'}),nNext:next.length,nPlayed:played.length,bN:S.profTab==='next'?{bg:'var(--accent)',fg:'var(--onAccent)'}:{bg:'var(--mint)',fg:'var(--mintInk)'},bP:S.profTab==='played'?{bg:'var(--accent)',fg:'var(--onAccent)'}:{bg:'var(--mint)',fg:'var(--mintInk)'},list,emptyList:list.length===0,isMe:pid===ME,
+        h2h:PL.filter(x=>x.id!==pid&&mine.some(m=>m.a===x.id||m.b===x.id)).map((o,i)=>{const m=mine.find(x=>x.a===o.id||x.b===o.id);const s=score(m);let res,fg='var(--ink2)';
+          if(s&&m.status!=='cont'){const side=m.a===pid?'a':'b';const w=s.w===side;res=`${s.w===null?'Senza esito':w?'Vinta':'Persa'}, ${scoreStr(m)}`;fg=s.w===null?'var(--ink2)':w?'var(--accent)':'var(--errFg)'}
+          else if(m.status==='cont'){res='Contestata';fg='var(--errFg)'}else res=`G${m.g}, ${m.status==='prog'?fdw(m.date):ST[m.status].l.toLowerCase()}`;
+          return{name:o.n,init:o.init,av:o.av,avFg:o.avFg,res,fg,sep:i?'1px solid var(--line)':'none',open:()=>this.go('match',{mid:m.id})}})};
+    }
+
+    // admin
+    if(admin){
+      const T=[['dash','Dashboard'],['tornei','Tornei'],['players','Giocatori'],['clubs','Circoli'],['cal','Calendario'],['res','Risultati'],['import','Importa Excel']];
+      const cont=ms.filter(m=>m.status==='cont');
+      const titles={dash:['Dashboard',`Giornata ${CUR}, ${rng(CUR-1)}`],players:['Giocatori','12 giocatori, accesso con magic link'],clubs:['Circoli',`${CLUBS.length} circoli disponibili per le partite`],cal:['Calendario','11 giornate, pausa natalizia 19 dic - 10 gen'],res:['Risultati','Modifica o forza la conferma dei risultati'],import:['Importa Excel','Carica il file, controlla le differenze, poi applica'],tornei:['Tornei','Torneo in corso, in programma e archivio'],new:['Nuovo torneo',`Passo ${S.wiz?S.wiz.step:1} di 4`]};
+      const force=m=>()=>{this.upd(m.id,{status:'conf'});this.toast(`${PM[m.a].s} vs ${PM[m.b].s} confermata`)};
+      const t=S.adminTab;
+      v.ad={wrap:wide?{display:'grid',gridTemplateColumns:'240px minmax(0,1fr)',minHeight:'100%'}:{display:'flex',flexDirection:'column',minHeight:'100%'},
+        nav:wide?{background:'#0B1A24',padding:'22px 14px',display:'flex',flexDirection:'column',gap:4,position:'sticky',top:0,height:'100vh'}:{background:'#0B1A24',padding:'10px 12px',display:'flex',alignItems:'center',gap:6,overflowX:'auto',position:'sticky',top:0,zIndex:5},
+        exitMt:wide?'auto':'0',pad:wide?'32px 36px':'18px 14px 28px',title:titles[t][0],sub:titles[t][1],exit:()=>this.tab('home'),add:()=>this.toast('Modulo di modifica (non incluso nel mockup)'),
+        isTornei:t==='tornei',isNew:t==='new',newT:()=>this.setState({adminTab:'new',wiz:newWiz()}),
+        tourn:S.tournaments.map(x=>{const act=x.status==='In corso',arc=x.status==='Concluso';return{...x,hasChamp:!!x.champ,bg:act?'var(--hero)':'var(--surface)',fg:act?'#fff':'var(--ink)',pillBg:act?'#C6EEDB':arc?'var(--surface2)':'var(--warnBg)',pillFg:act?'#0B1A24':arc?'var(--ink2)':'var(--warnFg)',canClose:act,openLabel:arc?'Classifica finale':act?'Apri classifica':'Vedi calendario',
+          open:()=>{if(arc||act){this.setState({season:x.id});this.tab('class')}else this.toast('Il calendario sarà visibile ai giocatori dal primo giorno del torneo')},
+          close:()=>this.toast('Si potrà archiviare dopo la finale: classifica, risultati e foto restano consultabili')}}),
+        tabs:T.map(([k,l])=>({label:l,go:()=>this.setState({adminTab:k}),bg:k===t||(k==='tornei'&&t==='new')?'#C6EEDB':'transparent',fg:k===t?'#0B1A24':'#fff',hasCount:k==='dash'&&cont.length>0,count:cont.length})),
+        isDash:t==='dash',isPlayers:t==='players',isClubs:t==='clubs',isCal:t==='cal',isRes:t==='res',isImport:t==='import',
+        tiles:[{v:`${ms.filter(m=>m.status==='prov'||m.status==='conf').length}/66`,l:'Partite giocate',fg:'var(--ink)'},{v:ms.filter(m=>m.status==='prov').length,l:'Da confermare',fg:'var(--accent)'},{v:cont.length,l:'Contestazioni',fg:'var(--errFg)'},{v:ms.filter(m=>m.status==='rec'||m.status==='rinv').length,l:'Da recuperare o rinviate',fg:'var(--recFg)'}],
+        contested:cont.map(m=>({...this.mv(m),meta:`Inserito da ${PM[m.by||m.a].s}, contestato da ${PM[m.contestBy||m.b].s}`,note:m.note||'',edit:()=>this.openResult(m.id,true),force:force(m)})),noContested:cont.length===0,
+        recover:ms.filter(m=>m.status==='rec'||m.status==='rinv').map((m,i)=>({...this.mv(m,i),nudge:()=>this.toast(`Promemoria inviato a ${PM[m.a].s} e ${PM[m.b].s}`)})),
+        players:PL.map((p,i)=>({...this.pv(p.id),name:p.n,email:p.email,role:p.role,roleBg:p.role==='Admin'?'var(--night)':'var(--surface2)',roleFg:p.role==='Admin'?'#C6EEDB':'var(--ink2)',status:i===11?'Invito inviato':'Attivo',stFg:i===11?'var(--warnFg)':'var(--accent)',sep:i?'1px solid var(--line)':'none',resend:()=>this.toast(`Link di accesso inviato a ${p.email}`)})),
+        clubs:CLUBS.map(c=>({...c,count:`${ms.filter(m=>m.club===c.id).length} partite`})),
+        rounds:RD.map((_,i)=>{const n=i+1,l=ms.filter(m=>m.g===n);const d=l.filter(m=>m.status==='prov'||m.status==='conf').length;return{n,range:rng(i),summary:`${d}/6 giocate, ${l.filter(m=>m.status==='prog').length} programmate, ${l.filter(m=>m.status==='rec'||m.status==='rinv').length} da recuperare`,sep:i?'1px solid var(--line)':'none',badgeBg:n===CUR?'var(--accent)':'var(--surface2)',badgeFg:n===CUR?'var(--onAccent)':'var(--ink)'}}),
+        results:ms.filter(m=>['prov','conf','cont'].includes(m.status)).sort((x,y)=>(y.date||'').localeCompare(x.date||'')).map((m,i)=>{const b=this.mv(m,i);return{...b,ptsLine:`${b.rows[0].pts}-${b.rows[1].pts} punti`,canForce:m.status!=='conf',force:force(m),edit:()=>this.openResult(m.id,true)}}),
+        imp0:S.importStep===0,imp1:S.importStep===1,fileName:S.fileName,pickXls:()=>this.xlsRef.current&&this.xlsRef.current.click(),onXls:e=>{const f=e.target.files&&e.target.files[0];if(f)this.setState({importStep:1,fileName:f.name});e.target.value=''},
+        sample:()=>this.setState({importStep:1,fileName:'ATP_Umbria_2026-27.xlsx'}),resetImp:()=>this.setState({importStep:0}),
+        sgApp:SEG(S.conflict==='app'),sgXls:SEG(S.conflict==='xls'),keepApp:()=>this.setState({conflict:'app'}),useXls:()=>this.setState({conflict:'xls'}),
+        apply:()=>{this.setState({importStep:0});this.toast('Importazione applicata, 52 modifiche')},
+        diffMod:[{what:'G3, Alessandro P. - Francesco, settimana',from:'26 ott - 1 nov',to:'2 - 8 nov'},{what:'Circolo, nome',from:'CT Bastia',to:'CT Bastia Umbra'},{what:'Alessandro Cofanelli, email',from:'cofanelli@libero.it',to:'a.cofanelli@gmail.com'}],
+        diffNew:ms.filter(m=>m.g===4).slice(0,5).map(m=>({what:`G4, ${PM[m.a].s} vs ${PM[m.b].s}`,to:rng(3)}))};
+    }
+
+    // wizard nuovo torneo
+    if(S.wiz){
+      const W=S.wiz,set=p=>this.setState(s=>({wiz:{...s.wiz,...p}}));
+      const on=W.pl.filter(p=>p.on),n=on.length,nr=n%2?n:n-1,nm=n*(n-1)/2,per=Math.floor(n/2);
+      const nameOf=id=>{const p=W.pl.find(x=>x.id===id);return PM[id]?PM[id].s:p.n.split(' ')[0]};
+      let seed=W.seed*7919+13;const rnd=()=>(seed=(seed*48271)%2147483647)/2147483647;
+      const ids=on.map(p=>p.id);for(let i=ids.length-1;i>0;i--){const j=Math.floor(rnd()*(i+1));[ids[i],ids[j]]=[ids[j],ids[i]]}
+      const R=n>=2?circle(ids):[],wk=W.start?weeks(W.start,R.length,W.pauses):[];
+      const errs={1:W.name.trim()?'':'Inserisci il nome del torneo',2:n<4?'Servono almeno 4 giocatori':W.clubs.length?'':'Scegli almeno un circolo',3:W.start?'':'Scegli la data di inizio',4:''};
+      const err=errs[W.step];
+      const last=wk[wk.length-1];
+      v.wz={steps:['Torneo','Giocatori','Date e pause','Calendario'].map((l,i)=>({n:i+1,l,bar:i+1<=W.step?'var(--accent)':'var(--line)',fg:i+1===W.step?'var(--ink)':'var(--ink3)',go:()=>{if(i+1<W.step)set({step:i+1})}})),
+        s1:W.step===1,s2:W.step===2,s3:W.step===3,s4:W.step===4,
+        name:W.name,season:W.season,sub:W.sub,onName:e=>set({name:e.target.value}),onSeason:e=>set({season:e.target.value}),onSub:e=>set({sub:e.target.value}),
+        tops:[4,8,0].map(k=>({l:k?`Primi ${k}`:'Nessuna',...SEG(W.top===k),pick:()=>set({top:k})})),
+        summary:`${n} giocatori: ${nr} giornate, ${nm} partite${n%2?', uno riposa a turno':`, ${per} a settimana`}`,
+        players:W.pl.map(p=>({n:p.n,isNew:!PM[p.id],tick:p.on?'✓':'',boxBg:p.on?'var(--accent)':'transparent',boxBd:p.on?'1.5px solid var(--accent)':'1.5px solid var(--line2)',fg:p.on?'var(--ink)':'var(--ink3)',toggle:()=>set({pl:W.pl.map(x=>x.id===p.id?{...x,on:!x.on}:x)})})),
+        newEmail:W.newEmail,onEmail:e=>set({newEmail:e.target.value}),
+        addPlayer:()=>{const em=W.newEmail.trim();if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)){this.toast('Inserisci un’email valida');return}const nm2=em.split('@')[0].split(/[._]/).filter(Boolean).map(w=>w[0].toUpperCase()+w.slice(1)).join(' ');set({pl:[...W.pl,{id:'x'+Date.now(),n:nm2,on:true}],newEmail:''})},
+        clubs:CLUBS.map(c=>{const o=W.clubs.includes(c.id);return{n:c.n,bg:o?'var(--accent)':'var(--bg)',fg:o?'var(--onAccent)':'var(--ink2)',bd:o?'1.5px solid var(--accent)':'1.5px solid var(--line2)',toggle:()=>set({clubs:o?W.clubs.filter(x=>x!==c.id):[...W.clubs,c.id]})}}),
+        start:W.start,onStart:e=>set({start:e.target.value}),pa:W.pa,pb:W.pb,onPa:e=>set({pa:e.target.value}),onPb:e=>set({pb:e.target.value}),
+        pauses:W.pauses.map((p,i)=>({l:`Pausa dal ${fdw(p.a)} al ${fdw(p.b)}`,remove:()=>set({pauses:W.pauses.filter((_,j)=>j!==i)})})),
+        addPause:()=>{if(!W.pa||!W.pb||W.pb<W.pa){this.toast('Scegli inizio e fine della pausa');return}set({pauses:[...W.pauses,{a:W.pa,b:W.pb}].sort((x,y)=>x.a.localeCompare(y.a)),pa:'',pb:''})},
+        dateSummary:last?`${wk.length} giornate dal ${fdw(wk[0].a)} al ${fdw(last.b)}${W.top?`, poi fase finale con i primi ${W.top}`:''}.`:'Scegli la data di inizio.',
+        rounds:R.map((pr,i)=>{const w=wk[i];const inR=new Set(pr.flat());const bye=ids.find(x=>!inR.has(x));return{n:i+1,range:w?fr(w.a,w.b):'',pairs:pr.map(([a,b])=>`${nameOf(a)} vs ${nameOf(b)}`),hasBye:!!bye,bye:bye?nameOf(bye):'',hasPause:!!(w&&w.pause),pauseL:w&&w.pause?`Dopo questa giornata: pausa fino al ${fdw(w.pause.b)}`:''}}),
+        shuffle:()=>set({seed:W.seed+1}),err,
+        prevLabel:W.step===1?'Annulla':'Indietro',prev:()=>W.step===1?this.setState({adminTab:'tornei',wiz:null}):set({step:W.step-1}),
+        nextLabel:W.step===4?'Pubblica torneo':'Avanti',nextBg:err?'var(--surface2)':'var(--accent)',nextFg:err?'var(--ink3)':'var(--onAccent)',
+        next:()=>{if(err)return;if(W.step<4){set({step:W.step+1});this.top();return}
+          this.setState(s=>({tournaments:[{id:'t'+Date.now(),name:W.name.trim(),season:W.season,status:'In programma',info:`${n} giocatori, ${R.length} giornate dal ${fd(wk[0].a)}, inviti in partenza`},...s.tournaments],adminTab:'tornei',wiz:null}));
+          this.toast(`${W.name.trim()} ${W.season} pubblicato: ${n} giocatori ricevono il link`)}};
+    }
+
+    // sheet
+    if(S.sheet){
+      const sh=S.sheet,m=this.m(sh.mid),[a,b]=RD[m.g-1];
+      const date=sh.other?sh.otherDate:sh.day;const out=!!date&&(date<a||date>b);
+      const can=!!(date&&sh.time&&sh.club);
+      const set=p=>this.setState(s=>({sheet:{...s.sheet,...p}}));
+      const chip=on=>on?{bg:'var(--accent)',fg:'var(--onAccent)',bd:'1.5px solid var(--accent)'}:{bg:'var(--bg)',fg:'var(--ink)',bd:'1.5px solid var(--line)'};
+      const oc=chip(sh.other);
+      v.sh={sub:`${PM[m.a].s} vs ${PM[m.b].s}, Giornata ${m.g} (${rng(m.g-1)})`,
+        days:Array.from({length:7},(_,i)=>{const d=addDays(a,i),c=chip(!sh.other&&sh.day===d),dd=D(d);return{wd:WD[dd.getDay()],dn:dd.getDate(),...c,pick:()=>set({day:d,other:false})}}),
+        toggleOther:()=>set({other:!sh.other}),otherOn:sh.other,otherDate:sh.otherDate,onOther:e=>set({otherDate:e.target.value}),otherBg:oc.bg,otherFg:oc.fg,otherBd:oc.bd,
+        hasWarn:out,warn:`${fdw(date||a)} è fuori dalla Giornata ${m.g} (${rng(m.g-1)}): la partita risulterà rinviata.`,
+        times:TIMES.map(t=>({l:t,...chip(sh.time===t),pick:()=>set({time:t})})),
+        clubs:CLUBS.map((c,i)=>({...c,sep:i?'1px solid var(--line)':'none',bg:sh.club===c.id?'color-mix(in oklch, var(--mint) 35%, var(--surface))':'var(--surface)',ring:sh.club===c.id?'6px solid var(--accent)':'2px solid var(--line2)',pick:()=>set({club:c.id})})),
+        btnBg:can?'var(--accent)':'var(--surface2)',btnFg:can?'var(--onAccent)':'var(--ink3)',btnLabel:out?'Salva, partita rinviata':'Salva',
+        close:()=>this.setState({sheet:null}),
+        save:()=>{if(!can)return;this.upd(m.id,{date,time:sh.time,club:sh.club,status:out?'rinv':'prog'});this.setState({sheet:null});this.toast(out?`Partita rinviata a ${fdw(date)}`:`Programmata: ${fdw(date)} alle ${sh.time}, ${PM[this.opp(m,ME)].s} riceve una notifica`)}};
+    }
+    return v;
+  }
+
+  ics(m){
+    const[h,mi]=(m.time||'19:00').split(':').map(Number);const d=m.date.replace(/-/g,'');const pad=n=>String(n).padStart(2,'0');
+    const end=`${pad(h+2)}${pad(mi)}00`;
+    const txt=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//ATP Umbria//IT','BEGIN:VEVENT',`UID:${m.id}@atpumbria`,`DTSTART:${d}T${pad(h)}${pad(mi)}00`,`DTEND:${d}T${end}`,`SUMMARY:ATP Umbria, ${PM[m.a].s} vs ${PM[m.b].s}`,`LOCATION:${m.club?CM[m.club].n:''}`,'END:VEVENT','END:VCALENDAR'].join('\r\n');
+    const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([txt],{type:'text/calendar'}));a.download=`partita-${m.id}.ics`;a.click();
+    this.toast('Evento scaricato: aprilo per aggiungerlo al calendario');
+  }
+}
+</script>
+</body>
+</html>

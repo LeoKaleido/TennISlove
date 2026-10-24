@@ -1,0 +1,228 @@
+// Modello dati: brain/03-tech-backend.md
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+/// Un'edizione del torneo (es. "ATP Umbria Tournament 2026/27")
+model Season {
+  id                    String       @id @default(cuid())
+  name                  String
+  label                 String // "2026/27"
+  subtitle              String?
+  status                SeasonStatus @default(DRAFT)
+  qualifiers            Int          @default(8)
+  resultAutoConfirmDays Int          @default(2)
+  rulesVersion          String       @default("2026-10-21")
+  championPlayerId      String?
+  createdAt             DateTime     @default(now())
+
+  rounds  Round[]
+  players SeasonPlayer[]
+  matches Match[]
+  clubs   SeasonClub[]
+}
+
+enum SeasonStatus {
+  DRAFT
+  ACTIVE
+  ARCHIVED
+}
+
+enum Phase {
+  ROUND_ROBIN
+  KNOCKOUT
+}
+
+/// Una "giornata": la settimana in cui vanno giocate le sue partite
+model Round {
+  id       String @id @default(cuid())
+  seasonId String
+  number   Int
+  phase    Phase  @default(ROUND_ROBIN)
+  startsOn String // YYYY-MM-DD, fuso di Roma
+  endsOn   String // YYYY-MM-DD, fuso di Roma
+  /// pausa che segue questa giornata, es. "Pausa natalizia, 19 dic - 10 gen"
+  pauseAfter String?
+
+  season  Season  @relation(fields: [seasonId], references: [id], onDelete: Cascade)
+  matches Match[]
+
+  @@unique([seasonId, phase, number])
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  isAdmin   Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  player      Player?
+  sessions    Session[]
+  magicLinks  MagicLinkToken[]
+  photos      MatchPhoto[]
+  submitted   MatchResult[]    @relation("submittedBy")
+  confirmed   MatchResult[]    @relation("confirmedBy")
+  auditEvents AuditLog[]
+}
+
+model Player {
+  id        String  @id @default(cuid())
+  firstName String
+  lastName  String
+  /// nome usato nel calendario: "Giuseppe", "Alessandro P"
+  shortName String
+  photoKey  String?
+  userId    String? @unique
+
+  user    User?          @relation(fields: [userId], references: [id])
+  seasons SeasonPlayer[]
+  matchesAsA Match[]    @relation("playerA")
+  matchesAsB Match[]    @relation("playerB")
+}
+
+model SeasonPlayer {
+  seasonId  String
+  playerId  String
+  /// ordine dell'elenco iniziale (solo visualizzazione degli ex aequo)
+  seedOrder Int
+
+  season Season @relation(fields: [seasonId], references: [id], onDelete: Cascade)
+  player Player @relation(fields: [playerId], references: [id])
+
+  @@id([seasonId, playerId])
+}
+
+model Club {
+  id          String  @id @default(cuid())
+  name        String
+  city        String?
+  description String?
+  mapsUrl     String?
+  active      Boolean @default(true)
+
+  matches Match[]
+  seasons SeasonClub[]
+}
+
+model SeasonClub {
+  seasonId String
+  clubId   String
+
+  season Season @relation(fields: [seasonId], references: [id], onDelete: Cascade)
+  club   Club   @relation(fields: [clubId], references: [id])
+
+  @@id([seasonId, clubId])
+}
+
+model Match {
+  id          String    @id @default(cuid())
+  seasonId    String
+  roundId     String
+  /// "G01-03": giornata 1, partita 3 (come nell'Excel)
+  code        String
+  playerAId   String
+  playerBId   String
+  scheduledAt DateTime?
+  clubId      String?
+  /// versione della programmazione, per il SEQUENCE del file .ics
+  scheduleSeq Int       @default(0)
+  /// rinviata senza ancora una nuova data
+  postponedAt DateTime?
+  coverPhotoId String?  @unique
+
+  season     Season       @relation(fields: [seasonId], references: [id], onDelete: Cascade)
+  round      Round        @relation(fields: [roundId], references: [id], onDelete: Cascade)
+  playerA    Player       @relation("playerA", fields: [playerAId], references: [id])
+  playerB    Player       @relation("playerB", fields: [playerBId], references: [id])
+  club       Club?        @relation(fields: [clubId], references: [id])
+  result     MatchResult?
+  photos     MatchPhoto[] @relation("matchPhotos")
+  coverPhoto MatchPhoto?  @relation("cover", fields: [coverPhotoId], references: [id])
+
+  @@unique([seasonId, code])
+}
+
+enum ResultStatus {
+  PENDING
+  CONFIRMED
+  DISPUTED
+}
+
+model MatchResult {
+  matchId     String       @id
+  timeExpired Boolean      @default(false)
+  set1A       Int?
+  set1B       Int?
+  set2A       Int?
+  set2B       Int?
+  stbA        Int?
+  stbB        Int?
+  status      ResultStatus @default(PENDING)
+
+  submittedById          String?
+  submittedAt            DateTime  @default(now())
+  autoConfirmAt          DateTime?
+  confirmedById          String?
+  confirmedAt            DateTime?
+  confirmedAutomatically Boolean   @default(false)
+  disputeNote            String?
+  disputedAt             DateTime?
+
+  match       Match @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  submittedBy User? @relation("submittedBy", fields: [submittedById], references: [id])
+  confirmedBy User? @relation("confirmedBy", fields: [confirmedById], references: [id])
+}
+
+model MatchPhoto {
+  id           String   @id @default(cuid())
+  matchId      String
+  uploadedById String
+  storageKey   String
+  width        Int?
+  height       Int?
+  createdAt    DateTime @default(now())
+
+  match      Match  @relation("matchPhotos", fields: [matchId], references: [id], onDelete: Cascade)
+  uploadedBy User   @relation(fields: [uploadedById], references: [id])
+  coverOf    Match? @relation("cover")
+}
+
+model MagicLinkToken {
+  id        String    @id @default(cuid())
+  userId    String
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  tokenHash String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model AuditLog {
+  id       String   @id @default(cuid())
+  actorId  String?
+  entity   String
+  entityId String
+  action   String
+  before   Json?
+  after    Json?
+  at       DateTime @default(now())
+
+  actor User? @relation(fields: [actorId], references: [id])
+}
