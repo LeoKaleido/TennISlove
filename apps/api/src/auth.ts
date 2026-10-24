@@ -48,22 +48,7 @@ export async function authPlugin(app: FastifyInstance) {
       ? await db.magicLinkToken.count({ where: { userId: user.id, createdAt: { gt: new Date(Date.now() - 3_600_000) } } })
       : 0;
     // Risposta identica in ogni caso, per non rivelare chi è iscritto
-    if (user && recent < 3) {
-      const token = newToken();
-      await db.magicLinkToken.create({
-        data: {
-          userId: user.id,
-          tokenHash: hash(token),
-          expiresAt: new Date(Date.now() + env.magicLinkMinutes * 60_000),
-        },
-      });
-      const link = `${env.appUrl}/auth/verify?token=${token}`;
-      await sendMail({
-        to: email,
-        subject: 'Il tuo link per entrare in ATP Umbria Tournament',
-        text: `Ciao!\n\nTocca il link per entrare nell'app (vale ${env.magicLinkMinutes} minuti, si usa una volta sola):\n\n${link}\n\nSe non sei stato tu, ignora questa email.`,
-      });
-    }
+    if (user && recent < 3) await sendLoginLink(user, 'login');
     return { ok: true };
   });
 
@@ -102,6 +87,34 @@ export async function authPlugin(app: FastifyInstance) {
 
 // L'hook che legge la sessione deve valere per tutte le rotte, non solo dentro questo plugin
 (authPlugin as unknown as Record<symbol, boolean>)[Symbol.for('skip-override')] = true;
+
+const INVITE_DAYS = 7;
+
+/**
+ * Crea un link monouso e lo manda per email (D-014, D-035).
+ * L'invito dal gestionale vale 7 giorni, il link chiesto dalla pagina di login 15 minuti.
+ */
+export async function sendLoginLink(user: { id: string; email: string }, kind: 'login' | 'invite', firstName?: string) {
+  const token = newToken();
+  const minutes = kind === 'invite' ? INVITE_DAYS * 24 * 60 : env.magicLinkMinutes;
+  await db.magicLinkToken.create({
+    data: { userId: user.id, tokenHash: hash(token), expiresAt: new Date(Date.now() + minutes * 60_000) },
+  });
+  const link = `${env.appUrl}/auth/verify?token=${token}`;
+  if (kind === 'invite') {
+    await sendMail({
+      to: user.email,
+      subject: 'Sei nel torneo: entra in ATP Umbria Tournament',
+      text: `Ciao${firstName ? ` ${firstName}` : ''}!\n\nSei stato iscritto ad ATP Umbria Tournament. Qui trovi calendario, classifica e le tue partite: programmi gli incontri, inserisci i risultati e carichi le foto.\n\nEntra con questo link (vale ${INVITE_DAYS} giorni e si usa una volta sola):\n\n${link}\n\nUna volta entrato resti collegato per ${env.sessionDays} giorni. Quando scade, chiedi un nuovo link dalla pagina di accesso con la tua email.`,
+    });
+  } else {
+    await sendMail({
+      to: user.email,
+      subject: 'Il tuo link per entrare in ATP Umbria Tournament',
+      text: `Ciao!\n\nTocca il link per entrare nell'app (vale ${env.magicLinkMinutes} minuti, si usa una volta sola):\n\n${link}\n\nSe non sei stato tu, ignora questa email.`,
+    });
+  }
+}
 
 export async function requireUser(req: FastifyRequest, reply: FastifyReply) {
   if (!req.user) return reply.code(401).send({ error: 'Non autenticato' });

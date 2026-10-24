@@ -1,0 +1,230 @@
+// Gestionale: giocatori e inviti (D-035).
+
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useEffect, useState } from 'react';
+import { formatDayWithWeekday, romeDay } from '@tentennis/shared';
+import { api } from '../api';
+import { Avatar, ErrorState, Loading, useToast } from '../components/ui';
+
+interface Person {
+  userId: string | null;
+  email: string | null;
+  isAdmin: boolean;
+  invitedAt: string | null;
+  lastLoginAt: string | null;
+  player: { id: string; firstName: string; lastName: string; shortName: string; seasons: string[] } | null;
+}
+
+interface PlayerForm {
+  firstName: string;
+  lastName: string;
+  shortName: string;
+  email: string;
+}
+
+const EMPTY: PlayerForm = { firstName: '', lastName: '', shortName: '', email: '' };
+
+const day = (iso: string) => formatDayWithWeekday(romeDay(iso));
+
+export function AdminPlayers() {
+  const people = useQuery({ queryKey: ['admin-people'], queryFn: () => api<{ people: Person[] }>('/api/admin/people') });
+  const queryClient = useQueryClient();
+  const toast = useToast();
+  const [editing, setEditing] = useState<Person | 'new' | null>(null);
+
+  const invite = useMutation({
+    mutationFn: (p: Person) => api(`/api/admin/users/${p.userId}/invite`, { method: 'POST' }),
+    onSuccess: (_, p) => {
+      queryClient.invalidateQueries({ queryKey: ['admin-people'] });
+      toast(`Invito inviato a ${p.email}`);
+    },
+    onError: (e) => toast(e.message),
+  });
+
+  if (people.isLoading) return <Loading />;
+  if (!people.data) return <ErrorState error={people.error} />;
+  const players = people.data.people.filter((p) => p.player).sort((a, b) => a.player!.lastName.localeCompare(b.player!.lastName));
+  const adminsOnly = people.data.people.filter((p) => !p.player);
+
+  const status = (p: Person) => {
+    if (!p.email) return { text: 'Senza email', color: 'var(--errFg)' };
+    if (p.lastLoginAt) return { text: `Entrato ${day(p.lastLoginAt)}`, color: 'var(--accent)' };
+    if (p.invitedAt) return { text: `Invitato ${day(p.invitedAt)}`, color: 'var(--warnFg)' };
+    return { text: 'Mai invitato', color: 'var(--ink3)' };
+  };
+
+  return (
+    <>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'flex-end', justifyContent: 'space-between' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+          <h1 className="display" style={{ fontSize: 40, lineHeight: 0.92 }}>
+            Giocatori
+          </h1>
+          <span className="muted" style={{ fontSize: 13.5 }}>
+            Crea i giocatori e invitali: ricevono un'email con il link per entrare, poi restano collegati 90 giorni.
+          </span>
+        </div>
+        <button className="btn btn-primary" style={{ height: 44, fontSize: 14 }} onClick={() => setEditing('new')}>
+          + Nuovo giocatore
+        </button>
+      </div>
+
+      <div className="card">
+        {players.map((p) => {
+          const pl = p.player!;
+          const st = status(p);
+          return (
+            <div key={pl.id} className="list-row" style={{ flexWrap: 'wrap', padding: '10px 14px' }}>
+              <Avatar player={{ ...pl, photoUrl: null }} size={36} />
+              <div style={{ flex: '1 1 220px', minWidth: 0, display: 'flex', flexDirection: 'column', gap: 2 }}>
+                <span style={{ fontWeight: 700, fontSize: 14.5 }}>
+                  {pl.firstName} {pl.lastName}{' '}
+                  <span className="faint" style={{ fontWeight: 500, fontSize: 12 }}>
+                    ({pl.shortName})
+                  </span>
+                </span>
+                <span className="mono muted ellipsis" style={{ fontSize: 12 }}>
+                  {p.email ?? 'nessuna email'}
+                </span>
+              </div>
+              {p.isAdmin && (
+                <span className="pill" style={{ background: 'var(--night)', color: '#C6EEDB' }}>
+                  Admin
+                </span>
+              )}
+              <span style={{ fontSize: 12, fontWeight: 600, width: 140, color: st.color }}>{st.text}</span>
+              <button className="btn btn-outline btn-sm" onClick={() => setEditing(p)}>
+                Modifica
+              </button>
+              {p.userId && (
+                <button className="btn btn-outline btn-sm" disabled={invite.isPending} onClick={() => invite.mutate(p)}>
+                  {p.invitedAt || p.lastLoginAt ? 'Reinvia invito' : 'Invita'}
+                </button>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      {adminsOnly.length > 0 && (
+        <section style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          <h2 className="title" style={{ fontSize: 20 }}>
+            Solo amministratori
+          </h2>
+          <div className="card">
+            {adminsOnly.map((p) => (
+              <div key={p.userId} className="list-row" style={{ padding: '10px 14px' }}>
+                <span className="mono" style={{ flex: 1, fontSize: 13 }}>
+                  {p.email}
+                </span>
+                <span style={{ fontSize: 12, fontWeight: 600, color: status(p).color }}>{status(p).text}</span>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {editing && <PlayerDialog person={editing === 'new' ? null : editing} onClose={() => setEditing(null)} />}
+    </>
+  );
+}
+
+function PlayerDialog({ person, onClose }: { person: Person | null; onClose: () => void }) {
+  const queryClient = useQueryClient();
+  const toast = useToast();
+  const [form, setForm] = useState<PlayerForm>(
+    person?.player
+      ? { firstName: person.player.firstName, lastName: person.player.lastName, shortName: person.player.shortName, email: person.email ?? '' }
+      : EMPTY,
+  );
+  const [invite, setInvite] = useState(true);
+  const [shortTouched, setShortTouched] = useState(!!person);
+  const isNew = !person;
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [onClose]);
+
+  const save = useMutation({
+    mutationFn: () =>
+      isNew
+        ? api('/api/admin/players', { method: 'POST', body: { ...form, invite } })
+        : api(`/api/admin/players/${person!.player!.id}`, { method: 'PATCH', body: form }),
+    onSuccess: () => {
+      queryClient.invalidateQueries();
+      toast(isNew ? (invite ? `Giocatore creato, invito inviato a ${form.email}` : 'Giocatore creato') : 'Giocatore aggiornato');
+      onClose();
+    },
+    onError: (e) => toast(e.message),
+  });
+
+  const set = (key: keyof PlayerForm) => (e: React.ChangeEvent<HTMLInputElement>) => {
+    const next = { ...form, [key]: e.target.value };
+    // il nome breve segue il nome finché non lo si modifica a mano
+    if (key === 'firstName' && !shortTouched) next.shortName = e.target.value;
+    if (key === 'shortName') setShortTouched(true);
+    setForm(next);
+  };
+  const valid = form.firstName.trim() && form.lastName.trim() && form.shortName.trim() && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim());
+  const emailChanged = !isNew && person?.email && person.email !== form.email.trim().toLowerCase();
+
+  return (
+    <div className="modal-wrap" role="dialog" aria-modal="true" aria-label={isNew ? 'Nuovo giocatore' : 'Modifica giocatore'}>
+      <div className="modal-backdrop" onClick={onClose} />
+      <form
+        className="modal"
+        onSubmit={(e) => {
+          e.preventDefault();
+          if (valid) save.mutate();
+        }}
+      >
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <h2 className="display" style={{ fontSize: 32 }}>
+            {isNew ? 'Nuovo giocatore' : 'Modifica giocatore'}
+          </h2>
+          <button type="button" className="icon-btn" aria-label="Chiudi" onClick={onClose}>
+            ✕
+          </button>
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12 }}>
+          <label className="field">
+            <span>Nome</span>
+            <input className="input" style={{ height: 48 }} value={form.firstName} onChange={set('firstName')} autoFocus />
+          </label>
+          <label className="field">
+            <span>Cognome</span>
+            <input className="input" style={{ height: 48 }} value={form.lastName} onChange={set('lastName')} />
+          </label>
+          <label className="field">
+            <span>Nome breve (calendario e classifica)</span>
+            <input className="input" style={{ height: 48 }} value={form.shortName} onChange={set('shortName')} placeholder="Es. Alessandro P" />
+          </label>
+          <label className="field">
+            <span>Email</span>
+            <input className="input" style={{ height: 48 }} type="email" value={form.email} onChange={set('email')} placeholder="nome@email.it" />
+          </label>
+        </div>
+        {isNew && (
+          <label style={{ display: 'flex', alignItems: 'center', gap: 10, fontWeight: 700, fontSize: 14.5 }}>
+            <input type="checkbox" checked={invite} onChange={(e) => setInvite(e.target.checked)} style={{ width: 18, height: 18 }} />
+            Invia subito l'invito
+            <span className="muted" style={{ fontWeight: 500, fontSize: 13 }}>
+              (email con il link per entrare, valido 7 giorni)
+            </span>
+          </label>
+        )}
+        {emailChanged && <div className="note note-warn">Cambiando email il giocatore viene scollegato e dovrà essere invitato di nuovo.</div>}
+        <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+          <button type="button" className="btn btn-outline" onClick={onClose}>
+            Annulla
+          </button>
+          <button type="submit" className="btn btn-primary" style={{ height: 46, fontSize: 14 }} disabled={!valid || save.isPending}>
+            {save.isPending ? 'Salvataggio…' : isNew ? (invite ? 'Crea e invita' : 'Crea giocatore') : 'Salva'}
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+}

@@ -5,6 +5,7 @@ import { authPlugin } from './auth';
 import { env } from './env';
 import { startJobs } from './jobs';
 import { adminRoutes } from './routes/admin';
+import { adminPlayerRoutes } from './routes/admin-players';
 import { matchRoutes } from './routes/matches';
 import { seasonRoutes } from './routes/season';
 
@@ -24,6 +25,7 @@ await app.register(authPlugin);
 await app.register(seasonRoutes);
 await app.register(matchRoutes);
 await app.register(adminRoutes);
+await app.register(adminPlayerRoutes);
 
 app.get('/api/health', async () => ({ ok: true }));
 

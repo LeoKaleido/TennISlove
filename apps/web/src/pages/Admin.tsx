@@ -1,18 +1,19 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { formatDayWithWeekday, formatScore, romeDay } from '@tentennis/shared';
 import { api, type Match, type SeasonOverview } from '../api';
 import { AdminResultEditor } from '../components/AdminResultEditor';
+import { AdminPlayers } from './AdminPlayers';
 import { ErrorState, Loading, Logo, StatusPill, useToast } from '../components/ui';
 import { matchInfo, playerIndex, useSeason } from '../data';
 
-type Tab = 'dash' | 'results' | 'users';
+type Tab = 'dash' | 'results' | 'players';
 
 const TABS: { key: Tab; label: string }[] = [
   { key: 'dash', label: 'Dashboard' },
   { key: 'results', label: 'Risultati' },
-  { key: 'users', label: 'Utenti' },
+  { key: 'players', label: 'Giocatori' },
 ];
 
 export function AdminPage() {
@@ -74,7 +75,7 @@ export function AdminPage() {
       <main className="admin-main">
         {tab === 'dash' && <Dashboard data={data} onEdit={setEditing} />}
         {tab === 'results' && <Results data={data} onEdit={setEditing} />}
-        {tab === 'users' && <Users data={data} />}
+        {tab === 'players' && <AdminPlayers />}
       </main>
       {editingMatch && <AdminResultEditor key={editingMatch.id} match={editingMatch} players={playerIndex(data.players)} onClose={() => setEditing(null)} />}
     </div>
@@ -269,47 +270,6 @@ function Results({ data, onEdit }: { data: SeasonOverview; onEdit: (id: string) 
               >
                 Elimina
               </button>
-            </div>
-          );
-        })}
-      </div>
-    </>
-  );
-}
-
-interface AdminUser {
-  id: string;
-  email: string;
-  isAdmin: boolean;
-  playerId: string | null;
-  lastLoginAt: string | null;
-}
-
-function Users({ data }: { data: SeasonOverview }) {
-  const players = playerIndex(data.players);
-  const users = useQuery({ queryKey: ['admin-users'], queryFn: () => api<AdminUser[]>('/api/admin/users') });
-  if (users.isLoading) return <Loading />;
-  if (!users.data) return <ErrorState error={users.error} />;
-  return (
-    <>
-      <Header title="Utenti" sub="Giocatori e amministratori che possono entrare nell'app." />
-      <div className="card">
-        {users.data.map((u) => {
-          const p = u.playerId ? players.get(u.playerId) : undefined;
-          return (
-            <div key={u.id} className="list-row" style={{ flexWrap: 'wrap', padding: '10px 14px' }}>
-              <div style={{ flex: '1 1 200px', minWidth: 0, display: 'flex', flexDirection: 'column', gap: 2 }}>
-                <span style={{ fontWeight: 700, fontSize: 14.5 }}>{p ? `${p.firstName} ${p.lastName}` : 'Solo amministratore'}</span>
-                <span className="mono muted" style={{ fontSize: 12 }}>
-                  {u.email}
-                </span>
-              </div>
-              <span className="pill" style={{ background: u.isAdmin ? 'var(--night)' : 'var(--surface2)', color: u.isAdmin ? '#C6EEDB' : 'var(--ink2)' }}>
-                {u.isAdmin ? 'Admin' : 'Giocatore'}
-              </span>
-              <span style={{ fontSize: 12, fontWeight: 600, width: 130, color: u.lastLoginAt ? 'var(--accent)' : 'var(--ink3)' }}>
-                {u.lastLoginAt ? `Entrato ${formatDayWithWeekday(romeDay(u.lastLoginAt))}` : 'Mai entrato'}
-              </span>
             </div>
           );
         })}

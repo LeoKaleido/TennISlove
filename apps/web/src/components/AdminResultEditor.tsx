@@ -4,6 +4,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { formatScore } from '@tentennis/shared';
 import { api, type Match, type Player } from '../api';
+import { outcomeColors, sideOutcome } from './PointsPreview';
 import { evaluateForm, formFromResult, type Pair, type ScoreForm } from '../score-form';
 import { useToast } from './ui';
 
@@ -98,7 +99,11 @@ export function AdminResultEditor({ match, players, onClose }: { match: Match; p
                     </td>
                   );
                 })}
-                <td className="pts">{ev.status === 'OK' ? (side === 0 ? ev.pointsA : ev.pointsB) : '-'}</td>
+                <td>
+                  <span className="outcome-badge" style={outcomeColors(sideOutcome(ev, side === 0 ? 'A' : 'B'))}>
+                    {ev.status === 'OK' ? (side === 0 ? ev.pointsA : ev.pointsB) : '-'}
+                  </span>
+                </td>
               </tr>
             ))}
           </tbody>

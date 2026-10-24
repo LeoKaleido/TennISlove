@@ -1,4 +1,4 @@
-// Gestionale (/admin): per ora dashboard, utenti e risultati.
+// Gestionale (/admin): risultati. Giocatori e inviti sono in admin-players.ts.
 
 import type { FastifyInstance } from 'fastify';
 import { evaluateMatch } from '@tentennis/shared';
@@ -8,20 +8,6 @@ import { resultBody, resultRecord } from './matches';
 
 export async function adminRoutes(app: FastifyInstance) {
   app.addHook('preHandler', requireAdmin);
-
-  app.get('/api/admin/users', async () => {
-    const users = await db.user.findMany({
-      include: { player: true, sessions: { select: { createdAt: true }, orderBy: { createdAt: 'desc' }, take: 1 } },
-      orderBy: { email: 'asc' },
-    });
-    return users.map((u) => ({
-      id: u.id,
-      email: u.email,
-      isAdmin: u.isAdmin,
-      playerId: u.player?.id ?? null,
-      lastLoginAt: u.sessions[0]?.createdAt.toISOString() ?? null,
-    }));
-  });
 
   /** Inserisce o corregge un risultato: dal gestionale è subito confermato */
   app.put<{ Params: { id: string } }>('/api/admin/matches/:id/result', async (req, reply) => {

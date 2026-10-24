@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { api, type MatchDetail } from '../api';
+import { PointsPreview } from '../components/PointsPreview';
 import { BackButton, ErrorState, Loading, useToast } from '../components/ui';
 import { playerIndex, useMe, useSeason } from '../data';
 import { evaluateForm, formFromResult, type Pair, type ScoreForm } from '../score-form';
@@ -150,14 +151,10 @@ function ResultForm({
       </div>
 
       <div className="sticky-footer">
-        <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 10 }}>
-          <span className="faint" style={{ fontSize: 11.5, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.08em' }}>
-            Anteprima punti
-          </span>
-          <span style={{ fontWeight: 900, fontStretch: '70%', fontSize: 24 }}>
-            {ok ? `${names[0]} ${ev.pointsA}, ${names[1]} ${ev.pointsB}` : '-'}
-          </span>
-        </div>
+        <span className="faint" style={{ fontSize: 11.5, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.08em' }}>
+          Anteprima punti
+        </span>
+        <PointsPreview ev={ev} names={names} />
         <button className="btn btn-primary" disabled={!ok || submit.isPending} onClick={() => submit.mutate()}>
           {submit.isPending ? 'Invio…' : 'Invia risultato'}
         </button>

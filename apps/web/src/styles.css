@@ -761,3 +761,24 @@ textarea.input {
     padding: 32px 36px 48px;
   }
 }
+
+/* Esito in pastello: vincitore, sconfitto, senza vincitore */
+:root {
+  --winBg: #d4f1e0;
+  --winFg: #14532d;
+  --loseBg: #f9d9d9;
+  --loseFg: #7f1d1d;
+  --tieBg: #fbefc4;
+  --tieFg: #6b4e00;
+}
+
+.outcome-badge {
+  min-width: 48px;
+  padding: 3px 10px;
+  border-radius: 10px;
+  text-align: center;
+  font-weight: 900;
+  font-stretch: 70%;
+  font-size: 22px;
+  line-height: 1.2;
+}
