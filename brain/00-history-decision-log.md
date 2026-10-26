@@ -31,6 +31,7 @@ Registro cronologico di eventi, decisioni e domande aperte. Le voci nuove si agg
 | 26/10/2026 | Nuovo logo: cuore a forma di pallina da tennis (D-051). Icone e schermate di avvio rigenerate. |
 | 26/10/2026 | Il cuore che rimbalza diventa il loader di tutta l'app (D-052). Classifica solo a schede, aperture e chiusure animate (D-053). |
 | 26/10/2026 | Sviluppo e produzione passano a un unico container (D-054), provati in locale (produzione con certificato di prova). |
+| 26/10/2026 | Email di produzione da una casella su Plesk invece di Resend (D-055). |
 
 ## Decisioni
 
@@ -90,6 +91,7 @@ Registro cronologico di eventi, decisioni e domande aperte. Le voci nuove si agg
 | D-052 | 26/10/2026 | **Loader unico**: il cuore-pallina che rimbalza (`apps/web/public/loader.svg`, dall'animazione `Tennis Heart.svg` con salto ridotto) in avvio, caricamenti di pagina e pulsanti in corso. Sostituisce le racchette, lo shimmer e le scritte "Invio…/Salvataggio…" | Un solo segno riconoscibile per tutte le attese | Accettata |
 | D-053 | 26/10/2026 | **Classifica solo a schede**, tolta la vista a tabella (e la legenda delle sigle). **Aperture e chiusure animate**: accordion con animazione d'altezza e freccia che ruota; fogli e finestre animati anche in chiusura | Richiesta dell'utente: meno viste, interfaccia più curata | Accettata |
 | D-054 | 26/10/2026 | **Un unico container**, in sviluppo e in produzione, costruito sull'immagine ufficiale di Postgres 17. Sviluppo: Postgres, API, Vite e Mailpit (`docker/dev.Dockerfile`, `docker/dev-start.sh`). Produzione: Postgres, API, Nginx e certbot (`docker/prod.Dockerfile`, `docker/prod-start.sh`). Uno script avvia i programmi in ordine; se uno si ferma, si ferma il container. Modifica D-027 (compose con più servizi) | Scelta dell'utente, per avere una cosa sola da gestire. Accettato consapevolmente: un riavvio dell'app riavvia anche il database, log mescolati, aggiornamenti di Postgres, Node e Nginx legati alla ricostruzione dell'immagine | Accettata |
+| D-055 | 26/10/2026 | Email in produzione da una **casella su Plesk** via SMTP, non più Resend. Sostituisce la parte di produzione di D-030; Mailpit resta in sviluppo. Il codice non cambia (nodemailer, solo variabili `SMTP_*`). Da configurare su Plesk SPF, DKIM e DMARC del dominio | Decisione del team | Accettata |
 
 ## Domande aperte
 

@@ -10,7 +10,7 @@
 | Database | PostgreSQL 17 via Prisma 6 |
 | Validazione | Zod 4 sui body delle richieste |
 | Login | codice di 6 cifre via email + sessione in cookie httpOnly di 90 giorni (D-049) |
-| Email | nodemailer via SMTP: Mailpit in sviluppo, Resend in produzione (D-030) |
+| Email | nodemailer via SMTP: Mailpit in sviluppo, casella su Plesk in produzione (D-055) |
 | Foto | su disco (`UPLOAD_DIR`), servite solo con login (D-038) |
 | Calendario | file `.ics` scritto a mano (`ics.ts`) + link Google Calendar |
 | Lavori periodici | `setInterval` ogni 5 minuti (`jobs.ts`): conferma automatica dei risultati, pulizia di sessioni e codici scaduti |

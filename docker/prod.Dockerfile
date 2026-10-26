@@ -1,4 +1,5 @@
-# Produzione in un unico container (D-054): Postgres, API, Nginx (HTTPS e file del web) e rinnovo dei certificati.
+# Produzione in un unico container (D-054): Postgres, API e Nginx (file del web e proxy /api).
+# HTTPS e certificati li gestisce il server davanti al container (D-056).
 # Si parte dall'immagine ufficiale di Postgres 17, come in sviluppo.
 
 # 1. build del web
@@ -16,7 +17,7 @@ RUN pnpm --filter @tentennis/web build
 # 2. container finale
 FROM postgres:17
 RUN apt-get update \
-  && apt-get install -y --no-install-recommends nginx certbot gettext-base openssl ca-certificates \
+  && apt-get install -y --no-install-recommends nginx openssl ca-certificates \
   && rm -rf /var/lib/apt/lists/* /etc/nginx/sites-enabled/default \
   && sed -i '/server_tokens/d' /etc/nginx/nginx.conf
 
@@ -37,14 +38,14 @@ RUN cd apps/api && pnpm prisma generate
 
 # Web e Nginx
 COPY --from=web /app/apps/web/dist /usr/share/nginx/html
-COPY docker/nginx/https.conf.template docker/nginx/http-only.conf.template /etc/nginx/templates/
+COPY docker/nginx/tennislove.conf /etc/nginx/templates/tennislove.conf
 
-# L'API non gira come root; foto e verifica dei certificati in cartelle dedicate
+# L'API non gira come root; foto in una cartella dedicata
 RUN useradd --system --no-create-home app \
-  && mkdir -p /data/uploads /var/www/certbot \
+  && mkdir -p /data/uploads \
   && chown -R app:app /data
 
 COPY docker/prod-start.sh /usr/local/bin/prod-start
 ENV NODE_ENV=production UPLOAD_DIR=/data/uploads TRUST_PROXY=true
-EXPOSE 80 443
+EXPOSE 80
 CMD ["prod-start"]
