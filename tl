@@ -22,6 +22,15 @@ case "${1:-aiuto}" in
   codice) [ $# -eq 2 ] || { echo "Uso: ./tl codice nome@email.it"; exit 1; }; scripts/codice.sh "$2" ;;
   backup) scripts/backup.sh "${2:-./backups}" ;;
   db) $DC exec app psql -U tentennis tentennis ;;
+  versione) git log -1 --format='%h %ad %s' --date=format:'%d/%m/%Y %H:%M' ;;
+  spazio)
+    df -h / | tail -1 | awk '{print "Disco: " $3 " usati su " $2 " (" $5 "), liberi " $4}'
+    docker system df ;;
+  pulisci)
+    # solo immagini e cache di build non usate: database e foto (volumi) non si toccano
+    docker image prune -f
+    docker builder prune -f ;;
+  backup-elenco) ls -lh "${2:-./backups}" 2>/dev/null || echo 'Nessun backup in ./backups' ;;
   *)
     cat <<'AIUTO'
 ./tl aggiorna                       scarica il codice nuovo e riavvia l'app
@@ -34,7 +43,11 @@ case "${1:-aiuto}" in
 ./tl password EMAIL 'PASSWORD'      imposta la password di un utente, senza email
 ./tl codice EMAIL                   codice di accesso d'emergenza, senza email
 ./tl backup                         backup di database e foto in ./backups
-./tl db                             console del database
+./tl db                             console del database (esci con \q)
+./tl versione                       versione del codice installata
+./tl spazio                         spazio su disco e occupato da Docker
+./tl pulisci                        cancella immagini Docker vecchie (dati e foto restano)
+./tl backup-elenco                  elenco dei backup
 AIUTO
     ;;
 esac
