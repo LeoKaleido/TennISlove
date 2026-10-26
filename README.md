@@ -18,17 +18,17 @@ Procedura completa, produzione compresa: [`brain/05-runbook.md`](brain/05-runboo
 
 ```sh
 cp .env.example .env        # la prima volta
-docker compose up -d        # db, api, web, mailpit
+docker compose up -d        # un unico container: database, API, web e Mailpit
 ```
 
 - App: http://localhost:5173
 - Email di sviluppo (codici di accesso compresi): http://localhost:8025
 - API: http://localhost:3000/api/health
 
-La prima volta, o per ripartire dai dati del torneo al 22/10/2026:
+Al primo avvio il database viene creato e riempito con i dati del torneo al 22/10/2026. Per ripartire da zero:
 
 ```sh
-docker compose exec api pnpm prisma migrate reset --force   # ricrea il db ed esegue il seed
+docker compose exec -w /repo/apps/api app pnpm prisma migrate reset --force
 ```
 
 Per entrare: apri l'app, inserisci l'email di un giocatore (vedi `apps/api/prisma/seed-data.ts`), scrivi il codice che trovi su Mailpit.
@@ -36,9 +36,9 @@ Per entrare: apri l'app, inserisci l'email di un giocatore (vedi `apps/api/prism
 ## Comandi utili
 
 ```sh
-docker compose run --rm install                                   # dopo aver cambiato le dipendenze
-docker compose run --rm --no-deps -w /repo install pnpm -r test   # test
-docker compose run --rm --no-deps -w /repo install pnpm -r typecheck
-docker compose exec api pnpm prisma migrate dev --name <nome>     # nuova migrazione
-docker compose logs -f api
+docker compose restart                                                   # dopo aver cambiato le dipendenze
+docker compose exec app pnpm -r test                                     # test
+docker compose exec app pnpm -r typecheck
+docker compose exec -w /repo/apps/api app pnpm prisma migrate dev --name <nome>   # nuova migrazione
+docker compose logs -f
 ```

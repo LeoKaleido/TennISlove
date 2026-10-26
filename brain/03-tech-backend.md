@@ -50,4 +50,4 @@ Chi può fare cosa:
 Dettaglio delle protezioni attive in `05-runbook.md`, sezione "Protezioni già attive".
 
 ## Hosting
-VPS con Docker Compose (`docker-compose.prod.yml`): Postgres, API e **Nginx** (D-039), che serve la build del web, inoltra `/api` e gestisce l'HTTPS con Let's Encrypt. Procedura completa in `05-runbook.md`.
+VPS con un **unico container** (D-054, `docker-compose.prod.yml`): Postgres, API, **Nginx** (D-039) che serve la build del web, inoltra `/api` e gestisce l'HTTPS con Let's Encrypt, e il rinnovo dei certificati. Stessa impostazione in sviluppo, con Vite e Mailpit al posto di Nginx e certbot. Procedura completa in `05-runbook.md`.
