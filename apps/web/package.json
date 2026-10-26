@@ -8,7 +8,8 @@
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
     "test": "echo 'nessun test web per ora'",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "splash": "node scripts/splash.mjs"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.62.8",

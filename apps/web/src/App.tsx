@@ -1,6 +1,6 @@
-import { useState, type ReactNode } from 'react';
+import { useEffect, type ReactNode } from 'react';
 import { Navigate, Outlet, Route, Routes, useLocation } from 'react-router';
-import { useFontsReady, useSplashFade } from './boot';
+import { hideBoot, useFontsReady } from './boot';
 import { Splash, TabBar } from './components/ui';
 import { useMe, useSeason } from './data';
 import { AdminPage } from './pages/Admin';
@@ -34,16 +34,10 @@ function RequireLogin({ admin = false }: { admin?: boolean }) {
   );
 }
 
-/** Pagina pronta: alla prima apertura la schermata di avvio sfuma sopra di lei */
+/** Pagina pronta: la schermata di avvio sfuma sopra di lei */
 function FromSplash({ children }: { children: ReactNode }) {
-  const fade = useSplashFade();
-  const [visible, setVisible] = useState(fade);
-  return (
-    <>
-      {children}
-      {visible && <Splash leaving onDone={() => setVisible(false)} />}
-    </>
-  );
+  useEffect(hideBoot, []);
+  return children;
 }
 
 function WithTabs() {

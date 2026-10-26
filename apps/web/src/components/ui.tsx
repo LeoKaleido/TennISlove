@@ -4,6 +4,7 @@ import { createContext, useCallback, useContext, useEffect, useId, useRef, useSt
 import { NavLink, useNavigate } from 'react-router';
 import type { MatchStatus, Zone } from '@tentennis/shared';
 import type { Match, Player } from '../api';
+import { bootVisible } from '../boot';
 import { avatarColors, initials, STATUS_STYLE, ZONE_STYLE } from '../data';
 
 /** Logo TennISlove: cuore a forma di pallina da tennis. `inverted` per gli sfondi scuri: riquadro un po' più chiaro */
@@ -231,11 +232,15 @@ export function ButtonLoader({ height = 30 }: { height?: number }) {
   return <img src="/loader.svg" alt="In corso" style={{ height, margin: '-6px 0' }} />;
 }
 
-/** Come la schermata di avvio di index.html: niente salto tra avvio e primo caricamento */
-export function Splash({ leaving = false, onDone }: { leaving?: boolean; onDone?: () => void }) {
+/**
+ * Attesa a tutto schermo prima della prima pagina. All'avvio copre già la schermata di index.html, quindi non disegna niente;
+ * se serve più tardi (es. dopo un nuovo login) mostra lo stesso cuore su sfondo scuro.
+ */
+export function Splash() {
+  if (bootVisible()) return null;
   return (
-    <div className={`boot${leaving ? ' boot-leaving' : ''}`} onAnimationEnd={(e) => e.target === e.currentTarget && onDone?.()}>
-      <img src="/loader.svg" alt="" />
+    <div className="boot">
+      <img className="in" src="/loader.svg" alt="" />
     </div>
   );
 }
