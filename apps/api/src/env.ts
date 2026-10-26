@@ -1,4 +1,8 @@
-const num = (v: string | undefined, fallback: number) => (v ? Number(v) : fallback);
+// tollera virgolette e commenti lasciati nel .env (es. "465" oppure 465 # ssl)
+const num = (v: string | undefined, fallback: number) => {
+  const n = Number.parseInt((v ?? '').replace(/["']/g, ''), 10);
+  return Number.isNaN(n) ? fallback : n;
+};
 
 export const env = {
   port: num(process.env.PORT, 3000),
