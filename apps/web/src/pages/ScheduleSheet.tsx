@@ -1,11 +1,22 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { addDays, formatDayWithWeekday, romeDay, romeTime } from '@tentennis/shared';
 import { api, type Club, type Match, type Round } from '../api';
-import { useToast } from '../components/ui';
+import { ButtonLoader, useClosing, useToast } from '../components/ui';
+import { clearDraft, loadDraft, saveDraft } from '../drafts';
 
 const TIMES = ['18:00', '18:30', '19:00', '19:30', '20:00', '20:30', '21:00'];
 const WEEKDAYS = ['dom', 'lun', 'mar', 'mer', 'gio', 'ven', 'sab'];
+
+interface Draft {
+  day: string | null;
+  otherOn: boolean;
+  otherDate: string;
+  time: string | null;
+  clubId: string | null;
+  venueOn: boolean;
+  venue: string;
+}
 
 /** Bottom sheet "Programma partita": giorno della settimana (o altra data), ora, circolo */
 export function ScheduleSheet({
@@ -28,30 +39,47 @@ export function ScheduleSheet({
 
   const initialDay = match.scheduledAt ? romeDay(match.scheduledAt) : null;
   const inWeek = !!initialDay && days.includes(initialDay);
-  const [day, setDay] = useState<string | null>(inWeek ? initialDay : null);
-  const [otherOn, setOtherOn] = useState(!!initialDay && !inWeek);
-  const [otherDate, setOtherDate] = useState(initialDay && !inWeek ? initialDay : '');
-  const [time, setTime] = useState<string | null>(match.scheduledAt ? romeTime(match.scheduledAt) : null);
-  const [clubId, setClubId] = useState<string | null>(match.clubId);
+  const draftKey = `schedule:${match.id}`;
+  const [draft] = useState(() => loadDraft<Draft>(draftKey));
+  const [day, setDay] = useState<string | null>(draft ? draft.day : inWeek ? initialDay : null);
+  const [otherOn, setOtherOn] = useState(draft ? draft.otherOn : !!initialDay && !inWeek);
+  const [otherDate, setOtherDate] = useState(draft ? draft.otherDate : initialDay && !inWeek ? initialDay : '');
+  const [time, setTime] = useState<string | null>(draft ? draft.time : match.scheduledAt ? romeTime(match.scheduledAt) : null);
+  const [clubId, setClubId] = useState<string | null>(draft ? draft.clubId : match.clubId);
+  // campo non in lista: testo libero al posto del circolo
+  const [venueOn, setVenueOn] = useState(draft ? draft.venueOn : !!match.venue);
+  const [venue, setVenue] = useState(draft ? draft.venue : (match.venue ?? ''));
+  // focus sul campo libero solo dopo un tocco: su iPhone un focus senza tocco non apre la tastiera
+  const [venueTapped, setVenueTapped] = useState(false);
+  useEffect(
+    () => saveDraft<Draft>(draftKey, { day, otherOn, otherDate, time, clubId, venueOn, venue }),
+    [draftKey, day, otherOn, otherDate, time, clubId, venueOn, venue],
+  );
+  const [closing, animateClose] = useClosing(onClose);
+  const close = () => {
+    clearDraft(draftKey);
+    animateClose();
+  };
 
   const date = otherOn ? otherDate || null : day;
   const outside = !!date && date > round.endsOn;
   const before = !!date && date < round.startsOn;
-  const ready = !!date && !!time && !!clubId && !before;
+  const place = venueOn ? venue.trim().length >= 2 : !!clubId;
+  const ready = !!date && !!time && place && !before;
 
   const save = useMutation({
-    mutationFn: () => api(`/api/matches/${match.id}/schedule`, { method: 'PUT', body: { date, time, clubId } }),
+    mutationFn: () => api(`/api/matches/${match.id}/schedule`, { method: 'PUT', body: venueOn ? { date, time, venue: venue.trim() } : { date, time, clubId } }),
     onSuccess: () => {
       queryClient.invalidateQueries();
-      toast('Partita programmata: vi arriva un\'email con l\'invito per il calendario');
-      onClose();
+      toast('Partita programmata');
+      close();
     },
     onError: (e) => toast(e.message),
   });
 
   return (
-    <div className="sheet-wrap">
-      <div className="sheet-backdrop" onClick={onClose} />
+    <div className={`sheet-wrap${closing ? ' closing' : ''}`}>
+      <div className="sheet-backdrop" onClick={close} />
       <div className="sheet" role="dialog" aria-label="Programma partita">
         <div className="sheet-handle" />
         <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
@@ -133,9 +161,15 @@ export function ScheduleSheet({
           <SheetLabel>Circolo</SheetLabel>
           <div className="card" style={{ borderRadius: 16 }}>
             {clubs.map((c) => {
-              const on = clubId === c.id;
+              const on = !venueOn && clubId === c.id;
               return (
-                <button key={c.id} className="list-row" onClick={() => setClubId(c.id)} style={{ padding: '11px 14px', background: on ? 'color-mix(in oklch, var(--mint) 35%, transparent)' : undefined }}>
+                <button
+                  key={c.id}
+                  className="list-row"
+                  onClick={() => {
+                    setClubId(c.id);
+                    setVenueOn(false);
+                  }} style={{ padding: '11px 14px', background: on ? 'color-mix(in oklch, var(--mint) 35%, transparent)' : undefined }}>
                   <span style={{ width: 20, height: 20, borderRadius: '50%', flex: 'none', border: on ? '6px solid var(--accent)' : '2px solid var(--line2)', background: 'var(--surface)' }} />
                   <span style={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                     <span style={{ fontWeight: 700, fontSize: 14.5 }}>{c.name}</span>
@@ -148,11 +182,31 @@ export function ScheduleSheet({
                 </button>
               );
             })}
+            <button className="list-row" onClick={() => {
+                setVenueOn(true);
+                setVenueTapped(true);
+              }} style={{ padding: '11px 14px', background: venueOn ? 'color-mix(in oklch, var(--mint) 35%, transparent)' : undefined }}>
+              <span style={{ width: 20, height: 20, borderRadius: '50%', flex: 'none', border: venueOn ? '6px solid var(--accent)' : '2px solid var(--line2)', background: 'var(--surface)' }} />
+              <span style={{ fontWeight: 700, fontSize: 14.5 }}>Altro campo, non in lista</span>
+            </button>
+            {venueOn && (
+              <div style={{ padding: '0 14px 12px' }}>
+                <input
+                  className="input"
+                  autoFocus={venueTapped}
+                  maxLength={120}
+                  value={venue}
+                  onChange={(e) => setVenue(e.target.value)}
+                  placeholder="Nome del circolo e città"
+                  style={{ height: 44, borderRadius: 12, fontSize: 14.5 }}
+                />
+              </div>
+            )}
           </div>
         </div>
 
         <button className="btn btn-primary" disabled={!ready || save.isPending} onClick={() => save.mutate()}>
-          {save.isPending ? 'Salvataggio…' : ready ? 'Salva e avvisa l\'avversario' : 'Scegli giorno, ora e circolo'}
+          {save.isPending ? <ButtonLoader /> : 'Salva'}
         </button>
       </div>
     </div>

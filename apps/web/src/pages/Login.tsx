@@ -1,21 +1,52 @@
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate } from 'react-router';
 import { api } from '../api';
-import { Logo } from '../components/ui';
+import { ButtonLoader, Logo, TextField } from '../components/ui';
 import { useMe } from '../data';
+import { clearDraft, loadDraft, saveDraft } from '../drafts';
+
+// l'email resta salvata: per leggere il codice si passa all'app Mail e il telefono può chiudere l'app
+const SENT_TO = 'login';
 
 export function LoginPage() {
   const me = useMe();
-  const [email, setEmail] = useState('');
-  const [sentTo, setSentTo] = useState<string | null>(null);
+  const [sentTo, setSentToState] = useState<string | null>(() => loadDraft<string>(SENT_TO));
+  const [email, setEmail] = useState(sentTo ?? '');
   const [error, setError] = useState('');
+  const [code, setCode] = useState('');
+  const [codeError, setCodeError] = useState('');
+  const queryClient = useQueryClient();
+
+  const setSentTo = (to: string | null) => {
+    if (to) saveDraft(SENT_TO, to);
+    else clearDraft(SENT_TO);
+    setSentToState(to);
+    setCode('');
+    setCodeError('');
+  };
 
   const send = useMutation({
-    mutationFn: (to: string) => api('/api/auth/magic-link', { method: 'POST', body: { email: to } }),
+    mutationFn: (to: string) => api('/api/auth/code', { method: 'POST', body: { email: to } }),
     onSuccess: (_, to) => setSentTo(to),
     onError: (e) => setError(e.message),
   });
+
+  const verify = useMutation({
+    mutationFn: (value: string) => api('/api/auth/login', { method: 'POST', body: { email: sentTo, code: value } }),
+    onSuccess: async () => {
+      clearDraft(SENT_TO);
+      await queryClient.invalidateQueries({ queryKey: ['me'] });
+    },
+    onError: (e) => setCodeError(e.message),
+  });
+
+  const onCode = (value: string) => {
+    const digits = value.replace(/\D/g, '').slice(0, 6);
+    setCode(digits);
+    setCodeError('');
+    if (digits.length === 6) verify.mutate(digits);
+  };
 
   if (me.data) return <Navigate to="/" replace />;
 
@@ -29,6 +60,13 @@ export function LoginPage() {
     send.mutate(value);
   };
 
+  const onEmail = (value: string) => {
+    setEmail(value);
+    setError('');
+    // email cambiata dopo l'invio: il codice mandato non vale per la nuova
+    if (sentTo && value.trim().toLowerCase() !== sentTo.toLowerCase()) setSentTo(null);
+  };
+
   return (
     <div style={{ flex: '1 0 auto', display: 'flex', flexDirection: 'column', background: '#0B1A24', color: '#fff', minHeight: '100dvh' }}>
       <div style={{ flex: '1 0 auto', display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '40px 28px 24px', gap: 28, position: 'relative', overflow: 'hidden' }}>
@@ -36,74 +74,56 @@ export function LoginPage() {
         <div style={{ position: 'absolute', right: -60, top: 150, width: 260, borderTop: '2px solid rgba(198,238,219,.14)' }} />
         <Logo size={72} inverted />
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10, position: 'relative' }}>
-          <h1 className="display" style={{ fontSize: 58, lineHeight: 0.88 }}>
-            ATP Umbria
-            <br />
-            Tournament
+          <h1 className="display brand" style={{ fontSize: 56, lineHeight: 0.88 }}>
+            TennISlove
           </h1>
-          <div style={{ fontSize: 15, color: '#C6EEDB', fontWeight: 600 }}>Amici Tennis, Pre-cena</div>
         </div>
       </div>
 
       <div style={{ background: 'var(--surface)', color: 'var(--ink)', borderRadius: '28px 28px 0 0', padding: '26px 22px 30px', display: 'flex', flexDirection: 'column', gap: 16 }}>
-        {!sentTo ? (
-          <>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-              <h2 className="title" style={{ fontSize: 26 }}>
-                Accedi
-              </h2>
-              <div className="muted" style={{ fontSize: 14.5, lineHeight: 1.45 }}>
-                Niente password: inserisci la tua email e ti mandiamo un link per entrare.
-              </div>
-            </div>
-            <label className="field">
-              <span>Email</span>
-              <input
-                className="input"
-                type="email"
-                inputMode="email"
-                autoComplete="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && submit()}
-                placeholder="nome@email.it"
-                style={{ borderColor: error ? 'var(--errFg)' : undefined }}
-              />
-            </label>
-            {error && <div style={{ fontSize: 13, color: 'var(--errFg)', fontWeight: 600, marginTop: -6 }}>{error}</div>}
-            <button className="btn btn-primary" onClick={submit} disabled={send.isPending}>
-              {send.isPending ? 'Invio…' : 'Inviami il link'}
-            </button>
-            <div className="faint" style={{ fontSize: 12.5, textAlign: 'center' }}>
-              App privata: accedono solo i giocatori del torneo.
-            </div>
-          </>
+        <h2 className="title" style={{ fontSize: 26 }}>
+          Accedi
+        </h2>
+        <TextField
+          label="Email"
+          type="email"
+          inputMode="email"
+          autoComplete="email"
+          value={email}
+          onChange={(e) => onEmail(e.target.value)}
+          onKeyDown={(e) => e.key === 'Enter' && !sentTo && submit()}
+          placeholder="nome@email.it"
+          error={!!error}
+        />
+        {error && <div style={{ fontSize: 13, color: 'var(--errFg)', fontWeight: 600, marginTop: -6 }}>{error}</div>}
+        {sentTo && (
+          <div className="reveal" style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <TextField
+              label="Codice"
+              inputMode="numeric"
+              autoComplete="one-time-code"
+              value={code}
+              onChange={(e) => onCode(e.target.value)}
+              disabled={verify.isPending}
+              error={!!codeError}
+              style={{ letterSpacing: '0.3em', fontWeight: 700 }}
+            />
+            {codeError && <div style={{ fontSize: 13, color: 'var(--errFg)', fontWeight: 600, marginTop: -6 }}>{codeError}</div>}
+          </div>
+        )}
+        {sentTo ? (
+          <button className="btn btn-primary" onClick={() => verify.mutate(code)} disabled={code.length < 6 || verify.isPending}>
+            {verify.isPending ? <ButtonLoader /> : 'Entra'}
+          </button>
         ) : (
-          <>
-            <div style={{ width: 56, height: 56, borderRadius: 18, background: 'var(--mint)', display: 'grid', placeItems: 'center' }}>
-              <svg width="28" height="28" viewBox="0 0 28 28">
-                <rect x="3" y="6" width="22" height="16" rx="3" fill="none" stroke="#0B1A24" strokeWidth="2.2" />
-                <path d="M4 8l10 7 10-7" fill="none" stroke="#0B1A24" strokeWidth="2.2" strokeLinejoin="round" />
-              </svg>
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-              <h2 className="title" style={{ fontSize: 26 }}>
-                Controlla la tua email
-              </h2>
-              <div className="muted" style={{ fontSize: 14.5, lineHeight: 1.45 }}>
-                Se <strong style={{ color: 'var(--ink)' }}>{sentTo}</strong> è tra i giocatori del torneo, ti è arrivato il link di
-                accesso. Aprilo da questo telefono: vale 15 minuti.
-              </div>
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13.5 }}>
-              <button className="link-btn" style={{ color: 'var(--ink2)', fontWeight: 600 }} onClick={() => setSentTo(null)}>
-                Usa un'altra email
-              </button>
-              <button className="link-btn" onClick={() => send.mutate(sentTo)}>
-                Invia di nuovo
-              </button>
-            </div>
-          </>
+          <button className="btn btn-primary" onClick={submit} disabled={send.isPending}>
+            {send.isPending ? <ButtonLoader /> : 'Inviami il codice'}
+          </button>
+        )}
+        {sentTo && (
+          <button className="link-btn" style={{ alignSelf: 'center', fontSize: 13.5 }} onClick={() => send.mutate(sentTo)} disabled={send.isPending}>
+            Invia un nuovo codice
+          </button>
         )}
       </div>
     </div>

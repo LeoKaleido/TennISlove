@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { MatchRow } from '../components/MatchRow';
-import { ErrorState, Loading } from '../components/ui';
+import { Chevron, Collapse, ErrorState, Loading } from '../components/ui';
 import { currentRound, isMine, roundRange, today, useMe, useSeason } from '../data';
 
 export function CalendarPage() {
@@ -78,11 +78,9 @@ export function CalendarPage() {
                   <span style={{ fontSize: 12, fontWeight: 700, color: isCurrent ? 'var(--accent)' : 'var(--ink3)' }}>
                     {isCurrent ? 'In corso' : `${done}/${all} giocate`}
                   </span>
-                  <span className="faint" style={{ width: 22, textAlign: 'center', fontSize: 18 }}>
-                    {expanded ? '−' : '+'}
-                  </span>
+                  <Chevron open={expanded} />
                 </button>
-                {expanded && (
+                <Collapse open={expanded}>
                   <div style={{ borderTop: '1px solid var(--line)' }}>
                     {matches.length === 0 && (
                       <div className="faint" style={{ padding: '12px 14px', fontSize: 13 }}>
@@ -93,7 +91,7 @@ export function CalendarPage() {
                       <MatchRow key={m.id} match={m} data={data} highlight={isMine(m, myId)} />
                     ))}
                   </div>
-                )}
+                </Collapse>
               </div>
               {r.pauseAfter && (
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '14px 4px 4px', color: 'var(--ink2)' }}>
@@ -105,13 +103,15 @@ export function CalendarPage() {
             </div>
           );
         })}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 4px', color: 'var(--ink2)' }}>
-          <span style={{ flex: 1, borderTop: '1.5px solid var(--line2)' }} />
-          <span style={{ fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.08em' }}>
-            Poi: fase finale, top {data.season.qualifiers}
-          </span>
-          <span style={{ flex: 1, borderTop: '1.5px solid var(--line2)' }} />
-        </div>
+        {data.season.qualifiers > 0 && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 4px', color: 'var(--ink2)' }}>
+            <span style={{ flex: 1, borderTop: '1.5px solid var(--line2)' }} />
+            <span style={{ fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.08em' }}>
+              Poi: fase finale, top {data.season.qualifiers}
+            </span>
+            <span style={{ flex: 1, borderTop: '1.5px solid var(--line2)' }} />
+          </div>
+        )}
       </div>
     </div>
   );

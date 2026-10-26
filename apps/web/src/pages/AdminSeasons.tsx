@@ -4,7 +4,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useMemo, useState } from 'react';
 import { formatDay, formatRange, roundRobin, scheduleWeeks, type Pause } from '@tentennis/shared';
 import { api } from '../api';
-import { ErrorState, Loading, useToast } from '../components/ui';
+import { ButtonLoader, ErrorState, Loading, TextField, useToast } from '../components/ui';
 
 interface SeasonRow {
   id: string;
@@ -44,7 +44,7 @@ export function AdminSeasons() {
     mutationFn: (id: string) => api(`/api/admin/seasons/${id}/activate`, { method: 'POST' }),
     onSuccess: () => {
       queryClient.invalidateQueries();
-      toast('Torneo avviato: ora è quello che vedono i giocatori');
+      toast('Torneo avviato');
     },
     onError: (e) => toast(e.message),
   });
@@ -68,9 +68,6 @@ export function AdminSeasons() {
           <h1 className="display" style={{ fontSize: 40, lineHeight: 0.92 }}>
             Tornei
           </h1>
-          <span className="muted" style={{ fontSize: 13.5 }}>
-            Il torneo in corso è quello che vedono i giocatori. I tornei chiusi restano consultabili dalla Classifica.
-          </span>
         </div>
         <button className="btn btn-primary" style={{ height: 44, fontSize: 14 }} onClick={() => setCreating(true)}>
           + Nuovo torneo
@@ -157,7 +154,7 @@ function SeasonWizard({ existing, onDone }: { existing: SeasonRow[]; onDone: () 
   const [name, setName] = useState(existing[0]?.name ?? 'ATP Umbria Tournament');
   const [label, setLabel] = useState(nextLabel(existing.map((s) => s.label)));
   const [subtitle, setSubtitle] = useState(existing[0]?.subtitle ?? '');
-  const [qualifiers, setQualifiers] = useState(8);
+  const [qualifiers, setQualifiers] = useState(0);
   const [playerIds, setPlayerIds] = useState<string[] | null>(null);
   const [clubIds, setClubIds] = useState<string[] | null>(null);
   const [start, setStart] = useState('');
@@ -203,7 +200,7 @@ function SeasonWizard({ existing, onDone }: { existing: SeasonRow[]; onDone: () 
       }),
     onSuccess: () => {
       queryClient.invalidateQueries();
-      toast(running ? `${name} ${label} creato e in programma` : `${name} ${label} creato: ora è il torneo in corso`);
+      toast(`${name} ${label} creato`);
       onDone();
     },
     onError: (e) => toast(e.message),
@@ -219,9 +216,6 @@ function SeasonWizard({ existing, onDone }: { existing: SeasonRow[]; onDone: () 
         <h1 className="display" style={{ fontSize: 40, lineHeight: 0.92 }}>
           Nuovo torneo
         </h1>
-        <span className="muted" style={{ fontSize: 13.5 }}>
-          Girone all'italiana di sola andata, regolamento come il 2026/27.
-        </span>
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
@@ -237,24 +231,15 @@ function SeasonWizard({ existing, onDone }: { existing: SeasonRow[]; onDone: () 
 
       {step === 1 && (
         <div className="card" style={{ padding: 18, display: 'flex', flexDirection: 'column', gap: 14, maxWidth: 640 }}>
-          <label className="field">
-            <span>Nome del torneo</span>
-            <input className="input" style={{ height: 48 }} value={name} onChange={(e) => setName(e.target.value)} />
-          </label>
+          <TextField label="Nome del torneo" style={{ height: 48 }} value={name} onChange={(e) => setName(e.target.value)} />
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12 }}>
-            <label className="field">
-              <span>Stagione</span>
-              <input className="input" style={{ height: 48 }} value={label} onChange={(e) => setLabel(e.target.value)} />
-            </label>
-            <label className="field">
-              <span>Sottotitolo</span>
-              <input className="input" style={{ height: 48 }} value={subtitle} onChange={(e) => setSubtitle(e.target.value)} />
-            </label>
+            <TextField label="Stagione" style={{ height: 48 }} value={label} onChange={(e) => setLabel(e.target.value)} />
+            <TextField label="Sottotitolo" style={{ height: 48 }} value={subtitle} onChange={(e) => setSubtitle(e.target.value)} />
           </div>
           <div className="field">
             <span>Accedono alla fase finale</span>
             <div className="segmented" style={{ maxWidth: 360 }}>
-              {[4, 8, 0].map((q) => (
+              {[0, 4, 8].map((q) => (
                 <button key={q} aria-pressed={qualifiers === q} onClick={() => setQualifiers(q)}>
                   {q ? `Primi ${q}` : 'Nessuna'}
                 </button>
@@ -286,9 +271,6 @@ function SeasonWizard({ existing, onDone }: { existing: SeasonRow[]; onDone: () 
                 </button>
               );
             })}
-            <div className="muted" style={{ padding: '10px 16px', fontSize: 12.5, borderTop: '1px solid var(--line)' }}>
-              Manca qualcuno? Aggiungilo prima dalla sezione Giocatori.
-            </div>
           </div>
           <div className="card" style={{ padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 10 }}>
             <span className="title" style={{ fontSize: 18 }}>
@@ -301,19 +283,13 @@ function SeasonWizard({ existing, onDone }: { existing: SeasonRow[]; onDone: () 
                 </button>
               ))}
             </div>
-            <span className="muted" style={{ fontSize: 12.5, lineHeight: 1.45 }}>
-              Sono i circoli che i giocatori vedranno quando programmano una partita.
-            </span>
           </div>
         </div>
       )}
 
       {step === 3 && (
         <div className="card" style={{ padding: 18, display: 'flex', flexDirection: 'column', gap: 16, maxWidth: 640 }}>
-          <label className="field" style={{ maxWidth: 260 }}>
-            <span>Lunedì della prima giornata</span>
-            <input className="input" style={{ height: 48 }} type="date" value={start} onChange={(e) => setStart(e.target.value)} />
-          </label>
+          <TextField label="Lunedì della prima giornata" fieldStyle={{ maxWidth: 260 }} style={{ height: 48 }} type="date" value={start} onChange={(e) => setStart(e.target.value)} />
           <div className="field">
             <span>Pause (nessuna giornata in questi giorni)</span>
             {pauses.map((p, i) => (
@@ -355,16 +331,13 @@ function SeasonWizard({ existing, onDone }: { existing: SeasonRow[]; onDone: () 
       {step === 4 && (
         <>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, alignItems: 'center', justifyContent: 'space-between' }}>
-            <span className="muted" style={{ fontSize: 13.5, lineHeight: 1.45, maxWidth: 560 }}>
-              Calendario generato in automatico: ognuno gioca una volta a settimana e incontra tutti una volta. Giorno, ora e circolo li sceglieranno i giocatori.
-            </span>
             <button className="btn btn-outline" onClick={() => setSeed(seed + 1)}>
               Rimescola accoppiamenti
             </button>
           </div>
           {running && (
             <div className="note note-info">
-              {running.name} {running.label} è ancora in corso: il nuovo torneo resterà in programma e lo avvii dopo aver chiuso quello attuale.
+              {running.name} {running.label} è ancora in corso: questo torneo si potrà avviare dopo averlo chiuso.
             </div>
           )}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 250px), 1fr))', gap: 10 }}>
@@ -410,7 +383,7 @@ function SeasonWizard({ existing, onDone }: { existing: SeasonRow[]; onDone: () 
           disabled={!!error || create.isPending}
           onClick={() => (step < 4 ? setStep(step + 1) : create.mutate())}
         >
-          {step < 4 ? 'Avanti' : create.isPending ? 'Creazione…' : 'Crea e pubblica'}
+          {step < 4 ? 'Avanti' : create.isPending ? <ButtonLoader /> : 'Crea e pubblica'}
         </button>
       </div>
     </>

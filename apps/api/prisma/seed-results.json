@@ -1,0 +1,104 @@
+{
+  "G01-01": {
+    "timeExpired": false,
+    "set1": {
+      "a": 6,
+      "b": 2
+    },
+    "set2": {
+      "a": 6,
+      "b": 2
+    },
+    "stb": null
+  },
+  "G01-02": {
+    "timeExpired": false,
+    "set1": {
+      "a": 6,
+      "b": 1
+    },
+    "set2": {
+      "a": 6,
+      "b": 3
+    },
+    "stb": null
+  },
+  "G01-03": {
+    "timeExpired": false,
+    "set1": {
+      "a": 1,
+      "b": 6
+    },
+    "set2": {
+      "a": 2,
+      "b": 6
+    },
+    "stb": null
+  },
+  "G01-04": {
+    "timeExpired": false,
+    "set1": {
+      "a": 6,
+      "b": 3
+    },
+    "set2": {
+      "a": 6,
+      "b": 2
+    },
+    "stb": null
+  },
+  "G01-05": {
+    "timeExpired": false,
+    "set1": {
+      "a": 2,
+      "b": 6
+    },
+    "set2": {
+      "a": 6,
+      "b": 4
+    },
+    "stb": {
+      "a": 10,
+      "b": 5
+    }
+  },
+  "G01-06": {
+    "timeExpired": false,
+    "set1": {
+      "a": 3,
+      "b": 6
+    },
+    "set2": {
+      "a": 3,
+      "b": 6
+    },
+    "stb": null
+  },
+  "G02-02": {
+    "timeExpired": false,
+    "set1": {
+      "a": 0,
+      "b": 6
+    },
+    "set2": {
+      "a": 2,
+      "b": 6
+    },
+    "stb": null
+  },
+  "G02-05": {
+    "timeExpired": false,
+    "set1": {
+      "a": 4,
+      "b": 6
+    },
+    "set2": {
+      "a": 6,
+      "b": 3
+    },
+    "stb": {
+      "a": 9,
+      "b": 11
+    }
+  }
+}

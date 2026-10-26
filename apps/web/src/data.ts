@@ -74,7 +74,7 @@ export function matchInfo(m: Match, rounds: Round[], clubName: (id: string | nul
     case 'DISPUTED':
       return `${formatScore(m.result!)}, in revisione`;
     case 'SCHEDULED':
-      return [when, clubName(m.clubId)].filter(Boolean).join(', ');
+      return [when, clubName(m.clubId) ?? m.venue].filter(Boolean).join(', ');
     case 'POSTPONED':
       return when ? `Rinviata a ${when}` : 'Rinviata, nuova data da decidere';
     case 'TO_RECOVER':

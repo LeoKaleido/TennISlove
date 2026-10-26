@@ -1,26 +1,23 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Avatar, ErrorState, Loading, ZonePill } from '../components/ui';
+import { Link } from 'react-router';
+import { Avatar, Chevron, Collapse, ErrorState, Loading, ZonePill } from '../components/ui';
 import { playerIndex, useMe, useSeason, useSeasons } from '../data';
 
-type View = 'tabella' | 'schede';
-
 const COLUMNS = [
-  { key: 'played', label: 'G', title: 'Giocate' },
-  { key: 'won', label: 'V', title: 'Vinte' },
-  { key: 'lost', label: 'P', title: 'Perse' },
-  { key: 'noResult', label: 'SE', title: 'Senza esito' },
-  { key: 'gamesWon', label: 'GF', title: 'Game fatti' },
-  { key: 'gamesLost', label: 'GS', title: 'Game subiti' },
-  { key: 'gamesDiff', label: 'DG', title: 'Differenza game' },
-  { key: 'bonus', label: 'B', title: 'Bonus e compensazioni' },
+  { key: 'played', title: 'Giocate' },
+  { key: 'won', title: 'Vinte' },
+  { key: 'lost', title: 'Perse' },
+  { key: 'noResult', title: 'Senza esito' },
+  { key: 'gamesWon', title: 'Game fatti' },
+  { key: 'gamesLost', title: 'Game subiti' },
+  { key: 'gamesDiff', title: 'Differenza game' },
+  { key: 'bonus', title: 'Bonus e compensazioni' },
 ] as const;
 
 export function StandingsPage() {
   const me = useMe();
   const seasons = useSeasons();
   const [seasonId, setSeasonId] = useState<string | undefined>();
-  const [view, setView] = useState<View>('tabella');
   const [expanded, setExpanded] = useState<string | null>(null);
   const season = useSeason(seasonId);
 
@@ -69,75 +66,12 @@ export function StandingsPage() {
         </div>
       )}
 
-      <div className="pad">
-        <div className="segmented">
-          <button aria-pressed={view === 'tabella'} onClick={() => setView('tabella')}>
-            Tabella
-          </button>
-          <button aria-pressed={view === 'schede'} onClick={() => setView('schede')}>
-            Schede
-          </button>
-        </div>
-      </div>
-
-      {view === 'tabella' ? (
-        <div className="pad">
-          <div className="card" style={{ overflowX: 'auto' }}>
-            <table style={{ borderCollapse: 'collapse', width: '100%', fontSize: 14, minWidth: 560 }}>
-              <thead>
-                <tr style={{ fontSize: 10.5, color: 'var(--ink3)', textTransform: 'uppercase', letterSpacing: '.06em' }}>
-                  <th style={{ ...stickyCell(0), textAlign: 'left', padding: '10px 6px 10px 12px' }}>#</th>
-                  <th style={{ ...stickyCell(34), textAlign: 'left', padding: '10px 6px' }}>Giocatore</th>
-                  <th style={{ padding: '10px 6px' }} title="Punti">
-                    Pt
-                  </th>
-                  {COLUMNS.map((c) => (
-                    <th key={c.key} title={c.title} style={{ padding: '10px 6px', fontWeight: 700 }}>
-                      {c.label}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {data.standings.map((r, i) => {
-                  const p = players.get(r.playerId)!;
-                  const mine = r.playerId === myId;
-                  const next = data.standings[i + 1];
-                  const cut = r.position <= q && !!next && next.position > q;
-                  const bg = mine ? 'color-mix(in oklch, var(--mint) 35%, var(--surface))' : 'var(--surface)';
-                  return (
-                    <tr key={r.playerId} style={{ borderTop: '1px solid var(--line)', borderBottom: cut ? '2px solid var(--accent)' : undefined }}>
-                      <td style={{ ...stickyCell(0), background: bg, padding: '10px 6px 10px 12px', fontWeight: 900, fontStretch: '70%', fontSize: 18 }}>{r.position}</td>
-                      <td style={{ ...stickyCell(34), background: bg, padding: '8px 6px' }}>
-                        <Link to={`/giocatori/${p.id}`} style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'inherit', textDecoration: 'none', fontWeight: 700, whiteSpace: 'nowrap' }}>
-                          <Avatar player={p} size={28} />
-                          {p.shortName}
-                        </Link>
-                      </td>
-                      <td style={{ textAlign: 'center', fontWeight: 900, fontStretch: '70%', fontSize: 20, background: bg }}>{r.points}</td>
-                      {COLUMNS.map((c) => (
-                        <td key={c.key} style={{ textAlign: 'center', color: 'var(--ink2)', background: bg }}>
-                          {c.key === 'gamesDiff' && r.gamesDiff > 0 ? `+${r.gamesDiff}` : r[c.key]}
-                        </td>
-                      ))}
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-          <div className="faint" style={{ fontSize: 11.5, lineHeight: 1.5, padding: '8px 4px 0' }}>
-            G giocate, V vinte, P perse, SE senza esito (tempo scaduto), GF/GS game fatti/subiti, DG differenza game, B bonus e compensazioni. La linea
-            verde è il taglio per i primi {q}.
-          </div>
-        </div>
-      ) : (
         <div style={{ padding: '0 16px', display: 'flex', flexDirection: 'column', gap: 8 }}>
           {data.standings.map((r, i) => {
             const p = players.get(r.playerId)!;
             const open = expanded === r.playerId;
             const next = data.standings[i + 1];
-            const showCut = r.position <= q && (!next || next.position > q) && i < data.standings.length - 1;
+            const showCut = q > 0 && r.position <= q && (!next || next.position > q) && i < data.standings.length - 1;
             return (
               <div key={r.playerId}>
                 <div className="card" style={{ borderRadius: 18, background: r.playerId === myId ? 'color-mix(in oklch, var(--mint) 28%, var(--surface))' : undefined }}>
@@ -149,7 +83,7 @@ export function StandingsPage() {
                         {p.firstName} {p.lastName}
                       </span>
                       <span>
-                        <ZonePill zone={r.zone} qualifiers={q} />
+                        {q > 0 && <ZonePill zone={r.zone} qualifiers={q} />}
                       </span>
                     </span>
                     <span style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
@@ -158,9 +92,9 @@ export function StandingsPage() {
                         punti
                       </span>
                     </span>
+                    <Chevron open={open} />
                   </button>
-                  {open && (
-                    <>
+                  <Collapse open={open}>
                       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 1, background: 'var(--line)', borderTop: '1px solid var(--line)' }}>
                         {COLUMNS.map((c) => (
                           <div key={c.key} style={{ background: 'var(--surface)', padding: '10px 8px', display: 'flex', flexDirection: 'column', gap: 2, alignItems: 'center' }}>
@@ -174,8 +108,7 @@ export function StandingsPage() {
                       <Link to={`/giocatori/${p.id}`} className="btn" style={{ width: '100%', height: 42, borderRadius: 0, borderTop: '1px solid var(--line)', color: 'var(--accent)', fontWeight: 700, fontSize: 13 }}>
                         Apri profilo
                       </Link>
-                    </>
-                  )}
+                  </Collapse>
                 </div>
                 {showCut && (
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 2px 2px', fontSize: 11, fontWeight: 800, letterSpacing: '.08em', textTransform: 'uppercase', color: 'var(--accent)' }}>
@@ -188,7 +121,6 @@ export function StandingsPage() {
             );
           })}
         </div>
-      )}
 
       <div style={{ margin: '4px 16px 0', padding: 18, borderRadius: 22, background: 'var(--hero)', color: '#fff', display: 'flex', flexDirection: 'column', gap: 12 }}>
         <div className="title" style={{ fontSize: 22, color: '#C6EEDB' }}>
@@ -201,7 +133,7 @@ export function StandingsPage() {
         </div>
         <div style={{ fontSize: 12.5, lineHeight: 1.45, color: 'rgba(255,255,255,.75)', borderTop: '1px solid rgba(255,255,255,.14)', paddingTop: 10 }}>
           Compensazione: se chi vince al super tie break ha fatto meno game, riceve la differenza. Es. 0-6 6-4 10-8: vincitore 13, sconfitto 10. A pari
-          punti conta lo scontro diretto; tra tre o più, i punti negli scontri tra loro e poi la differenza game. I primi {q} vanno alla fase finale.
+          punti conta lo scontro diretto; tra tre o più, i punti negli scontri tra loro e poi la differenza game.{q > 0 && ` I primi ${q} vanno alla fase finale.`}
         </div>
       </div>
     </div>
@@ -216,5 +148,3 @@ function Rule({ label, value }: { label: string; value: string }) {
     </div>
   );
 }
-
-const stickyCell = (left: number) => ({ position: 'sticky' as const, left, zIndex: 1, background: 'var(--surface)' });

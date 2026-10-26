@@ -1,10 +1,13 @@
 // Dati iniziali del torneo 2026/27. Fonte: brain/reference/torneo-2026-27.md
 
+import type { MatchScoreInput } from '@tentennis/shared';
+
 export const SEASON = {
   name: 'ATP Umbria Tournament',
   label: '2026/27',
   subtitle: 'Amici Tennis, Pre-cena',
-  qualifiers: 8,
+  // fase finale rimandata: per ora solo girone (risposte di Giuseppe del 26/10, D-041)
+  qualifiers: 0,
 };
 
 /** Nell'ordine dell'elenco iniziale dell'Excel (foglio Calcoli) */
@@ -42,27 +45,20 @@ export const ROUNDS: { startsOn: string; endsOn: string; pauseAfter?: string; ma
   { startsOn: '2027-01-11', endsOn: '2027-01-17', matches: [['Giuseppe', 'Marco'], ['Alessandro C', 'Luca'], ['Alessandro P', 'Michele'], ['Francesco', 'Federico'], ['Fabrizio', 'Gennaro'], ['Alessio', 'Leonardo']] },
 ];
 
-type Pair = [number, number];
+/** Risultati iniziali, confermati: stanno in seed-results.json, rigenerabile dall'Excel con `pnpm seed:excel` */
+export type SeedResult = MatchScoreInput;
 
-/** Risultati dell'Excel al 22/10/2026, per codice partita. Entrano come confermati. */
-export const RESULTS: Record<string, { set1: Pair; set2: Pair; stb?: Pair }> = {
-  'G01-01': { set1: [6, 2], set2: [6, 2] },
-  'G01-02': { set1: [6, 1], set2: [6, 3] },
-  'G01-03': { set1: [1, 6], set2: [2, 6] },
-  'G01-04': { set1: [6, 3], set2: [6, 2] },
-  'G01-05': { set1: [2, 6], set2: [6, 4], stb: [10, 5] },
-  'G01-06': { set1: [3, 6], set2: [3, 6] },
-  'G02-02': { set1: [0, 6], set2: [2, 6] },
-  'G02-05': { set1: [4, 6], set2: [6, 3], stb: [9, 11] },
-};
-
-/** Segnaposto finché Giuseppe non manda la lista dei circoli (Q-007) */
-export const PLACEHOLDER_CLUBS = [
-  { name: 'Circolo Tennis Perugia', city: 'Perugia' },
-  { name: 'TC Ponte San Giovanni', city: 'Ponte San Giovanni' },
-  { name: 'Tennis Club Assisi', city: 'Santa Maria degli Angeli' },
-  { name: 'CT Bastia Umbra', city: 'Bastia Umbra' },
-  { name: 'Polisportiva Corciano', city: 'Corciano' },
+/** Circoli indicati da Giuseppe il 26/10/2026 (brain/comunicazioni/2026-10-26_risposte-di-Giuseppe.docx) */
+export const CLUBS = [
+  { name: 'Tennis Country (ex 3T)', city: 'Santa Maria degli Angeli, Assisi', mapsUrl: 'https://share.google/oCkPEujfmgAmhS7Sv' },
+  { name: 'Tennis Training School', city: 'Foligno', mapsUrl: 'https://maps.app.goo.gl/RMHWePdLaFYhDcUW6' },
+  { name: 'Sporting Club Torgiano', city: 'Torgiano', mapsUrl: 'https://maps.app.goo.gl/aU9jKxvirF2x3jUT9' },
+  { name: 'ASD Mariquita Sporting Club', city: 'Deruta', mapsUrl: 'https://maps.app.goo.gl/NY72YFY5E5KYCaWM7' },
+  { name: 'Gryphus Sporting Club', city: 'Perugia', mapsUrl: 'https://maps.app.goo.gl/StMdoJAfoJpJb8z16' },
+  { name: 'Pattol Club', city: 'Ponte Pattoli, Perugia', mapsUrl: 'https://maps.app.goo.gl/Uq34Q3u329k7QYkb6' },
+  { name: 'Centro Sportivo Tennis Chiugiana', city: 'Corciano', mapsUrl: 'https://maps.app.goo.gl/WTZMSbvdckp7fhwK8' },
+  { name: 'Circolo Tennis Foligno', city: 'Foligno', mapsUrl: 'https://maps.app.goo.gl/tfEzTxz2AxKhLo4u7' },
+  { name: 'CUS Perugia', city: 'Perugia', mapsUrl: 'https://maps.app.goo.gl/2srkWabAtKpeqpzk9' },
 ];
 
 export const matchCode = (round: number, index: number) =>

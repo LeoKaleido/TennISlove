@@ -32,7 +32,7 @@ export function AdminPhotos({ data }: { data: SeasonOverview }) {
           Foto
         </h1>
         <span className="muted" style={{ fontSize: 13.5 }}>
-          {gallery.data.photos.length} foto nel torneo in corso. Puoi eliminare quelle non adatte.
+          {gallery.data.photos.length} foto
         </span>
       </div>
       {gallery.data.photos.length === 0 ? (

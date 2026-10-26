@@ -1,10 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router';
 import { api, type MatchDetail } from '../api';
 import { PointsPreview } from '../components/PointsPreview';
-import { BackButton, ErrorState, Loading, useToast } from '../components/ui';
+import { BackButton, ButtonLoader, ErrorState, Loading, useToast } from '../components/ui';
 import { playerIndex, useMe, useSeason } from '../data';
+import { clearDraft, loadDraft, saveDraft } from '../drafts';
 import { evaluateForm, formFromResult, type Pair, type ScoreForm } from '../score-form';
 
 /** Inserimento risultato dal telefono, solo per i due giocatori. L'admin corregge dal gestionale. */
@@ -23,7 +24,6 @@ export function ResultPage() {
       detail={detail.data}
       players={playerIndex(season.data.players)}
       myId={me.data?.playerId ?? null}
-      autoConfirmDays={season.data.season.resultAutoConfirmDays}
       onDone={() => navigate(`/partite/${id}`, { replace: true })}
     />
   );
@@ -33,32 +33,32 @@ function ResultForm({
   detail,
   players,
   myId,
-  autoConfirmDays,
   onDone,
 }: {
   detail: MatchDetail;
   players: ReturnType<typeof playerIndex>;
   myId: string | null;
-  autoConfirmDays: number;
   onDone: () => void;
 }) {
   const m = detail.match;
   const queryClient = useQueryClient();
   const toast = useToast();
-  const [form, setForm] = useState<ScoreForm>(formFromResult(m.result));
+  const draftKey = `result:${m.id}`;
+  const [form, setForm] = useState<ScoreForm>(() => loadDraft<ScoreForm>(draftKey) ?? formFromResult(m.result));
+  useEffect(() => saveDraft(draftKey, form), [draftKey, form]);
 
   const a = players.get(m.playerAId)!;
   const b = players.get(m.playerBId)!;
   const nameOf = (id: string, fallback: string) => (id === myId ? 'Tu' : fallback);
   const names: [string, string] = [nameOf(a.id, a.shortName), nameOf(b.id, b.shortName)];
-  const opponentName = myId === a.id ? b.shortName : a.shortName;
   const { input, ev, split, feedback: message } = evaluateForm(form, names);
 
   const submit = useMutation({
     mutationFn: () => api(`/api/matches/${m.id}/result`, { method: 'PUT', body: input }),
     onSuccess: () => {
+      clearDraft(draftKey);
       queryClient.invalidateQueries();
-      toast(`Risultato inviato: ${opponentName} deve confermarlo`);
+      toast('Risultato inviato');
       onDone();
     },
     onError: (e) => toast(e.message),
@@ -138,16 +138,10 @@ function ResultForm({
           </span>
           <span style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
             <span style={{ fontWeight: 800, fontSize: 15 }}>Tempo scaduto</span>
-            <span className="muted" style={{ fontSize: 12.5, lineHeight: 1.4 }}>
-              Le 2 ore sono finite senza un vincitore: ognuno prende solo i game vinti
-            </span>
           </span>
         </button>
 
         <div className={`note note-${message.tone}`}>{message.text}</div>
-        <div className="faint" style={{ fontSize: 12, lineHeight: 1.45, padding: '0 4px' }}>
-          Dopo l'invio {opponentName} riceve il risultato da confermare. Se non risponde, si conferma automaticamente tra {autoConfirmDays} giorni.
-        </div>
       </div>
 
       <div className="sticky-footer">
@@ -156,7 +150,7 @@ function ResultForm({
         </span>
         <PointsPreview ev={ev} names={names} />
         <button className="btn btn-primary" disabled={!ok || submit.isPending} onClick={() => submit.mutate()}>
-          {submit.isPending ? 'Invio…' : 'Invia risultato'}
+          {submit.isPending ? <ButtonLoader /> : 'Invia risultato'}
         </button>
       </div>
     </div>

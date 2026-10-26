@@ -66,7 +66,7 @@ model User {
 
   player      Player?
   sessions    Session[]
-  magicLinks  MagicLinkToken[]
+  loginCodes  LoginCode[]
   photos      MatchPhoto[]
   submitted   MatchResult[]    @relation("submittedBy")
   confirmed   MatchResult[]    @relation("confirmedBy")
@@ -132,6 +132,8 @@ model Match {
   playerBId   String
   scheduledAt DateTime?
   clubId      String?
+  /// campo fuori dalla lista dei circoli, scritto dai giocatori (in alternativa a clubId)
+  venue       String?
   /// versione della programmazione, per il SEQUENCE del file .ics
   scheduleSeq Int       @default(0)
   /// rinviata senza ancora una nuova data
@@ -195,10 +197,13 @@ model MatchPhoto {
   coverOf    Match? @relation("cover")
 }
 
-model MagicLinkToken {
+/// Codice di 6 cifre per entrare, mandato per email (D-049)
+model LoginCode {
   id        String    @id @default(cuid())
   userId    String
-  tokenHash String    @unique
+  codeHash  String
+  /// tentativi sbagliati: dopo 5 il codice non vale più
+  attempts  Int       @default(0)
   expiresAt DateTime
   usedAt    DateTime?
   createdAt DateTime  @default(now())

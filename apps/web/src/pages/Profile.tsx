@@ -1,11 +1,13 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router';
 import { api } from '../api';
 import { MatchRow } from '../components/MatchRow';
-import { Avatar, BackButton, ErrorState, Loading, useToast } from '../components/ui';
+import { Avatar, BackButton, ButtonLoader, Collapse, ErrorState, Loading, useToast } from '../components/ui';
 import { compressImage, uploadImage } from '../photos';
 import { isMine, opponentOf, playerIndex, useMe, useSeason, ZONE_STYLE } from '../data';
+import { clearLocalData } from '../drafts';
+import { useInstall } from '../pwa';
 import { getTheme, setTheme, type Theme } from '../theme';
 
 export function ProfilePage() {
@@ -16,6 +18,8 @@ export function ProfilePage() {
   const queryClient = useQueryClient();
   const [tab, setTab] = useState<'next' | 'played'>('next');
   const [theme, setThemeState] = useState<Theme>(getTheme());
+  const install = useInstall();
+  const [installHelp, setInstallHelp] = useState(false);
 
   const toast = useToast();
   const uploadPhoto = useMutation({
@@ -30,6 +34,7 @@ export function ProfilePage() {
   const logout = useMutation({
     mutationFn: () => api('/api/auth/logout', { method: 'POST' }),
     onSuccess: () => {
+      clearLocalData();
       queryClient.clear();
       navigate('/login', { replace: true });
     },
@@ -57,6 +62,17 @@ export function ProfilePage() {
       <span className="muted">{theme === 'dark' ? 'Scuro' : 'Chiaro'}</span>
     </button>
   );
+  // Android apre il prompt di sistema; su iPhone l'installazione si fa solo da Safari
+  const installButton = install.available && (
+    <>
+      <button className="btn btn-outline" style={{ height: 50, fontSize: 14.5 }} onClick={() => (install.prompt ? install.prompt() : setInstallHelp(!installHelp))}>
+        Installa l'app
+      </button>
+      <Collapse open={installHelp}>
+        <div className="note note-info">In Safari tocca Condividi, poi «Aggiungi alla schermata Home».</div>
+      </Collapse>
+    </>
+  );
   const logoutButton = (
     <button className="btn btn-outline" style={{ height: 50, color: 'var(--errFg)', fontSize: 14.5 }} onClick={() => logout.mutate()}>
       Esci
@@ -72,6 +88,7 @@ export function ProfilePage() {
           <div className="sub">{me.data?.email}</div>
         </div>
         <div style={{ padding: '0 14px', display: 'flex', flexDirection: 'column', gap: 8 }}>
+          {installButton}
           {themeButton}
           {logoutButton}
         </div>
@@ -130,7 +147,7 @@ export function ProfilePage() {
                 <Avatar player={p} size={92} />
               </div>
               <span style={{ position: 'absolute', bottom: -8, left: '50%', transform: 'translateX(-50%)', whiteSpace: 'nowrap', padding: '2px 8px', borderRadius: 99, background: '#C6EEDB', color: '#0B1A24', fontSize: 10.5, fontWeight: 800 }}>
-                {uploadPhoto.isPending ? 'Carico…' : p.photoUrl ? 'Cambia' : '+ Foto'}
+                {uploadPhoto.isPending ? <ButtonLoader height={20} /> : p.photoUrl ? 'Cambia' : '+ Foto'}
               </span>
             </label>
           ) : (
@@ -149,7 +166,7 @@ export function ProfilePage() {
                 {row.position}° in classifica, {row.points} punti
               </span>
             )}
-            {row && (
+            {row && data.season.qualifiers > 0 && (
               <span>
                 <span className="pill" style={{ background: '#C6EEDB', color: '#0B1A24', fontSize: 11 }}>
                   {ZONE_STYLE[row.zone].label.replace('8', String(data.season.qualifiers))}
@@ -226,6 +243,7 @@ export function ProfilePage() {
 
       {isMe && (
         <div style={{ padding: '0 14px', display: 'flex', flexDirection: 'column', gap: 8 }}>
+          {installButton}
           {themeButton}
           {logoutButton}
         </div>

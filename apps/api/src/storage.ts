@@ -13,6 +13,15 @@ const MIME: Record<string, string> = Object.fromEntries(Object.entries(EXTENSION
 
 export const isAllowedImage = (mime: string) => mime in EXTENSIONS;
 
+/** Riconosce il formato dai primi byte del file: il tipo dichiarato dal browser non è affidabile */
+export function detectImage(data: Buffer): string | null {
+  if (data.length < 12) return null;
+  if (data[0] === 0xff && data[1] === 0xd8 && data[2] === 0xff) return 'image/jpeg';
+  if (data.subarray(0, 8).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]))) return 'image/png';
+  if (data.toString('ascii', 0, 4) === 'RIFF' && data.toString('ascii', 8, 12) === 'WEBP') return 'image/webp';
+  return null;
+}
+
 /** Chiave relativa, es. "photos/abc.jpg" */
 export const storageKey = (folder: 'photos' | 'players', id: string, mime: string) => `${folder}/${id}.${EXTENSIONS[mime]}`;
 

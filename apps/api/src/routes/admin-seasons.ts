@@ -32,7 +32,7 @@ const seasonBody = z.object({
 const clubBody = z.object({
   name: z.string().trim().min(1).max(80),
   city: z.string().trim().max(80).optional().nullable(),
-  mapsUrl: z.string().trim().url().optional().nullable().or(z.literal('')),
+  mapsUrl: z.string().trim().url().regex(/^https?:\/\//i, 'Il link deve iniziare con https://').optional().nullable().or(z.literal('')),
   active: z.boolean().default(true),
 });
 

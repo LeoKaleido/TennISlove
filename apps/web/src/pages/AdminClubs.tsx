@@ -3,7 +3,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { api } from '../api';
-import { ErrorState, Loading, useToast } from '../components/ui';
+import { ButtonLoader, ErrorState, Loading, TextField, useClosing, useToast } from '../components/ui';
 
 interface ClubRow {
   id: string;
@@ -27,9 +27,6 @@ export function AdminClubs() {
           <h1 className="display" style={{ fontSize: 40, lineHeight: 0.92 }}>
             Circoli
           </h1>
-          <span className="muted" style={{ fontSize: 13.5 }}>
-            I giocatori scelgono da questo elenco quando programmano una partita.
-          </span>
         </div>
         <button className="btn btn-primary" style={{ height: 44, fontSize: 14 }} onClick={() => setEditing('new')}>
           + Nuovo circolo
@@ -58,6 +55,7 @@ export function AdminClubs() {
 }
 
 function ClubDialog({ club, onClose }: { club: ClubRow | null; onClose: () => void }) {
+  const [closing, close] = useClosing(onClose);
   const queryClient = useQueryClient();
   const toast = useToast();
   const [name, setName] = useState(club?.name ?? '');
@@ -66,10 +64,10 @@ function ClubDialog({ club, onClose }: { club: ClubRow | null; onClose: () => vo
   const [active, setActive] = useState(club?.active ?? true);
 
   useEffect(() => {
-    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && close();
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [onClose]);
+  }, [close]);
 
   const save = useMutation({
     mutationFn: () => {
@@ -79,14 +77,14 @@ function ClubDialog({ club, onClose }: { club: ClubRow | null; onClose: () => vo
     onSuccess: () => {
       queryClient.invalidateQueries();
       toast(club ? 'Circolo aggiornato' : 'Circolo aggiunto');
-      onClose();
+      close();
     },
     onError: (e) => toast(e.message),
   });
 
   return (
-    <div className="modal-wrap" role="dialog" aria-modal="true" aria-label={club ? 'Modifica circolo' : 'Nuovo circolo'}>
-      <div className="modal-backdrop" onClick={onClose} />
+    <div className={`modal-wrap${closing ? ' closing' : ''}`} role="dialog" aria-modal="true" aria-label={club ? 'Modifica circolo' : 'Nuovo circolo'}>
+      <div className="modal-backdrop" onClick={close} />
       <form
         className="modal"
         onSubmit={(e) => {
@@ -98,37 +96,25 @@ function ClubDialog({ club, onClose }: { club: ClubRow | null; onClose: () => vo
           <h2 className="display" style={{ fontSize: 32 }}>
             {club ? 'Modifica circolo' : 'Nuovo circolo'}
           </h2>
-          <button type="button" className="icon-btn" aria-label="Chiudi" onClick={onClose}>
+          <button type="button" className="icon-btn" aria-label="Chiudi" onClick={close}>
             ✕
           </button>
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12 }}>
-          <label className="field">
-            <span>Nome</span>
-            <input className="input" style={{ height: 48 }} value={name} onChange={(e) => setName(e.target.value)} autoFocus />
-          </label>
-          <label className="field">
-            <span>Città</span>
-            <input className="input" style={{ height: 48 }} value={city} onChange={(e) => setCity(e.target.value)} />
-          </label>
+          <TextField label="Nome" style={{ height: 48 }} value={name} onChange={(e) => setName(e.target.value)} autoFocus />
+          <TextField label="Città" style={{ height: 48 }} value={city} onChange={(e) => setCity(e.target.value)} />
         </div>
-        <label className="field">
-          <span>Link Google Maps (facoltativo)</span>
-          <input className="input" style={{ height: 48 }} type="url" value={mapsUrl} onChange={(e) => setMapsUrl(e.target.value)} placeholder="https://maps.google.com/…" />
-        </label>
+        <TextField label="Link Google Maps" style={{ height: 48 }} type="url" value={mapsUrl} onChange={(e) => setMapsUrl(e.target.value)} placeholder="https://maps.google.com/…" />
         <label style={{ display: 'flex', alignItems: 'center', gap: 10, fontWeight: 700, fontSize: 14.5 }}>
           <input type="checkbox" checked={active} onChange={(e) => setActive(e.target.checked)} style={{ width: 18, height: 18 }} />
           Attivo
-          <span className="muted" style={{ fontWeight: 500, fontSize: 13 }}>
-            (se lo disattivi non compare più tra le scelte)
-          </span>
         </label>
         <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-          <button type="button" className="btn btn-outline" onClick={onClose}>
+          <button type="button" className="btn btn-outline" onClick={close}>
             Annulla
           </button>
           <button type="submit" className="btn btn-primary" style={{ height: 46, fontSize: 14 }} disabled={!name.trim() || save.isPending}>
-            {save.isPending ? 'Salvataggio…' : 'Salva'}
+            {save.isPending ? <ButtonLoader /> : 'Salva'}
           </button>
         </div>
       </form>

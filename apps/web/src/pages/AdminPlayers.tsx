@@ -4,7 +4,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { formatDayWithWeekday, romeDay } from '@tentennis/shared';
 import { api } from '../api';
-import { Avatar, ErrorState, Loading, useToast } from '../components/ui';
+import { Avatar, ButtonLoader, ErrorState, Loading, TextField, useClosing, useToast } from '../components/ui';
 
 interface Person {
   userId: string | null;
@@ -60,9 +60,6 @@ export function AdminPlayers() {
           <h1 className="display" style={{ fontSize: 40, lineHeight: 0.92 }}>
             Giocatori
           </h1>
-          <span className="muted" style={{ fontSize: 13.5 }}>
-            Crea i giocatori e invitali: ricevono un'email con il link per entrare, poi restano collegati 90 giorni.
-          </span>
         </div>
         <button className="btn btn-primary" style={{ height: 44, fontSize: 14 }} onClick={() => setEditing('new')}>
           + Nuovo giocatore
@@ -130,6 +127,7 @@ export function AdminPlayers() {
 }
 
 function PlayerDialog({ person, onClose }: { person: Person | null; onClose: () => void }) {
+  const [closing, close] = useClosing(onClose);
   const queryClient = useQueryClient();
   const toast = useToast();
   const [form, setForm] = useState<PlayerForm>(
@@ -142,10 +140,10 @@ function PlayerDialog({ person, onClose }: { person: Person | null; onClose: () 
   const isNew = !person;
 
   useEffect(() => {
-    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && close();
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [onClose]);
+  }, [close]);
 
   const save = useMutation({
     mutationFn: () =>
@@ -155,7 +153,7 @@ function PlayerDialog({ person, onClose }: { person: Person | null; onClose: () 
     onSuccess: () => {
       queryClient.invalidateQueries();
       toast(isNew ? (invite ? `Giocatore creato, invito inviato a ${form.email}` : 'Giocatore creato') : 'Giocatore aggiornato');
-      onClose();
+      close();
     },
     onError: (e) => toast(e.message),
   });
@@ -171,8 +169,8 @@ function PlayerDialog({ person, onClose }: { person: Person | null; onClose: () 
   const emailChanged = !isNew && person?.email && person.email !== form.email.trim().toLowerCase();
 
   return (
-    <div className="modal-wrap" role="dialog" aria-modal="true" aria-label={isNew ? 'Nuovo giocatore' : 'Modifica giocatore'}>
-      <div className="modal-backdrop" onClick={onClose} />
+    <div className={`modal-wrap${closing ? ' closing' : ''}`} role="dialog" aria-modal="true" aria-label={isNew ? 'Nuovo giocatore' : 'Modifica giocatore'}>
+      <div className="modal-backdrop" onClick={close} />
       <form
         className="modal"
         onSubmit={(e) => {
@@ -184,44 +182,29 @@ function PlayerDialog({ person, onClose }: { person: Person | null; onClose: () 
           <h2 className="display" style={{ fontSize: 32 }}>
             {isNew ? 'Nuovo giocatore' : 'Modifica giocatore'}
           </h2>
-          <button type="button" className="icon-btn" aria-label="Chiudi" onClick={onClose}>
+          <button type="button" className="icon-btn" aria-label="Chiudi" onClick={close}>
             ✕
           </button>
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12 }}>
-          <label className="field">
-            <span>Nome</span>
-            <input className="input" style={{ height: 48 }} value={form.firstName} onChange={set('firstName')} autoFocus />
-          </label>
-          <label className="field">
-            <span>Cognome</span>
-            <input className="input" style={{ height: 48 }} value={form.lastName} onChange={set('lastName')} />
-          </label>
-          <label className="field">
-            <span>Nome breve (calendario e classifica)</span>
-            <input className="input" style={{ height: 48 }} value={form.shortName} onChange={set('shortName')} placeholder="Es. Alessandro P" />
-          </label>
-          <label className="field">
-            <span>Email</span>
-            <input className="input" style={{ height: 48 }} type="email" value={form.email} onChange={set('email')} placeholder="nome@email.it" />
-          </label>
+          <TextField label="Nome" style={{ height: 48 }} value={form.firstName} onChange={set('firstName')} autoFocus />
+          <TextField label="Cognome" style={{ height: 48 }} value={form.lastName} onChange={set('lastName')} />
+          <TextField label="Nome breve" style={{ height: 48 }} value={form.shortName} onChange={set('shortName')} placeholder="Es. Alessandro P" />
+          <TextField label="Email" style={{ height: 48 }} type="email" value={form.email} onChange={set('email')} placeholder="nome@email.it" />
         </div>
         {isNew && (
           <label style={{ display: 'flex', alignItems: 'center', gap: 10, fontWeight: 700, fontSize: 14.5 }}>
             <input type="checkbox" checked={invite} onChange={(e) => setInvite(e.target.checked)} style={{ width: 18, height: 18 }} />
             Invia subito l'invito
-            <span className="muted" style={{ fontWeight: 500, fontSize: 13 }}>
-              (email con il link per entrare, valido 7 giorni)
-            </span>
           </label>
         )}
         {emailChanged && <div className="note note-warn">Cambiando email il giocatore viene scollegato e dovrà essere invitato di nuovo.</div>}
         <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-          <button type="button" className="btn btn-outline" onClick={onClose}>
+          <button type="button" className="btn btn-outline" onClick={close}>
             Annulla
           </button>
           <button type="submit" className="btn btn-primary" style={{ height: 46, fontSize: 14 }} disabled={!valid || save.isPending}>
-            {save.isPending ? 'Salvataggio…' : isNew ? (invite ? 'Crea e invita' : 'Crea giocatore') : 'Salva'}
+            {save.isPending ? <ButtonLoader /> : isNew ? (invite ? 'Crea e invita' : 'Crea giocatore') : 'Salva'}
           </button>
         </div>
       </form>

@@ -5,7 +5,10 @@ import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import { z } from 'zod';
 import { requireUser } from '../auth';
 import { audit, db } from '../db';
-import { isAllowedImage, MAX_UPLOAD_BYTES, openFile, removeFile, saveFile, storageKey } from '../storage';
+import { detectImage, isAllowedImage, MAX_UPLOAD_BYTES, openFile, removeFile, saveFile, storageKey } from '../storage';
+
+/** Tetto per partita: evita che il disco si riempia */
+const MAX_PHOTOS_PER_MATCH = 30;
 
 /** Legge l'unica immagine del form multipart */
 async function readImage(req: FastifyRequest, reply: FastifyReply) {
@@ -23,7 +26,12 @@ async function readImage(req: FastifyRequest, reply: FastifyReply) {
     reply.code(413).send({ error: 'Foto troppo grande (massimo 8 MB)' });
     return null;
   }
-  return { data, mime: file.mimetype };
+  const mime = detectImage(data);
+  if (!mime) {
+    reply.code(400).send({ error: 'Il file non è una foto valida' });
+    return null;
+  }
+  return { data, mime };
 }
 
 async function sendStored(reply: FastifyReply, key: string | null | undefined) {
@@ -32,6 +40,7 @@ async function sendStored(reply: FastifyReply, key: string | null | undefined) {
   return reply
     .header('Content-Type', file.mime)
     .header('Content-Length', file.size)
+    .header('X-Content-Type-Options', 'nosniff')
     .header('Cache-Control', 'private, max-age=31536000, immutable')
     .send(file.stream);
 }
@@ -55,7 +64,7 @@ export async function photoRoutes(app: FastifyInstance) {
     const season = req.query.season
       ? await db.season.findUnique({ where: { id: req.query.season } })
       : await db.season.findFirst({ where: { status: 'ACTIVE' }, orderBy: { createdAt: 'desc' } });
-    if (!season) return { photos: [] };
+    if (!season || (season.status === 'DRAFT' && !req.user!.isAdmin)) return { photos: [] };
     const photos = await db.matchPhoto.findMany({
       where: { match: { seasonId: season.id } },
       include: { match: { select: { id: true, playerAId: true, playerBId: true, round: { select: { number: true } } } } },
@@ -84,6 +93,9 @@ export async function photoRoutes(app: FastifyInstance) {
       return reply.code(403).send({ error: 'Puoi caricare foto solo delle tue partite' });
     }
     if (match.season.status !== 'ACTIVE') return reply.code(409).send({ error: 'Il torneo non è in corso' });
+    if ((await db.matchPhoto.count({ where: { matchId: match.id } })) >= MAX_PHOTOS_PER_MATCH) {
+      return reply.code(409).send({ error: `Massimo ${MAX_PHOTOS_PER_MATCH} foto per partita` });
+    }
     const image = await readImage(req, reply);
     if (!image) return;
 

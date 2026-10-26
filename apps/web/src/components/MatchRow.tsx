@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 import type { Match, SeasonOverview } from '../api';
 import { matchInfo, playerIndex } from '../data';
 import { StatusPill } from './ui';

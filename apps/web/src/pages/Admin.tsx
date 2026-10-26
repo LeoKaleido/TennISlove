@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router';
 import { formatDayWithWeekday, formatScore, romeDay } from '@tentennis/shared';
 import { api, type Match, type SeasonOverview } from '../api';
 import { AdminResultEditor } from '../components/AdminResultEditor';
@@ -38,8 +38,8 @@ export function AdminPage() {
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '4px 6px 14px' }}>
           <Logo size={34} inverted />
           <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-            <span className="title" style={{ fontSize: 17, fontStretch: '72%', lineHeight: 1 }}>
-              ATP Umbria
+            <span className="title brand" style={{ fontSize: 17, fontStretch: '72%', lineHeight: 1 }}>
+              TennISlove
             </span>
             <span className="mono" style={{ fontSize: 10.5, color: '#C6EEDB' }}>
               /admin, {data.season.label}
@@ -89,15 +89,17 @@ export function AdminPage() {
   );
 }
 
-function Header({ title, sub }: { title: string; sub: string }) {
+function Header({ title, sub }: { title: string; sub?: string }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
       <h1 className="display" style={{ fontSize: 40, lineHeight: 0.92 }}>
         {title}
       </h1>
-      <span className="muted" style={{ fontSize: 13.5 }}>
-        {sub}
-      </span>
+      {sub && (
+        <span className="muted" style={{ fontSize: 13.5 }}>
+          {sub}
+        </span>
+      )}
     </div>
   );
 }
@@ -225,7 +227,7 @@ function Results({ data, onEdit }: { data: SeasonOverview; onEdit: (id: string) 
   const withResult = data.matches.filter((m) => m.result).sort((a, b) => (b.result!.submittedAt > a.result!.submittedAt ? 1 : -1));
   return (
     <>
-      <Header title="Risultati" sub="Inserisci, modifica, conferma o elimina qualsiasi risultato. Ogni azione resta nel registro." />
+      <Header title="Risultati" />
       <label className="field" style={{ maxWidth: 420 }}>
         <span>Inserisci il risultato di una partita</span>
         <select className="input" style={{ height: 46, fontSize: 14.5 }} value="" onChange={(e) => e.target.value && onEdit(e.target.value)}>

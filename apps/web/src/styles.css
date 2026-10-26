@@ -112,6 +112,22 @@ a {
   }
 }
 
+/* Elemento che compare sotto un altro senza cambiare schermata */
+.reveal {
+  animation: reveal 0.22s ease;
+}
+
+@keyframes reveal {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
 /* Contenitore dell'app giocatore: colonna da telefono, centrata su desktop */
 .app {
   max-width: 480px;
@@ -148,6 +164,12 @@ a {
   line-height: 0.9;
   text-transform: uppercase;
   margin: 0;
+}
+
+/* il nome si scrive sempre TennISlove: mai tutto maiuscolo */
+.display.brand,
+.title.brand {
+  text-transform: none;
 }
 
 .title {
@@ -525,6 +547,64 @@ textarea.input {
   resize: none;
 }
 
+/* Campo con etichetta interna: al focus, o se c'è un valore, l'etichetta sale sul bordo.
+   Lo sfondo a due colori (contenitore sopra, input sotto) interrompe il bordo dietro la scritta. */
+.float-field {
+  position: relative;
+  display: block;
+}
+
+.float-field > span {
+  position: absolute;
+  left: 11px;
+  top: 50%;
+  transform: translateY(-62%);
+  padding: 0 6px;
+  border-radius: 6px;
+  font-size: 15.5px;
+  font-weight: 600;
+  color: var(--ink2);
+  background: transparent;
+  pointer-events: none;
+  transition:
+    top 0.16s ease,
+    transform 0.16s ease,
+    font-size 0.16s ease,
+    color 0.16s ease;
+}
+
+.float-field .input::placeholder {
+  color: var(--ink3);
+  opacity: 0;
+  transition: opacity 0.16s ease;
+}
+
+.float-field .input:focus::placeholder {
+  opacity: 1;
+}
+
+.float-field:focus-within > span,
+.float-field.floated > span,
+.float-field .input:not(:placeholder-shown) + span {
+  top: 0;
+  transform: translateY(-50%);
+  font-size: 12px;
+  font-weight: 700;
+  background: linear-gradient(var(--surface) 50%, var(--bg) 50%);
+}
+
+.float-field:focus-within > span {
+  color: var(--accent);
+}
+
+.float-field.has-error .input {
+  border-color: var(--errFg);
+}
+
+.float-field.has-error > span {
+  color: var(--errFg);
+}
+
 /* Bottom sheet */
 .sheet-wrap {
   position: fixed;
@@ -555,6 +635,91 @@ textarea.input {
   display: flex;
   flex-direction: column;
   gap: 16px;
+}
+
+/* Chiusura animata di fogli e finestre (useClosing): il componente resta montato finché l'animazione finisce */
+.sheet-wrap.closing .sheet-backdrop,
+.modal-wrap.closing .modal-backdrop {
+  animation: fadeOut 0.22s ease forwards;
+}
+
+.sheet-wrap.closing .sheet {
+  animation: sheetDown 0.22s cubic-bezier(0.4, 0, 1, 1) forwards;
+}
+
+.lightbox-img {
+  animation: modalIn 0.22s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.modal-wrap.closing .modal,
+.modal-wrap.closing .lightbox-img {
+  animation: modalOut 0.18s ease forwards;
+}
+
+@keyframes sheetDown {
+  to {
+    transform: translateY(100%);
+  }
+}
+
+@keyframes fadeOut {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes modalIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(6px);
+  }
+}
+
+@keyframes modalOut {
+  to {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+}
+
+/* Accordion: l'altezza va da 0 al contenuto con la griglia, senza misurare niente in JavaScript */
+.collapse {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.26s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.collapse.open {
+  grid-template-rows: 1fr;
+}
+
+.collapse > div {
+  min-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.collapse.open > div {
+  opacity: 1;
+}
+
+.chevron {
+  flex: none;
+  color: var(--ink3);
+  transition: transform 0.26s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.chevron.open {
+  transform: rotate(180deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .collapse,
+  .collapse > div,
+  .chevron {
+    transition: none;
+  }
 }
 
 .sheet-handle {
@@ -606,6 +771,36 @@ textarea.input {
   text-align: center;
 }
 
+.update-bar {
+  position: fixed;
+  top: calc(10px + env(safe-area-inset-top));
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 70;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 8px 8px 8px 16px;
+  border-radius: 99px;
+  background: #0b1a24;
+  color: #fff;
+  font-size: 13.5px;
+  font-weight: 600;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+  animation: fadeIn 0.2s ease;
+}
+
+.update-bar button {
+  height: 32px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 99px;
+  background: #c6eedb;
+  color: #0b1a24;
+  font-weight: 800;
+  font-size: 13px;
+}
+
 .placeholder-photo {
   background: repeating-linear-gradient(135deg, var(--ph1) 0 10px, var(--ph2) 10px 20px);
 }
@@ -648,7 +843,7 @@ textarea.input {
   flex-direction: column;
   gap: 16px;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-  animation: fadeIn 0.15s ease;
+  animation: modalIn 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 .admin-score {

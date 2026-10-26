@@ -1,6 +1,6 @@
-// Login con magic link (D-014) e sessione in cookie httpOnly.
+// Login con codice di 6 cifre via email (D-049) e sessione in cookie httpOnly.
 
-import { createHash, randomBytes } from 'node:crypto';
+import { createHash, randomBytes, randomInt } from 'node:crypto';
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import { z } from 'zod';
 import { db } from './db';
@@ -24,6 +24,21 @@ declare module 'fastify' {
 
 const hash = (token: string) => createHash('sha256').update(token).digest('hex');
 const newToken = () => randomBytes(32).toString('base64url');
+const newCode = () => String(randomInt(0, 1_000_000)).padStart(6, '0');
+const MAX_CODE_ATTEMPTS = 5;
+
+async function startSession(reply: FastifyReply, userId: string) {
+  const sessionToken = newToken();
+  const expiresAt = new Date(Date.now() + env.sessionDays * 86_400_000);
+  await db.session.create({ data: { userId, tokenHash: hash(sessionToken), expiresAt } });
+  reply.setCookie(SESSION_COOKIE, sessionToken, {
+    path: '/',
+    httpOnly: true,
+    sameSite: 'lax',
+    secure: env.secureCookies,
+    expires: expiresAt,
+  });
+}
 
 export async function authPlugin(app: FastifyInstance) {
   app.decorateRequest('user', null);
@@ -40,35 +55,42 @@ export async function authPlugin(app: FastifyInstance) {
     req.user = { id: u.id, email: u.email, isAdmin: u.isAdmin, playerId: u.player?.id ?? null };
   });
 
-  app.post('/api/auth/magic-link', async (req) => {
+  app.post('/api/auth/code', async (req) => {
     const { email } = z.object({ email: z.string().trim().toLowerCase().email() }).parse(req.body);
     const user = await db.user.findUnique({ where: { email } });
-    // Al massimo 3 link all'ora per email: protegge la quota di invio (D-030)
+    // Al massimo 3 codici all'ora per email: protegge la quota di invio (D-030)
     const recent = user
-      ? await db.magicLinkToken.count({ where: { userId: user.id, createdAt: { gt: new Date(Date.now() - 3_600_000) } } })
+      ? await db.loginCode.count({ where: { userId: user.id, createdAt: { gt: new Date(Date.now() - 3_600_000) } } })
       : 0;
     // Risposta identica in ogni caso, per non rivelare chi è iscritto
-    if (user && recent < 3) await sendLoginLink(user, 'login');
+    if (user && recent < 3) await sendLoginCode(user);
     return { ok: true };
   });
 
-  app.post('/api/auth/verify', async (req, reply) => {
-    const { token } = z.object({ token: z.string().min(10) }).parse(req.body);
-    const record = await db.magicLinkToken.findUnique({ where: { tokenHash: hash(token) } });
-    if (!record || record.usedAt || record.expiresAt < new Date()) {
-      return reply.code(400).send({ error: 'Link scaduto o già usato. Richiedine uno nuovo.' });
-    }
-    await db.magicLinkToken.update({ where: { id: record.id }, data: { usedAt: new Date() } });
-    const sessionToken = newToken();
-    const expiresAt = new Date(Date.now() + env.sessionDays * 86_400_000);
-    await db.session.create({ data: { userId: record.userId, tokenHash: hash(sessionToken), expiresAt } });
-    reply.setCookie(SESSION_COOKIE, sessionToken, {
-      path: '/',
-      httpOnly: true,
-      sameSite: 'lax',
-      secure: env.secureCookies,
-      expires: expiresAt,
+  /** Vale l'ultimo codice inviato, con al massimo 5 tentativi */
+  app.post('/api/auth/login', async (req, reply) => {
+    const { email, code } = z
+      .object({ email: z.string().trim().toLowerCase().email(), code: z.string().trim().regex(/^\d{6}$/) })
+      .parse(req.body);
+    const invalid = () => reply.code(400).send({ error: 'Codice non valido o scaduto' });
+    const user = await db.user.findUnique({ where: { email } });
+    const record = user
+      ? await db.loginCode.findFirst({
+          where: { userId: user.id, usedAt: null, expiresAt: { gt: new Date() } },
+          orderBy: { createdAt: 'desc' },
+        })
+      : null;
+    if (!record) return invalid();
+    // ogni tentativo si conta prima di confrontare, anche con richieste in parallelo
+    const counted = await db.loginCode.updateMany({
+      where: { id: record.id, usedAt: null, attempts: { lt: MAX_CODE_ATTEMPTS } },
+      data: { attempts: { increment: 1 } },
     });
+    if (!counted.count || hash(code) !== record.codeHash) return invalid();
+    // consumato in un'unica scrittura condizionata: due richieste in parallelo non aprono due sessioni
+    const consumed = await db.loginCode.updateMany({ where: { id: record.id, usedAt: null }, data: { usedAt: new Date() } });
+    if (!consumed.count) return invalid();
+    await startSession(reply, record.userId);
     return { ok: true };
   });
 
@@ -88,32 +110,26 @@ export async function authPlugin(app: FastifyInstance) {
 // L'hook che legge la sessione deve valere per tutte le rotte, non solo dentro questo plugin
 (authPlugin as unknown as Record<symbol, boolean>)[Symbol.for('skip-override')] = true;
 
-const INVITE_DAYS = 7;
-
-/**
- * Crea un link monouso e lo manda per email (D-014, D-035).
- * L'invito dal gestionale vale 7 giorni, il link chiesto dalla pagina di login 15 minuti.
- */
-export async function sendLoginLink(user: { id: string; email: string }, kind: 'login' | 'invite', firstName?: string) {
-  const token = newToken();
-  const minutes = kind === 'invite' ? INVITE_DAYS * 24 * 60 : env.magicLinkMinutes;
-  await db.magicLinkToken.create({
-    data: { userId: user.id, tokenHash: hash(token), expiresAt: new Date(Date.now() + minutes * 60_000) },
+/** Codice monouso per entrare (D-049): vale pochi minuti e si scrive nell'app */
+async function sendLoginCode(user: { id: string; email: string }) {
+  const code = newCode();
+  await db.loginCode.create({
+    data: { userId: user.id, codeHash: hash(code), expiresAt: new Date(Date.now() + env.loginCodeMinutes * 60_000) },
   });
-  const link = `${env.appUrl}/auth/verify?token=${token}`;
-  if (kind === 'invite') {
-    await sendMail({
-      to: user.email,
-      subject: 'Sei nel torneo: entra in ATP Umbria Tournament',
-      text: `Ciao${firstName ? ` ${firstName}` : ''}!\n\nSei stato iscritto ad ATP Umbria Tournament. Qui trovi calendario, classifica e le tue partite: programmi gli incontri, inserisci i risultati e carichi le foto.\n\nEntra con questo link (vale ${INVITE_DAYS} giorni e si usa una volta sola):\n\n${link}\n\nUna volta entrato resti collegato per ${env.sessionDays} giorni. Quando scade, chiedi un nuovo link dalla pagina di accesso con la tua email.`,
-    });
-  } else {
-    await sendMail({
-      to: user.email,
-      subject: 'Il tuo link per entrare in ATP Umbria Tournament',
-      text: `Ciao!\n\nTocca il link per entrare nell'app (vale ${env.magicLinkMinutes} minuti, si usa una volta sola):\n\n${link}\n\nSe non sei stato tu, ignora questa email.`,
-    });
-  }
+  await sendMail({
+    to: user.email,
+    subject: `${code} è il tuo codice per TennISlove`,
+    text: `Il tuo codice: ${code}\n\nVale ${env.loginCodeMinutes} minuti. Se non sei stato tu, ignora questa email.`,
+  });
+}
+
+/** Invito dal gestionale (D-035): dice dove entrare; il codice lo chiede il giocatore dall'app */
+export async function sendInvite(user: { email: string }, firstName?: string) {
+  await sendMail({
+    to: user.email,
+    subject: 'Sei nel torneo: entra in TennISlove',
+    text: `Ciao${firstName ? ` ${firstName}` : ''}!\n\nSei iscritto al torneo su TennISlove: calendario, classifica, risultati e foto delle partite.\n\nApri ${env.appUrl} ed entra con questa email: ti arriva un codice.`,
+  });
 }
 
 export async function requireUser(req: FastifyRequest, reply: FastifyReply) {

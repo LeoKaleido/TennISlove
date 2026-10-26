@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 import { api } from '../api';
 import { ErrorState, Loading, Logo } from '../components/ui';
 import { playerIndex, useMe, useSeason } from '../data';
@@ -35,7 +35,7 @@ export function GalleryPage() {
       <div className="page-head">
         <h1 className="display">Gallery</h1>
         <div className="sub">
-          {gallery.data.photos.length === 1 ? '1 foto' : `${gallery.data.photos.length} foto`}, tocca una foto per aprire la partita
+          {gallery.data.photos.length} foto
         </div>
       </div>
       {myId && (
@@ -54,7 +54,7 @@ export function GalleryPage() {
         <div className="center-state">
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 14 }}>
             <Logo size={56} />
-            <div style={{ maxWidth: 280, lineHeight: 1.5 }}>Ancora nessuna foto. Carica un selfie dalla scheda della tua partita: diventerà la copertina.</div>
+            <div style={{ maxWidth: 280, lineHeight: 1.5 }}>Ancora nessuna foto</div>
           </div>
         </div>
       ) : (

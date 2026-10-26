@@ -2,7 +2,7 @@
 
 import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
-import { requireAdmin, sendLoginLink } from '../auth';
+import { requireAdmin, sendInvite } from '../auth';
 import { audit, db } from '../db';
 
 const playerBody = z.object({
@@ -65,7 +65,7 @@ export async function adminPlayerRoutes(app: FastifyInstance) {
     });
     await audit(req.user!.id, 'Player', player.id, 'create', null, body);
     if (body.invite) {
-      await sendLoginLink(user, 'invite', player.firstName);
+      await sendInvite(user, player.firstName);
       await db.user.update({ where: { id: user.id }, data: { invitedAt: new Date() } });
     }
     return { ok: true, playerId: player.id, invited: body.invite };
@@ -100,7 +100,7 @@ export async function adminPlayerRoutes(app: FastifyInstance) {
   app.post<{ Params: { id: string } }>('/api/admin/users/:id/invite', async (req, reply) => {
     const user = await db.user.findUnique({ where: { id: req.params.id }, include: { player: true } });
     if (!user) return reply.code(404).send({ error: 'Utente non trovato' });
-    await sendLoginLink(user, 'invite', user.player?.firstName);
+    await sendInvite(user, user.player?.firstName);
     await db.user.update({ where: { id: user.id }, data: { invitedAt: new Date() } });
     await audit(req.user!.id, 'User', user.id, 'invite');
     return { ok: true };

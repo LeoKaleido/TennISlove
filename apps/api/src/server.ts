@@ -11,7 +11,8 @@ import { matchRoutes } from './routes/matches';
 import { photoRoutes } from './routes/photos';
 import { seasonRoutes } from './routes/season';
 
-const app = Fastify({ logger: { level: process.env.LOG_LEVEL ?? 'info' } });
+// trustProxy: in produzione davanti c'è Nginx, così nei log compare l'IP vero del client
+const app = Fastify({ logger: { level: process.env.LOG_LEVEL ?? 'info' }, trustProxy: env.trustProxy });
 
 app.setErrorHandler((err: Error & { statusCode?: number }, _req, reply) => {
   if (err instanceof ZodError) {

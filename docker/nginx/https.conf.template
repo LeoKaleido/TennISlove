@@ -1,0 +1,78 @@
+# Produzione: HTTPS, file del web, proxy verso l'API. ${DOMAIN} arriva dall'ambiente.
+server_tokens off;
+
+# Limiti per IP: login stretto (protegge le email e i tentativi di accesso), resto dell'API largo
+limit_req_zone $binary_remote_addr zone=auth:10m rate=10r/m;
+limit_req_zone $binary_remote_addr zone=api:10m rate=20r/s;
+limit_req_status 429;
+
+server {
+    listen 80;
+    listen [::]:80;
+    server_name ${DOMAIN};
+
+    location /.well-known/acme-challenge/ {
+        root /var/www/certbot;
+    }
+    location / {
+        return 301 https://$host$request_uri;
+    }
+}
+
+server {
+    listen 443 ssl;
+    listen [::]:443 ssl;
+    http2 on;
+    server_name ${DOMAIN};
+
+    ssl_certificate /etc/letsencrypt/live/${DOMAIN}/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/${DOMAIN}/privkey.pem;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_prefer_server_ciphers off;
+    ssl_session_cache shared:SSL:10m;
+    ssl_session_timeout 1d;
+    ssl_session_tickets off;
+
+    # Foto fino a 8 MB lato API, con un po' di margine
+    client_max_body_size 10m;
+
+    # Valgono per tutte le risposte: nelle location non si usa add_header, altrimenti questi verrebbero persi
+    add_header Strict-Transport-Security "max-age=31536000" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header X-Frame-Options "DENY" always;
+    # Nessun Referer verso altri siti
+    add_header Referrer-Policy "no-referrer" always;
+    add_header Permissions-Policy "camera=(), microphone=(), geolocation=()" always;
+    add_header Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'" always;
+
+    # Risoluzione dinamica: se il container dell'API viene ricreato cambia IP
+    resolver 127.0.0.11 valid=10s;
+    set $api http://api:3000;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    # Nginx è il primo punto di ingresso: si sovrascrive quello che manda il client
+    proxy_set_header X-Forwarded-For $remote_addr;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    # l'API manda già nosniff sulle foto: niente header doppio
+    proxy_hide_header X-Content-Type-Options;
+
+    location /api/auth/ {
+        limit_req zone=auth burst=5 nodelay;
+        proxy_pass $api;
+    }
+    location /api/ {
+        limit_req zone=api burst=40 nodelay;
+        proxy_pass $api;
+    }
+
+    root /usr/share/nginx/html;
+    location /assets/ {
+        expires 1y;
+        try_files $uri =404;
+    }
+    location / {
+        # index.html, sw.js e manifest sempre freschi, così dopo un rilascio arrivano i nuovi file
+        expires -1;
+        try_files $uri /index.html;
+    }
+}

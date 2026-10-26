@@ -37,6 +37,7 @@ export function matchView(m: MatchRow, submittedByPlayerId: string | null = null
     playerBId: m.playerBId,
     scheduledAt: m.scheduledAt?.toISOString() ?? null,
     clubId: m.clubId,
+    venue: m.venue,
     postponed: m.postponedAt !== null,
     status: matchStatus({
       resultStatus: r?.status ?? null,

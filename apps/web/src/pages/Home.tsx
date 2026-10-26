@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 import { formatDayWithWeekday, romeDay } from '@tentennis/shared';
 import type { Match, SeasonOverview } from '../api';
 import { MatchRow } from '../components/MatchRow';
@@ -79,7 +79,7 @@ export function HomePage() {
               Giornata {round.number}
             </div>
             <div style={{ fontSize: 14, color: 'rgba(255,255,255,.8)' }}>
-              {roundRange(round)}, stagione {data.season.label}
+              {roundRange(round)}
             </div>
             <div style={{ display: 'flex', gap: 4, marginTop: 8 }}>
               {data.rounds

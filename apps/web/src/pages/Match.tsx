@@ -1,9 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
-import { Link, useParams, useSearchParams } from 'react-router-dom';
+import { Link, useParams, useSearchParams } from 'react-router';
 import { formatDayWithWeekday, romeDay, romeTime } from '@tentennis/shared';
 import { api, type MatchDetail } from '../api';
-import { Avatar, BackButton, ErrorState, Loading, Logo, ScoreTable, StatusPill, useToast } from '../components/ui';
+import { Avatar, BackButton, ErrorState, Loading, Logo, ScoreTable, StatusPill, useClosing, useToast } from '../components/ui';
 import { isMine, playerIndex, roundRange, today, useMe, useSeason } from '../data';
 import { ScheduleSheet } from './ScheduleSheet';
 
@@ -16,12 +16,13 @@ export function MatchPage() {
   const queryClient = useQueryClient();
   const toast = useToast();
   const [openPhoto, setOpenPhoto] = useState<string | null>(null);
+  const [photoClosing, closePhoto] = useClosing(() => setOpenPhoto(null));
 
   const postpone = useMutation({
     mutationFn: () => api(`/api/matches/${id}/postpone`, { method: 'POST' }),
     onSuccess: () => {
       queryClient.invalidateQueries();
-      toast('Partita segnata come rinviata');
+      toast('Partita rinviata');
     },
     onError: (e) => toast(e.message),
   });
@@ -46,28 +47,11 @@ export function MatchPage() {
 
   let note: { text: string; tone: 'ok' | 'warn' | 'err' | 'info' } | null = null;
   if (r?.status === 'PENDING') {
-    const by = r.submittedByPlayerId ? players.get(r.submittedByPlayerId)?.shortName : undefined;
     const other = r.submittedByPlayerId === m.playerAId ? b.shortName : a.shortName;
     const when = r.autoConfirmAt ? formatDayWithWeekday(romeDay(r.autoConfirmAt)) : '';
-    note = { text: `Risultato inserito da ${by ?? 'un giocatore'}, in attesa di conferma da ${other}. Si conferma automaticamente ${when}.`, tone: 'info' };
+    note = { text: `In attesa di conferma da ${other}, altrimenti si conferma da solo ${when}.`, tone: 'info' };
   } else if (r?.status === 'DISPUTED') {
-    note = { text: `Risultato contestato: "${r.disputeNote}". Decide un amministratore.`, tone: 'err' };
-  } else if (m.status === 'POSTPONED') {
-    note = { text: 'Partita rinviata: si gioca dopo la sua settimana.', tone: 'warn' };
-  } else if (m.status === 'TO_RECOVER') {
-    note = { text: 'La settimana è finita senza risultato: programmate il recupero.', tone: 'warn' };
-  } else if (r?.how) {
-    const winner = r.winner === 'A' ? a.shortName : r.winner === 'B' ? b.shortName : null;
-    const comp = r.compensationA || r.compensationB;
-    note = {
-      tone: 'ok',
-      text:
-        r.how === 'TIME_EXPIRED'
-          ? 'Tempo scaduto: nessun vincitore, ognuno prende i game vinti.'
-          : r.how === 'TWO_SETS'
-            ? `${winner} vince in due set: game + 3.`
-            : `${winner} vince al super tie break: game + 2 + 1${comp ? ` + ${comp} di compensazione` : ''}.`,
-    };
+    note = { text: `Contestato: "${r.disputeNote}"`, tone: 'err' };
   }
 
   // Azione principale per chi gioca la partita
@@ -86,8 +70,8 @@ export function MatchPage() {
           <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 14 }}>
             <div style={{ position: 'absolute', left: '50%', top: '50%', width: 200, height: 400, transform: 'translate(-50%,-50%) rotate(-12deg)', border: '2px solid rgba(198,238,219,.13)' }} />
             <Logo size={92} inverted />
-            <div className="display" style={{ position: 'relative', fontSize: 26, color: '#C6EEDB' }}>
-              ATP Umbria Tournament
+            <div className="display brand" style={{ position: 'relative', fontSize: 26, color: '#C6EEDB' }}>
+              TennISlove
             </div>
           </div>
         )}
@@ -135,7 +119,7 @@ export function MatchPage() {
           <Info label="Settimana" value={roundRange(round)} />
           <Info label="Data" value={day ? formatDayWithWeekday(day) : 'Da decidere'} />
           <Info label="Ora" value={m.scheduledAt ? romeTime(m.scheduledAt) : 'Da decidere'} />
-          <Info label="Circolo" value={club ? club.name : 'Da decidere'} href={club?.mapsUrl ?? undefined} />
+          <Info label="Circolo" value={club ? club.name : (m.venue ?? 'Da decidere')} href={club?.mapsUrl ?? undefined} />
         </div>
 
         {note && <div className={`note note-${note.tone}`}>{note.text}</div>}
@@ -208,9 +192,9 @@ export function MatchPage() {
       )}
 
       {openPhoto && (
-        <div className="modal-wrap" role="dialog" aria-modal="true" aria-label="Foto" onClick={() => setOpenPhoto(null)}>
+        <div className={`modal-wrap${photoClosing ? ' closing' : ''}`} role="dialog" aria-modal="true" aria-label="Foto" onClick={closePhoto}>
           <div className="modal-backdrop" style={{ background: 'rgba(0,0,0,.88)' }} />
-          <img src={openPhoto} alt="Foto della partita" style={{ position: 'relative', maxWidth: '100%', maxHeight: 'calc(100dvh - 40px)', borderRadius: 12 }} />
+          <img className="lightbox-img" src={openPhoto} alt="Foto della partita" style={{ position: 'relative', maxWidth: '100%', maxHeight: 'calc(100dvh - 40px)', borderRadius: 12 }} />
         </div>
       )}
 

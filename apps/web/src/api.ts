@@ -80,6 +80,8 @@ export interface Match {
   playerBId: string;
   scheduledAt: string | null;
   clubId: string | null;
+  /** campo fuori lista, scritto a mano */
+  venue: string | null;
   postponed: boolean;
   status: MatchStatus;
   coverPhotoUrl: string | null;

@@ -1,10 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { Link, useParams } from 'react-router';
 import { formatDayWithWeekday, romeDay } from '@tentennis/shared';
 import { api, type MatchDetail } from '../api';
 import { BackButton, ErrorState, Loading, ScoreTable } from '../components/ui';
 import { playerIndex, useMe, useSeason } from '../data';
+import { clearDraft, loadDraft, saveDraft } from '../drafts';
 
 /** Vista dell'avversario: conferma o contesta il risultato (D-010) */
 export function ConfirmPage() {
@@ -13,14 +14,17 @@ export function ConfirmPage() {
   const season = useSeason();
   const detail = useQuery({ queryKey: ['match', id], queryFn: () => api<MatchDetail>(`/api/matches/${id}`) });
   const queryClient = useQueryClient();
-  const [contesting, setContesting] = useState(false);
-  const [note, setNote] = useState('');
+  const draftKey = `dispute:${id}`;
+  const [note, setNote] = useState(() => loadDraft<string>(draftKey) ?? '');
+  const [contesting, setContesting] = useState(note !== '');
+  useEffect(() => (note ? saveDraft(draftKey, note) : clearDraft(draftKey)), [draftKey, note]);
   const [done, setDone] = useState<'confirmed' | 'disputed' | null>(null);
 
   const confirm = useMutation({
     mutationFn: () => api(`/api/matches/${id}/result/confirm`, { method: 'POST' }),
     onSuccess: () => {
       setDone('confirmed');
+      setNote('');
       queryClient.invalidateQueries();
     },
   });
@@ -28,6 +32,7 @@ export function ConfirmPage() {
     mutationFn: () => api(`/api/matches/${id}/result/dispute`, { method: 'POST', body: { note } }),
     onSuccess: () => {
       setDone('disputed');
+      setNote('');
       queryClient.invalidateQueries();
     },
   });
@@ -72,9 +77,6 @@ export function ConfirmPage() {
           <>
             <div className={`note ${done === 'confirmed' ? 'note-ok' : 'note-err'}`} style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
               <strong style={{ fontSize: 16 }}>{done === 'confirmed' ? 'Risultato confermato' : 'Contestazione inviata'}</strong>
-              <span style={{ fontWeight: 500 }}>
-                {done === 'confirmed' ? 'La classifica è aggiornata.' : 'La partita è in stato Contestata: decide un amministratore.'}
-              </span>
             </div>
             <Link to={`/partite/${m.id}`} className="btn btn-outline">
               Vai alla partita
@@ -85,7 +87,7 @@ export function ConfirmPage() {
             {r?.status === 'CONFIRMED'
               ? 'Il risultato è già confermato.'
               : r?.status === 'DISPUTED'
-                ? 'Il risultato è contestato: decide un amministratore.'
+                ? 'Il risultato è contestato.'
                 : "Può rispondere solo l'avversario di chi ha inserito il risultato."}
           </div>
         ) : !contesting ? (
@@ -111,9 +113,6 @@ export function ConfirmPage() {
               <span style={{ color: 'var(--ink)' }}>Cosa non torna?</span>
               <textarea className="input" rows={4} value={note} onChange={(e) => setNote(e.target.value)} placeholder="Es. il secondo set è finito 6-3, non 6-4" />
             </label>
-            <div className="muted" style={{ fontSize: 12.5, lineHeight: 1.4 }}>
-              La partita passa in stato Contestata e un amministratore decide il risultato finale.
-            </div>
             <div style={{ display: 'flex', gap: 8 }}>
               <button className="btn btn-outline" style={{ flex: 1, height: 52 }} onClick={() => setContesting(false)}>
                 Annulla

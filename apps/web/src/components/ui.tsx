@@ -1,22 +1,28 @@
 // Componenti di base riusati da tutte le schermate.
 
-import { createContext, useCallback, useContext, useRef, useState, type ReactNode } from 'react';
-import { NavLink, useNavigate } from 'react-router-dom';
+import { createContext, useCallback, useContext, useEffect, useId, useRef, useState, type CSSProperties, type InputHTMLAttributes, type ReactNode } from 'react';
+import { NavLink, useNavigate } from 'react-router';
 import type { MatchStatus, Zone } from '@tentennis/shared';
 import type { Match, Player } from '../api';
 import { avatarColors, initials, STATUS_STYLE, ZONE_STYLE } from '../data';
 
+/** Logo TennISlove: cuore a forma di pallina da tennis. `inverted` per gli sfondi scuri: riquadro un po' più chiaro */
 export function Logo({ size = 38, inverted = false }: { size?: number; inverted?: boolean }) {
-  const bg = inverted ? '#C6EEDB' : '#0B1A24';
-  const fg = inverted ? '#0B1A24' : '#C6EEDB';
-  const ball = inverted ? '#1F6F54' : '#C6EEDB';
+  const clip = useId();
   return (
     <svg width={size} height={size} viewBox="0 0 40 40" style={{ flex: 'none' }} aria-hidden>
-      <rect width="40" height="40" rx="11" fill={bg} />
-      <ellipse cx="17" cy="15" rx="7.5" ry="9.5" transform="rotate(-35 17 15)" fill="none" stroke={fg} strokeWidth="2.6" />
-      <line x1="22.4" y1="22.8" x2="28" y2="30.6" stroke={fg} strokeWidth="3.4" strokeLinecap="round" />
-      <circle cx="31" cy="10" r="3" fill={ball} />
-      <circle cx="10.5" cy="31.5" r="3" fill={ball} />
+      <defs>
+        <clipPath id={clip}>
+          <path d="M20 33.2S7.4 25.4 4.3 17.8C1.9 11.2 6.1 4.4 12.6 4.4c3.3 0 5.8 1.6 7.4 4 1.6-2.4 4.1-4 7.4-4 6.5 0 10.7 6.8 8.3 13.4C32.6 25.4 20 33.2 20 33.2z" />
+        </clipPath>
+      </defs>
+      <rect width="40" height="40" rx="11" fill={inverted ? '#16303D' : '#0B1A24'} />
+      <g clipPath={`url(#${clip})`}>
+        <rect width="40" height="40" fill="#E2CB58" />
+        <circle cx="14" cy="13" r="21" fill="none" stroke="#135E52" strokeOpacity=".18" strokeWidth="9" />
+        <path d="M5.5 6.5C10 12.5 30 12.5 34.5 6.5" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" />
+        <path d="M9 31C12.5 22.5 27.5 22.5 31 31" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" />
+      </g>
     </svg>
   );
 }
@@ -215,10 +221,97 @@ export function ToastProvider({ children }: { children: ReactNode }) {
 
 export const useToast = () => useContext(ToastContext);
 
+/** Il loader dell'app: il cuore-pallina che rimbalza (public/loader.svg) */
+export function HeartLoader({ width = 72 }: { width?: number }) {
+  return <img src="/loader.svg" alt="" aria-hidden width={width} style={{ display: 'block' }} />;
+}
+
+/** Nei pulsanti mentre l'azione è in corso, al posto di "Invio…" o "Salvataggio…" */
+export function ButtonLoader({ height = 30 }: { height?: number }) {
+  return <img src="/loader.svg" alt="In corso" style={{ height, margin: '-6px 0' }} />;
+}
+
+/** Come la schermata di avvio di index.html: niente salto tra avvio e primo caricamento */
+export function Splash({ leaving = false, onDone }: { leaving?: boolean; onDone?: () => void }) {
+  return (
+    <div className={`boot${leaving ? ' boot-leaving' : ''}`} onAnimationEnd={(e) => e.target === e.currentTarget && onDone?.()}>
+      <img src="/loader.svg" alt="" />
+    </div>
+  );
+}
+
+/** Attesa dentro l'app: il cuore che rimbalza, solo dopo 250 ms così le risposte veloci non fanno lampeggiare niente */
 export function Loading() {
-  return <div className="center-state">Caricamento…</div>;
+  const [show, setShow] = useState(false);
+  useEffect(() => {
+    const t = setTimeout(() => setShow(true), 250);
+    return () => clearTimeout(t);
+  }, []);
+  return (
+    <div className="center-state" aria-busy="true" aria-label="Caricamento">
+      {show && <HeartLoader />}
+    </div>
+  );
 }
 
 export function ErrorState({ error }: { error: unknown }) {
   return <div className="center-state">{error instanceof Error ? error.message : 'Qualcosa è andato storto'}</div>;
+}
+
+/** Campo di testo con l'etichetta dentro, che sale sul bordo al focus o quando c'è un valore */
+export function TextField({
+  label,
+  error = false,
+  fieldStyle,
+  placeholder,
+  ...input
+}: InputHTMLAttributes<HTMLInputElement> & { label: string; error?: boolean; fieldStyle?: CSSProperties }) {
+  // date e ore mostrano sempre un formato: l'etichetta resta in alto
+  const floated = input.type === 'date' || input.type === 'time';
+  return (
+    <label className={`float-field${floated ? ' floated' : ''}${error ? ' has-error' : ''}`} style={fieldStyle}>
+      {/* serve un placeholder, anche vuoto, per sapere con :placeholder-shown se il campo è vuoto */}
+      <input className="input" placeholder={placeholder ?? ' '} {...input} />
+      <span>{label}</span>
+    </label>
+  );
+}
+
+/** Contenuto che si apre e si chiude con un'animazione di altezza (accordion) */
+export function Collapse({ open, children }: { open: boolean; children: ReactNode }) {
+  return (
+    <div className={`collapse${open ? ' open' : ''}`}>
+      {/* chiuso, il contenuto resta montato per l'animazione ma non si raggiunge col tab */}
+      <div {...(open ? {} : { inert: '' })}>{children}</div>
+    </div>
+  );
+}
+
+/** Freccia degli accordion: ruota quando la sezione è aperta */
+export function Chevron({ open }: { open: boolean }) {
+  return (
+    <svg className={`chevron${open ? ' open' : ''}`} width="18" height="18" viewBox="0 0 18 18" aria-hidden>
+      <path d="M4.5 7l4.5 4.5L13.5 7" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+/**
+ * Chiusura animata di fogli e finestre: `close` aggiunge la classe `closing`,
+ * aspetta la fine dell'animazione e solo allora chiama `onClose`.
+ */
+export function useClosing(onClose: () => void, ms = 220) {
+  const [closing, setClosing] = useState(false);
+  const pending = useRef(false);
+  const close = useCallback(() => {
+    if (pending.current) return;
+    pending.current = true;
+    setClosing(true);
+    setTimeout(() => {
+      onClose();
+      pending.current = false;
+      setClosing(false);
+    }, ms);
+  }, [onClose, ms]);
+  return [closing, close] as const;
 }

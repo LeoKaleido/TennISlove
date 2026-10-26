@@ -2,11 +2,10 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
-import { formatScore } from '@tentennis/shared';
 import { api, type Match, type Player } from '../api';
 import { outcomeColors, sideOutcome } from './PointsPreview';
 import { evaluateForm, formFromResult, type Pair, type ScoreForm } from '../score-form';
-import { useToast } from './ui';
+import { ButtonLoader, useClosing, useToast } from './ui';
 
 const COLUMNS = [
   { key: 'set1', label: '1° set', max: 7 },
@@ -15,6 +14,7 @@ const COLUMNS = [
 ] as const;
 
 export function AdminResultEditor({ match, players, onClose }: { match: Match; players: Map<string, Player>; onClose: () => void }) {
+  const [closing, close] = useClosing(onClose);
   const queryClient = useQueryClient();
   const toast = useToast();
   const [form, setForm] = useState<ScoreForm>(formFromResult(match.result));
@@ -25,17 +25,17 @@ export function AdminResultEditor({ match, players, onClose }: { match: Match; p
   const r = match.result;
 
   useEffect(() => {
-    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && close();
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [onClose]);
+  }, [close]);
 
   const save = useMutation({
     mutationFn: () => api(`/api/admin/matches/${match.id}/result`, { method: 'PUT', body: input }),
     onSuccess: () => {
       queryClient.invalidateQueries();
-      toast(`Risultato salvato e confermato: ${a.shortName} vs ${b.shortName} ${formatScore(input)}`);
-      onClose();
+      toast('Risultato salvato');
+      close();
     },
     onError: (e) => toast(e.message),
   });
@@ -48,8 +48,8 @@ export function AdminResultEditor({ match, players, onClose }: { match: Match; p
   };
 
   return (
-    <div className="modal-wrap" role="dialog" aria-modal="true" aria-label="Modifica risultato">
-      <div className="modal-backdrop" onClick={onClose} />
+    <div className={`modal-wrap${closing ? ' closing' : ''}`} role="dialog" aria-modal="true" aria-label="Modifica risultato">
+      <div className="modal-backdrop" onClick={close} />
       <div className="modal">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
@@ -60,7 +60,7 @@ export function AdminResultEditor({ match, players, onClose }: { match: Match; p
               {a.shortName} vs {b.shortName}
             </h2>
           </div>
-          <button className="icon-btn" aria-label="Chiudi" onClick={onClose}>
+          <button className="icon-btn" aria-label="Chiudi" onClick={close}>
             ✕
           </button>
         </div>
@@ -119,15 +119,12 @@ export function AdminResultEditor({ match, players, onClose }: { match: Match; p
 
         <div className={`note note-${feedback.tone}`}>{feedback.text}</div>
 
-        <span className="muted" style={{ fontSize: 12.5 }}>
-          Salvato dal gestionale il risultato è subito confermato e resta nel registro.
-        </span>
         <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-          <button className="btn btn-outline" onClick={onClose}>
+          <button className="btn btn-outline" onClick={close}>
             Annulla
           </button>
           <button className="btn btn-primary" style={{ height: 46, fontSize: 14 }} disabled={ev.status !== 'OK' || save.isPending} onClick={() => save.mutate()}>
-            {save.isPending ? 'Salvataggio…' : 'Salva e conferma'}
+            {save.isPending ? <ButtonLoader /> : 'Salva e conferma'}
           </button>
         </div>
       </div>

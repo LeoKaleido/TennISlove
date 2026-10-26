@@ -19,10 +19,10 @@ export function toIcs(e: CalendarEvent): string {
   return [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
-    'PRODID:-//ATP Umbria Tournament//IT',
+    'PRODID:-//TennISlove//IT',
     'METHOD:PUBLISH',
     'BEGIN:VEVENT',
-    `UID:${e.uid}@atpumbria`,
+    `UID:${e.uid}@tennislove`,
     `SEQUENCE:${e.sequence}`,
     `DTSTAMP:${stamp(new Date())}`,
     `DTSTART:${stamp(e.start)}`,

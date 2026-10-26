@@ -2,7 +2,10 @@
 // Uso: pnpm prisma db seed
 
 import { PrismaClient } from '@prisma/client';
-import { ADMIN_ONLY_EMAILS, matchCode, PLACEHOLDER_CLUBS, PLAYERS, RESULTS, ROUNDS, SEASON } from './seed-data';
+import { readFileSync } from 'node:fs';
+import { ADMIN_ONLY_EMAILS, CLUBS, matchCode, PLAYERS, ROUNDS, SEASON, type SeedResult } from './seed-data';
+
+const RESULTS: Record<string, SeedResult> = JSON.parse(readFileSync(new URL('./seed-results.json', import.meta.url), 'utf8'));
 
 const prisma = new PrismaClient();
 
@@ -32,8 +35,8 @@ async function main() {
     await prisma.user.upsert({ where: { email }, update: { isAdmin: true }, create: { email, isAdmin: true } });
   }
 
-  for (const c of PLACEHOLDER_CLUBS) {
-    const club = await prisma.club.create({ data: { ...c, description: 'Segnaposto, da sostituire con la lista di Giuseppe' } });
+  for (const c of CLUBS) {
+    const club = await prisma.club.create({ data: c });
     await prisma.seasonClub.create({ data: { seasonId: season.id, clubId: club.id } });
   }
 
@@ -59,12 +62,13 @@ async function main() {
           playerBId: playerIds.get(b)!,
           result: res && {
             create: {
-              set1A: res.set1[0],
-              set1B: res.set1[1],
-              set2A: res.set2[0],
-              set2B: res.set2[1],
-              stbA: res.stb?.[0] ?? null,
-              stbB: res.stb?.[1] ?? null,
+              timeExpired: res.timeExpired,
+              set1A: res.set1?.a ?? null,
+              set1B: res.set1?.b ?? null,
+              set2A: res.set2?.a ?? null,
+              set2B: res.set2?.b ?? null,
+              stbA: res.stb?.a ?? null,
+              stbB: res.stb?.b ?? null,
               status: 'CONFIRMED',
               confirmedAt: new Date(),
             },

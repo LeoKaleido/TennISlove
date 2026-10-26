@@ -43,8 +43,8 @@ export function calendarEvent(m: FullMatch): CalendarEvent | null {
     start: m.scheduledAt,
     durationMinutes: 120,
     title: `Tennis: ${matchTitle(m)}`,
-    location: [m.club?.name, m.club?.city].filter(Boolean).join(', '),
-    description: `ATP Umbria Tournament, giornata ${m.round.number}.\n${env.appUrl}/partite/${m.id}`,
+    location: m.club ? [m.club.name, m.club.city].filter(Boolean).join(', ') : (m.venue ?? ''),
+    description: `Giornata ${m.round.number}.\n${env.appUrl}/partite/${m.id}`,
   };
 }
 
@@ -127,19 +127,25 @@ export async function matchRoutes(app: FastifyInstance) {
       .object({
         date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
         time: z.string().regex(/^\d{2}:\d{2}$/),
-        clubId: z.string().min(1),
+        // un circolo della lista oppure un campo scritto a mano (D-040)
+        clubId: z.string().min(1).nullish(),
+        venue: z.string().trim().min(2).max(120).nullish(),
       })
+      .refine((b) => !!b.clubId !== !!b.venue, 'Scegli un circolo oppure scrivi dove giocate')
       .parse(req.body);
     const m = await loadForAction(req.params.id, req.user!, reply);
     if (!m) return;
     if (m.result) return reply.code(409).send({ error: 'La partita è già stata giocata' });
+    if (body.clubId && !(await db.seasonClub.findFirst({ where: { seasonId: m.seasonId, clubId: body.clubId } }))) {
+      return reply.code(400).send({ error: 'Circolo non disponibile per questo torneo' });
+    }
 
     const scheduledAt = fromRomeLocal(body.date, body.time);
     const updated = await db.match.update({
       where: { id: m.id },
-      data: { scheduledAt, clubId: body.clubId, postponedAt: null, scheduleSeq: { increment: 1 } },
+      data: { scheduledAt, clubId: body.clubId ?? null, venue: body.venue ?? null, postponedAt: null, scheduleSeq: { increment: 1 } },
     });
-    await audit(req.user!.id, 'Match', m.id, 'schedule', { scheduledAt: m.scheduledAt, clubId: m.clubId }, body);
+    await audit(req.user!.id, 'Match', m.id, 'schedule', { scheduledAt: m.scheduledAt, clubId: m.clubId, venue: m.venue }, body);
 
     const fresh = (await fullMatch(m.id))!;
     const event = calendarEvent(fresh)!;

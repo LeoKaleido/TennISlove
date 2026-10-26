@@ -16,7 +16,8 @@ export async function seasonRoutes(app: FastifyInstance) {
     const season = req.query.id
       ? await db.season.findUnique({ where: { id: req.query.id } })
       : await db.season.findFirst({ where: { status: 'ACTIVE' }, orderBy: { createdAt: 'desc' } });
-    if (!season) return reply.code(404).send({ error: 'Nessun torneo in corso' });
+    // un torneo in preparazione lo vede solo l'admin, dal gestionale
+    if (!season || (season.status === 'DRAFT' && !req.user!.isAdmin)) return reply.code(404).send({ error: 'Nessun torneo in corso' });
     return seasonOverview(season);
   });
 }

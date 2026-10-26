@@ -2,9 +2,9 @@
 
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useRef, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router';
 import { api, type MatchDetail } from '../api';
-import { BackButton, ErrorState, Loading, useToast } from '../components/ui';
+import { BackButton, ButtonLoader, ErrorState, Loading, useToast } from '../components/ui';
 import { playerIndex, useMe, useSeason } from '../data';
 import { compressImage, uploadImage } from '../photos';
 
@@ -46,7 +46,7 @@ export function SelfiePage() {
 
   const addFiles = (files: FileList | null) => {
     if (!files) return;
-    const next = [...files].filter((f) => f.type.startsWith('image/')).map((file) => ({ key: crypto.randomUUID(), file, preview: URL.createObjectURL(file) }));
+    const next = [...files].filter((f) => f.type.startsWith('image/')).map((file) => ({ key: `${Date.now()}-${Math.random()}`, file, preview: URL.createObjectURL(file) }));
     setDrafts((d) => [...d, ...next]);
   };
 
@@ -54,7 +54,7 @@ export function SelfiePage() {
     try {
       const uploaded = new Map<string, string>();
       for (const [i, d] of drafts.entries()) {
-        setSaving(`Carico ${i + 1} di ${drafts.length}…`);
+        setSaving(drafts.length > 1 ? `${i + 1} di ${drafts.length}` : '');
         const blob = await compressImage(d.file);
         const res = await uploadImage<{ photoId: string }>(`/api/matches/${m.id}/photos`, blob);
         uploaded.set(d.key, res.photoId);
@@ -120,9 +120,6 @@ export function SelfiePage() {
               <span className="title" style={{ fontSize: 18 }}>
                 Anteprima
               </span>
-              <span className="faint" style={{ fontSize: 12.5 }}>
-                Tocca "Copertina" per sceglierla
-              </span>
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 8 }}>
               {items.map((it) => {
@@ -159,14 +156,18 @@ export function SelfiePage() {
           </>
         ) : (
           <div className="muted" style={{ padding: 24, borderRadius: 18, border: '1.5px dashed var(--line2)', textAlign: 'center', fontSize: 13.5 }}>
-            Nessuna foto ancora. Un selfie della coppia, e diventa la copertina della partita.
+            Nessuna foto
           </div>
         )}
       </div>
 
       <div className="sticky-footer">
-        <button className="btn btn-primary" disabled={!changed || !!saving} onClick={save}>
-          {saving ?? (drafts.length ? `Carica ${drafts.length === 1 ? 'la foto' : `${drafts.length} foto`}` : 'Salva copertina')}
+        <button className="btn btn-primary" disabled={!changed || saving !== null} onClick={save}>
+          {saving !== null ? (
+            <>
+              <ButtonLoader /> {saving}
+            </>
+          ) : (drafts.length ? `Carica ${drafts.length === 1 ? 'la foto' : `${drafts.length} foto`}` : 'Salva copertina')}
         </button>
       </div>
     </div>
