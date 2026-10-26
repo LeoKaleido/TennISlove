@@ -27,7 +27,7 @@ export default defineConfig({
         ],
       },
       workbox: {
-        globPatterns: ['**/*.{js,css,html,svg,ico}', 'pwa-*.png', 'apple-touch-icon-*.png'],
+        globPatterns: ['**/*.{js,css,html,svg,ico}', 'pwa-*.png', 'apple-touch-icon-*.png', 'login-court.jpg'],
         navigateFallback: '/index.html',
         // link diretti all'API (foto, file .ics) vanno sempre al server
         navigateFallbackDenylist: [/^\/api\//],

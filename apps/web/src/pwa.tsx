@@ -8,7 +8,10 @@ import { useRegisterSW } from 'virtual:pwa-register/react';
 export const isStandalone = () =>
   window.matchMedia('(display-mode: standalone)').matches || (navigator as { standalone?: boolean }).standalone === true;
 
-export const isIOS = () => /iphone|ipad|ipod/i.test(navigator.userAgent);
+export const isIOS = () => /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.maxTouchPoints > 1 && /macintosh/i.test(navigator.userAgent));
+
+/** Telefono o tablet (anche iPad, che si presenta come Mac) */
+export const isMobileDevice = () => isIOS() || /android/i.test(navigator.userAgent);
 
 /**
  * Nuova versione pubblicata: si controlla all'avvio, quando l'app torna in primo piano e ogni ora.

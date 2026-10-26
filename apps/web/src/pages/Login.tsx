@@ -2,7 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { Navigate } from 'react-router';
 import { api } from '../api';
-import { ButtonLoader, Logo, TextField } from '../components/ui';
+import { ButtonLoader, InstallBanner, Logo, TextField } from '../components/ui';
 import { useMe } from '../data';
 import { clearDraft, loadDraft, saveDraft } from '../drafts';
 
@@ -68,10 +68,9 @@ export function LoginPage() {
   };
 
   return (
-    <div style={{ flex: '1 0 auto', display: 'flex', flexDirection: 'column', background: '#0B1A24', color: '#fff', minHeight: '100dvh' }}>
+    // sfondo: campo in terra rossa dall'alto (foto di Maurits Bausenhart, Unsplash)
+    <div className="login-page" style={{ flex: '1 0 auto', display: 'flex', flexDirection: 'column', color: '#fff', minHeight: '100dvh' }}>
       <div style={{ flex: '1 0 auto', display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '40px 28px 24px', gap: 28, position: 'relative', overflow: 'hidden' }}>
-        <div style={{ position: 'absolute', right: -60, top: -40, width: 260, height: 380, border: '2px solid rgba(198,238,219,.14)', borderRadius: 6 }} />
-        <div style={{ position: 'absolute', right: -60, top: 150, width: 260, borderTop: '2px solid rgba(198,238,219,.14)' }} />
         <Logo size={72} inverted />
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10, position: 'relative' }}>
           <h1 className="display brand" style={{ fontSize: 56, lineHeight: 0.88 }}>
@@ -125,6 +124,9 @@ export function LoginPage() {
             Invia un nuovo codice
           </button>
         )}
+        <div style={{ margin: '4px -10px 0' }}>
+          <InstallBanner />
+        </div>
       </div>
     </div>
   );

@@ -1,7 +1,7 @@
 import { useEffect, type ReactNode } from 'react';
 import { Navigate, Outlet, Route, Routes, useLocation } from 'react-router';
 import { hideBoot, useFontsReady } from './boot';
-import { Splash, TabBar } from './components/ui';
+import { InstallBanner, Splash, TabBar } from './components/ui';
 import { useMe, useSeason } from './data';
 import { AdminPage } from './pages/Admin';
 import { CalendarPage } from './pages/Calendar';
@@ -44,7 +44,10 @@ function WithTabs() {
   return (
     <div className="app">
       <Outlet />
-      <TabBar />
+      <div className="dock">
+        <InstallBanner />
+        <TabBar />
+      </div>
     </div>
   );
 }

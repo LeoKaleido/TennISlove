@@ -26,7 +26,7 @@ Monorepo pnpm: `apps/web`, `apps/api`, `packages/shared` (motore di punteggio e 
 
 ## App installabile (D-048)
 
-- **Installazione**: dal Profilo, "Installa l'app". Su Android apre il prompt di sistema; su iPhone si fa da Safari (Condividi → Aggiungi alla schermata Home).
+- **Installazione**: dal Profilo, "Installa l'app", e con un banner sul telefono quando si usa il browser (login e pagine con la barra in basso; la × lo nasconde per 14 giorni; mai su desktop né nell'app installata). Su Android apre il prompt di sistema, che Chrome offre solo in HTTPS; su iPhone mostra i passi da fare (Condividi → Aggiungi alla schermata Home).
 - **Loader unico** (D-052): il cuore-pallina che rimbalza, `public/loader.svg` (animazione SVG, nessun JavaScript). Si usa ovunque si aspetta:
   - schermata di avvio, con il cuore a riposo nello stesso punto della schermata nativa;
   - caricamento delle pagine (`Loading`), solo dopo 250 ms;
@@ -58,6 +58,7 @@ L'app è ovvia per chi la usa: i testi devono essere pochi e brevi.
 - Nel dubbio, si toglie.
 
 ## Linee guida UX
+- **Sfondo del login** (telefono): foto di un campo in terra rossa dall'alto, `public/login-court.jpg` (1080×1920, 182 KB, senza metadati). Autore Maurits Bausenhart, [Unsplash](https://unsplash.com/photos/tennis-court-with-white-lines-XtcZbSPVJ3A), licenza Unsplash (uso libero). Per il desktop servirà una foto orizzontale.
 - **Classifica solo a schede** (D-053): ogni giocatore si apre per vedere le statistiche. Niente vista a tabella.
 - **Aperture e chiusure animate** (D-053):
   - accordion (classifica, calendario, aiuto installazione) con `Collapse` e freccia `Chevron`;

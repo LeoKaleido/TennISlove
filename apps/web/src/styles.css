@@ -405,11 +405,31 @@ a {
 }
 
 /* Barra di navigazione in basso */
-.tabbar {
+/* blocco fisso in basso: banner di installazione (se serve) e barra delle sezioni */
+.dock {
   position: sticky;
   bottom: 0;
   margin-top: auto;
   z-index: 10;
+}
+
+.install-banner {
+  margin: 0 10px 8px;
+  padding: 8px 8px 8px 10px;
+  border-radius: 18px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  animation: reveal 0.3s ease;
+}
+
+.install-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.tabbar {
   background: var(--surface);
   border-top: 1px solid var(--line);
   display: grid;
@@ -799,6 +819,17 @@ textarea.input {
   color: #0b1a24;
   font-weight: 800;
   font-size: 13px;
+}
+
+/* Login: foto del campo in terra rossa, con un velo scuro per leggere logo e nome */
+.login-page {
+  background:
+    linear-gradient(180deg, rgba(11, 26, 36, 0.55) 0%, rgba(11, 26, 36, 0.3) 45%, rgba(11, 26, 36, 0.65) 100%),
+    #0b1a24 url('/login-court.jpg') center / cover;
+}
+
+.login-page h1 {
+  text-shadow: 0 2px 18px rgba(0, 0, 0, 0.45);
 }
 
 .placeholder-photo {

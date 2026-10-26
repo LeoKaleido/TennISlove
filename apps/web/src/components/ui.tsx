@@ -5,6 +5,7 @@ import { NavLink, useNavigate } from 'react-router';
 import type { MatchStatus, Zone } from '@tentennis/shared';
 import type { Match, Player } from '../api';
 import { bootVisible } from '../boot';
+import { isMobileDevice, useInstall } from '../pwa';
 import { avatarColors, initials, STATUS_STYLE, ZONE_STYLE } from '../data';
 
 /** Logo TennISlove: cuore a forma di pallina da tennis. `inverted` per gli sfondi scuri: riquadro un po' più chiaro */
@@ -319,4 +320,48 @@ export function useClosing(onClose: () => void, ms = 220) {
     }, ms);
   }, [onClose, ms]);
   return [closing, close] as const;
+}
+
+const INSTALL_DISMISSED = 'tennislove:installBanner';
+const INSTALL_SNOOZE_MS = 14 * 24 * 60 * 60_000;
+
+/** "Installa l'app" sul telefono, quando si usa il browser e non l'app installata. Con la × sparisce per 14 giorni. */
+export function InstallBanner() {
+  const install = useInstall();
+  const [help, setHelp] = useState(false);
+  const [hidden, setHidden] = useState(() => {
+    try {
+      return Date.now() - Number(localStorage.getItem(INSTALL_DISMISSED) ?? 0) < INSTALL_SNOOZE_MS;
+    } catch {
+      return false;
+    }
+  });
+  if (hidden || !install.available || !isMobileDevice()) return null;
+  const dismiss = () => {
+    try {
+      localStorage.setItem(INSTALL_DISMISSED, String(Date.now()));
+    } catch {
+      // niente da fare: sparisce solo per questa visita
+    }
+    setHidden(true);
+  };
+  return (
+    <div className="install-banner">
+      <div className="install-row">
+        <Logo size={34} />
+        <span style={{ flex: 1, fontWeight: 800, fontSize: 14.5 }}>Installa l'app</span>
+        <button className="btn btn-primary btn-sm" onClick={() => (install.prompt ? install.prompt() : setHelp(!help))}>
+          Installa
+        </button>
+        <button className="icon-btn" aria-label="Chiudi" onClick={dismiss} style={{ width: 32, height: 32 }}>
+          ×
+        </button>
+      </div>
+      <Collapse open={help}>
+        <div className="muted" style={{ padding: '2px 4px 4px', fontSize: 13 }}>
+          Tocca Condividi, poi «Aggiungi alla schermata Home».
+        </div>
+      </Collapse>
+    </div>
+  );
 }
