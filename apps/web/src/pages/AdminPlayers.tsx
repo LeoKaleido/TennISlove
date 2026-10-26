@@ -115,6 +115,9 @@ export function AdminPlayers() {
                   {p.email}
                 </span>
                 <span style={{ fontSize: 12, fontWeight: 600, color: status(p).color }}>{status(p).text}</span>
+                <button className="btn btn-outline btn-sm" disabled={invite.isPending} onClick={() => invite.mutate(p)}>
+                  {p.invitedAt || p.lastLoginAt ? 'Reinvia invito' : 'Invita'}
+                </button>
               </div>
             ))}
           </div>

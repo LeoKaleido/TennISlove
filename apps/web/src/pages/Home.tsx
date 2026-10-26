@@ -50,17 +50,12 @@ export function HomePage() {
   const clubName = (id: string | null) => data.clubs.find((c) => c.id === id)?.name;
 
   return (
-    <div className="screen" style={{ gap: 24 }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '14px 16px 0' }}>
+    <div className="screen home" style={{ gap: 24 }}>
+      <div className="home-head" style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '14px 16px 0' }}>
         <Logo />
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 3, minWidth: 0, flex: 1 }}>
-          <span className="title ellipsis" style={{ fontSize: 17, fontStretch: '72%', lineHeight: 1 }}>
-            {data.season.name}
-          </span>
-          <span className="muted" style={{ fontSize: 11.5 }}>
-            {data.season.subtitle}
-          </span>
-        </div>
+        <span className="title brand" style={{ flex: 1, fontSize: 20, fontStretch: '72%', lineHeight: 1 }}>
+          TennIsLove
+        </span>
         {myPlayer && (
           <Link to="/profilo" aria-label="Il tuo profilo">
             <Avatar player={myPlayer} size={38} />
@@ -69,7 +64,7 @@ export function HomePage() {
       </div>
 
       {round && (
-        <div style={{ margin: '0 10px', background: 'var(--hero)', color: '#fff', borderRadius: 28, padding: '20px 16px 16px', display: 'flex', flexDirection: 'column', gap: 16, position: 'relative', overflow: 'hidden' }}>
+        <div className="home-hero" style={{ margin: '0 10px', background: 'var(--hero)', color: '#fff', borderRadius: 28, padding: '20px 16px 16px', display: 'flex', flexDirection: 'column', gap: 16, position: 'relative', overflow: 'hidden' }}>
           <div style={{ position: 'absolute', right: -30, top: -30, width: 150, height: 200, border: '2px solid rgba(198,238,219,.12)', borderRadius: 4 }} />
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6, padding: '0 4px', position: 'relative' }}>
             <div className="kicker" style={{ color: '#C6EEDB' }}>
@@ -103,7 +98,7 @@ export function HomePage() {
       )}
 
       {others.length > 0 && (
-        <section style={{ display: 'flex', flexDirection: 'column', gap: 10, padding: '0 14px' }}>
+        <section className="home-week" style={{ display: 'flex', flexDirection: 'column', gap: 10, padding: '0 14px' }}>
           <div className="section-head">
             <h2 className="title">Questa settimana</h2>
             <Link to="/calendario" className="link-btn">
@@ -119,7 +114,7 @@ export function HomePage() {
       )}
 
       {recent.length > 0 && (
-        <section style={{ display: 'flex', flexDirection: 'column', gap: 10, padding: '0 14px' }}>
+        <section className="home-recent" style={{ display: 'flex', flexDirection: 'column', gap: 10, padding: '0 14px' }}>
           <div className="section-head">
             <h2 className="title">Ultimi risultati</h2>
           </div>
@@ -140,7 +135,7 @@ export function HomePage() {
         </section>
       )}
 
-      <section style={{ display: 'flex', flexDirection: 'column', gap: 10, padding: '0 14px' }}>
+      <section className="home-table" style={{ display: 'flex', flexDirection: 'column', gap: 10, padding: '0 14px' }}>
         <div className="section-head">
           <h2 className="title">Classifica</h2>
           <Link to="/classifica" className="link-btn">

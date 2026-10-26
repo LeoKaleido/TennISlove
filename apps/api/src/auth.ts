@@ -1,6 +1,7 @@
-// Login con codice di 6 cifre via email (D-049) e sessione in cookie httpOnly.
+// Login con password (mandata con l'invito, D-060) o con codice di 6 cifre via email (D-049); sessione in cookie httpOnly.
 
-import { createHash, randomBytes, randomInt } from 'node:crypto';
+import { createHash, randomBytes, randomInt, scrypt, timingSafeEqual } from 'node:crypto';
+import { promisify } from 'node:util';
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import { z } from 'zod';
 import { db } from './db';
@@ -26,6 +27,30 @@ const hash = (token: string) => createHash('sha256').update(token).digest('hex')
 const newToken = () => randomBytes(32).toString('base64url');
 const newCode = () => String(randomInt(0, 1_000_000)).padStart(6, '0');
 const MAX_CODE_ATTEMPTS = 5;
+const MAX_PASSWORD_ATTEMPTS = 5;
+const LOCK_MINUTES = 15;
+
+const scryptAsync = promisify(scrypt) as (password: string, salt: Buffer, keylen: number) => Promise<Buffer>;
+
+/** Password da mandare con l'invito: 10 caratteri, senza quelli che si confondono (0/O, 1/l/I) */
+function newPassword() {
+  const chars = 'abcdefghjkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  return Array.from({ length: 10 }, () => chars[randomInt(chars.length)]).join('');
+}
+
+async function hashPassword(password: string) {
+  const salt = randomBytes(16);
+  const key = await scryptAsync(password, salt, 64);
+  return `scrypt$${salt.toString('base64')}$${key.toString('base64')}`;
+}
+
+async function checkPassword(password: string, stored: string) {
+  const [, salt, key] = stored.split('$');
+  if (!salt || !key) return false;
+  const expected = Buffer.from(key, 'base64');
+  const actual = await scryptAsync(password, Buffer.from(salt, 'base64'), expected.length);
+  return timingSafeEqual(actual, expected);
+}
 
 async function startSession(reply: FastifyReply, userId: string) {
   const sessionToken = newToken();
@@ -55,15 +80,38 @@ export async function authPlugin(app: FastifyInstance) {
     req.user = { id: u.id, email: u.email, isAdmin: u.isAdmin, playerId: u.player?.id ?? null };
   });
 
-  app.post('/api/auth/code', async (req) => {
+  app.post('/api/auth/code', async (req, reply) => {
     const { email } = z.object({ email: z.string().trim().toLowerCase().email() }).parse(req.body);
     const user = await db.user.findUnique({ where: { email } });
+    // L'app dice se l'email non è iscritta (D-060): più semplice per i giocatori, a costo di rivelare chi partecipa
+    if (!user) return reply.code(404).send({ error: 'Email non registrata' });
     // Al massimo 3 codici all'ora per email: protegge la quota di invio (D-030)
-    const recent = user
-      ? await db.loginCode.count({ where: { userId: user.id, createdAt: { gt: new Date(Date.now() - 3_600_000) } } })
-      : 0;
-    // Risposta identica in ogni caso, per non rivelare chi è iscritto
-    if (user && recent < 3) await sendLoginCode(user);
+    const recent = await db.loginCode.count({ where: { userId: user.id, createdAt: { gt: new Date(Date.now() - 3_600_000) } } });
+    if (recent >= 3) return reply.code(429).send({ error: "Troppi codici richiesti: riprova tra un'ora" });
+    await sendLoginCode(user);
+    return { ok: true };
+  });
+
+  /** Accesso con la password ricevuta nell'invito; dopo 5 errori di fila si blocca per 15 minuti */
+  app.post('/api/auth/password', async (req, reply) => {
+    const { email, password } = z.object({ email: z.string().trim().toLowerCase().email(), password: z.string().min(1).max(200) }).parse(req.body);
+    const user = await db.user.findUnique({ where: { email } });
+    if (!user) return reply.code(404).send({ error: 'Email non registrata' });
+    if (user.lockedUntil && user.lockedUntil > new Date()) {
+      return reply.code(429).send({ error: 'Troppi tentativi: riprova tra qualche minuto o ricevi un codice' });
+    }
+    if (!user.passwordHash) return reply.code(400).send({ error: 'Nessuna password per questa email: ricevi un codice' });
+    if (!(await checkPassword(password, user.passwordHash))) {
+      const failed = user.failedLogins + 1;
+      const lock = failed >= MAX_PASSWORD_ATTEMPTS;
+      await db.user.update({
+        where: { id: user.id },
+        data: lock ? { failedLogins: 0, lockedUntil: new Date(Date.now() + LOCK_MINUTES * 60_000) } : { failedLogins: failed },
+      });
+      return reply.code(lock ? 429 : 400).send({ error: lock ? 'Troppi tentativi: riprova tra qualche minuto o ricevi un codice' : 'Password errata' });
+    }
+    await db.user.update({ where: { id: user.id }, data: { failedLogins: 0, lockedUntil: null } });
+    await startSession(reply, user.id);
     return { ok: true };
   });
 
@@ -90,7 +138,17 @@ export async function authPlugin(app: FastifyInstance) {
     // consumato in un'unica scrittura condizionata: due richieste in parallelo non aprono due sessioni
     const consumed = await db.loginCode.updateMany({ where: { id: record.id, usedAt: null }, data: { usedAt: new Date() } });
     if (!consumed.count) return invalid();
+    // chi entra col codice sblocca anche l'accesso con password
+    await db.user.update({ where: { id: record.userId }, data: { failedLogins: 0, lockedUntil: null } });
     await startSession(reply, record.userId);
+    return { ok: true };
+  });
+
+  /** Nuova password dal profilo: basta essere dentro (anche entrati col codice, se la vecchia è dimenticata) */
+  app.post('/api/me/password', async (req, reply) => {
+    if (!req.user) return reply.code(401).send({ error: 'Non autenticato' });
+    const { password } = z.object({ password: z.string().min(8, 'Almeno 8 caratteri').max(200) }).parse(req.body);
+    await db.user.update({ where: { id: req.user.id }, data: { passwordHash: await hashPassword(password), failedLogins: 0, lockedUntil: null } });
     return { ok: true };
   });
 
@@ -118,17 +176,22 @@ async function sendLoginCode(user: { id: string; email: string }) {
   });
   await sendMail({
     to: user.email,
-    subject: `${code} è il tuo codice per TennISlove`,
+    subject: `${code} è il tuo codice per TennIsLove`,
     text: `Il tuo codice: ${code}\n\nVale ${env.loginCodeMinutes} minuti. Se non sei stato tu, ignora questa email.`,
   });
 }
 
-/** Invito dal gestionale (D-035): dice dove entrare; il codice lo chiede il giocatore dall'app */
-export async function sendInvite(user: { email: string }, firstName?: string) {
+/**
+ * Invito dal gestionale (D-035, D-060): genera una nuova password, la salva come hash e la manda per email.
+ * Reinvitare vale anche come reset della password.
+ */
+export async function sendInvite(user: { id: string; email: string }, firstName?: string) {
+  const password = newPassword();
+  await db.user.update({ where: { id: user.id }, data: { passwordHash: await hashPassword(password), failedLogins: 0, lockedUntil: null } });
   await sendMail({
     to: user.email,
-    subject: 'Sei nel torneo: entra in TennISlove',
-    text: `Ciao${firstName ? ` ${firstName}` : ''}!\n\nSei iscritto al torneo su TennISlove: calendario, classifica, risultati e foto delle partite.\n\nApri ${env.appUrl} ed entra con questa email: ti arriva un codice.`,
+    subject: 'Sei nel torneo: entra in TennIsLove',
+    text: `Ciao${firstName ? ` ${firstName}` : ''}!\n\nSei iscritto al torneo su TennIsLove: calendario, classifica, risultati e foto delle partite.\n\nApri ${env.appUrl} ed entra con:\nEmail: ${user.email}\nPassword: ${password}\n\nSe dimentichi la password, dalla pagina di accesso puoi farti mandare un codice via email.`,
   });
 }
 

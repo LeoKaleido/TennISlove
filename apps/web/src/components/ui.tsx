@@ -1,6 +1,6 @@
 // Componenti di base riusati da tutte le schermate.
 
-import { createContext, useCallback, useContext, useEffect, useId, useRef, useState, type CSSProperties, type InputHTMLAttributes, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useEffect, useId, useRef, useState, useSyncExternalStore, type CSSProperties, type InputHTMLAttributes, type ReactNode } from 'react';
 import { NavLink, useNavigate } from 'react-router';
 import type { MatchStatus, Zone } from '@tentennis/shared';
 import type { Match, Player } from '../api';
@@ -8,7 +8,7 @@ import { bootVisible } from '../boot';
 import { isMobileDevice, useInstall } from '../pwa';
 import { avatarColors, initials, STATUS_STYLE, ZONE_STYLE } from '../data';
 
-/** Logo TennISlove: cuore a forma di pallina da tennis. `inverted` per gli sfondi scuri: riquadro un po' più chiaro */
+/** Logo TennIsLove: cuore a forma di pallina da tennis. `inverted` per gli sfondi scuri: riquadro un po' più chiaro */
 export function Logo({ size = 38, inverted = false }: { size?: number; inverted?: boolean }) {
   const clip = useId();
   return (
@@ -187,6 +187,10 @@ const TABS = [
 export function TabBar() {
   return (
     <nav className="tabbar">
+      <div className="tabbar-brand">
+        <Logo size={34} inverted />
+        <span className="title brand">TennIsLove</span>
+      </div>
       {TABS.map((t) => (
         <NavLink key={t.to} to={t.to} end={t.end}>
           <svg width="24" height="24" viewBox="0 0 24 24">
@@ -364,4 +368,39 @@ export function InstallBanner() {
       </Collapse>
     </div>
   );
+}
+
+/** Vero se la media query è soddisfatta; si aggiorna quando si ridimensiona la finestra */
+export function useMediaQuery(query: string) {
+  return useSyncExternalStore(
+    (onChange) => {
+      const mq = window.matchMedia(query);
+      mq.addEventListener('change', onChange);
+      return () => mq.removeEventListener('change', onChange);
+    },
+    () => window.matchMedia(query).matches,
+  );
+}
+
+/** Schermi da desktop: stessa soglia del CSS (900 px) */
+export const useDesktop = () => useMediaQuery('(min-width: 900px)');
+
+/**
+ * Blocca lo scorrimento della pagina sotto una finestra. Se la pagina ha la barra di scorrimento,
+ * ne riserva prima lo spazio (gutter): togliendola, il contenuto e la finestra non si spostano.
+ */
+export function lockPageScroll() {
+  const root = document.documentElement;
+  const scrollbar = window.innerWidth - root.clientWidth;
+  if (scrollbar > 0) {
+    // i browser senza scrollbar-gutter (Safari prima della 18.2) riservano lo spazio con un margine interno
+    if (CSS.supports('scrollbar-gutter', 'stable')) root.style.scrollbarGutter = 'stable';
+    else root.style.paddingRight = `${scrollbar}px`;
+  }
+  root.style.overflow = 'hidden';
+  return () => {
+    root.style.overflow = '';
+    root.style.scrollbarGutter = '';
+    root.style.paddingRight = '';
+  };
 }

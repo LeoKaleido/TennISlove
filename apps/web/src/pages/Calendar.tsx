@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { MatchRow } from '../components/MatchRow';
-import { Chevron, Collapse, ErrorState, Loading } from '../components/ui';
+import { Chevron, Collapse, ErrorState, Loading, useDesktop } from '../components/ui';
+import type { Match, Round, SeasonOverview } from '../api';
 import { currentRound, isMine, roundRange, today, useMe, useSeason } from '../data';
 
 export function CalendarPage() {
@@ -8,6 +9,8 @@ export function CalendarPage() {
   const season = useSeason();
   const [mineOnly, setMineOnly] = useState(false);
   const [open, setOpen] = useState<Record<number, boolean>>({});
+  const [selected, setSelected] = useState<number | null>(null);
+  const desktop = useDesktop();
 
   if (season.isLoading) return <Loading />;
   if (!season.data) return <ErrorState error={season.error} />;
@@ -23,7 +26,7 @@ export function CalendarPage() {
       <div className="page-head">
         <h1 className="display">Calendario</h1>
         <div className="sub">
-          {rounds.length} giornate, {data.matches.filter((m) => m.phase === 'ROUND_ROBIN').length} partite. Giorno, ora e circolo li decidete voi.
+          {rounds.length} giornate, {data.matches.filter((m) => m.phase === 'ROUND_ROBIN').length} partite
         </div>
       </div>
       {myId && (
@@ -38,7 +41,17 @@ export function CalendarPage() {
           </div>
         </div>
       )}
-      <div style={{ padding: '0 16px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+      {desktop ? (
+        <DesktopRounds
+          data={data}
+          rounds={rounds}
+          selected={selected ?? current?.number ?? rounds[0]?.number}
+          onSelect={setSelected}
+          matchesOf={(r) => data.matches.filter((m) => m.round === r.number && m.phase === r.phase && (!mineOnly || isMine(m, myId)))}
+          myId={myId}
+        />
+      ) : (
+      <div className="cal-rounds" style={{ padding: '0 16px', display: 'flex', flexDirection: 'column', gap: 10 }}>
         {rounds.map((r) => {
           const matches = data.matches.filter((m) => m.round === r.number && m.phase === r.phase && (!mineOnly || isMine(m, myId)));
           const done = data.matches.filter((m) => m.round === r.number && m.phase === r.phase && m.result).length;
@@ -113,6 +126,81 @@ export function CalendarPage() {
           </div>
         )}
       </div>
+      )}
+    </div>
+  );
+}
+
+/**
+ * Desktop: elenco compatto delle giornate a sinistra, partite della giornata scelta a destra.
+ * Niente accordion: su due colonne le giornate aperte lascerebbero buchi.
+ */
+function DesktopRounds({
+  data,
+  rounds,
+  selected,
+  onSelect,
+  matchesOf,
+  myId,
+}: {
+  data: SeasonOverview;
+  rounds: Round[];
+  selected: number | undefined;
+  onSelect: (n: number) => void;
+  matchesOf: (r: Round) => Match[];
+  myId: string | null | undefined;
+}) {
+  const current = currentRound(data.rounds);
+  const day = today();
+  const round = rounds.find((r) => r.number === selected) ?? rounds[0];
+  const matches = round ? matchesOf(round) : [];
+  const played = (r: Round) => data.matches.filter((m) => m.round === r.number && m.phase === r.phase && m.result).length;
+  const total = (r: Round) => data.matches.filter((m) => m.round === r.number && m.phase === r.phase).length;
+
+  return (
+    <div className="cal-desktop">
+      <nav className="card cal-list" aria-label="Giornate">
+        {rounds.map((r) => {
+          const isCurrent = r.number === current?.number;
+          const on = r.number === round?.number;
+          return (
+            <div key={r.number}>
+              <button className="list-row" aria-current={on} onClick={() => onSelect(r.number)}>
+                <span className={`cal-num${isCurrent ? ' current' : r.endsOn < day ? ' past' : ''}`}>{r.number}</span>
+                <span style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 1 }}>
+                  <span style={{ fontWeight: 800, fontSize: 14.5 }}>Giornata {r.number}</span>
+                  <span className="muted" style={{ fontSize: 12 }}>
+                    {roundRange(r)}
+                  </span>
+                </span>
+                <span style={{ fontSize: 12, fontWeight: 700, color: isCurrent ? 'var(--accent)' : 'var(--ink3)' }}>
+                  {isCurrent ? 'In corso' : `${played(r)}/${total(r)}`}
+                </span>
+              </button>
+              {r.pauseAfter && <div className="cal-pause">{r.pauseAfter}</div>}
+            </div>
+          );
+        })}
+      </nav>
+      {round && (
+        <section key={round.number} className="card cal-detail" aria-live="polite">
+          <div className="cal-detail-head">
+            <span className="title" style={{ fontSize: 24 }}>
+              Giornata {round.number}
+            </span>
+            <span className="muted" style={{ fontSize: 13 }}>
+              {roundRange(round)}, {played(round)}/{total(round)} giocate
+            </span>
+          </div>
+          {matches.length === 0 ? (
+            <div className="faint" style={{ padding: '14px 18px', fontSize: 13 }}>
+              Nessuna tua partita in questa giornata.
+            </div>
+          ) : (
+            matches.map((m) => <MatchRow key={m.id} match={m} data={data} highlight={isMine(m, myId)} />)
+          )}
+        </section>
+      )}
     </div>
   );
 }

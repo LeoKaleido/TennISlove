@@ -10,8 +10,8 @@ export default defineConfig({
       registerType: 'prompt',
       injectRegister: false,
       manifest: {
-        name: 'TennISlove',
-        short_name: 'TennISlove',
+        name: 'TennIsLove',
+        short_name: 'TennIsLove',
         lang: 'it',
         start_url: '/',
         scope: '/',

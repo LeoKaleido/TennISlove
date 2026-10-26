@@ -13,7 +13,7 @@ export const env = {
   smtpPort: num(process.env.SMTP_PORT, 1025),
   smtpUser: process.env.SMTP_USER,
   smtpPass: process.env.SMTP_PASS,
-  mailFrom: process.env.MAIL_FROM ?? 'TennISlove <noreply@tennislove.local>',
+  mailFrom: process.env.MAIL_FROM ?? 'TennIsLove <noreply@tennislove.local>',
   uploadDir: process.env.UPLOAD_DIR ?? './uploads',
   secureCookies: process.env.NODE_ENV === 'production',
   trustProxy: process.env.TRUST_PROXY === 'true',

@@ -5,13 +5,13 @@
 ## 1. Onboarding giocatore
 **Attori**: admin, giocatore.
 1. L'admin crea (o importa dal seed) il giocatore con email.
-2. Il sistema manda un invito: apri l'app ed entra con la tua email (D-035, D-049).
+2. Il sistema manda un invito con indirizzo dell'app, email e una password generata (D-035, D-060). Reinvitare genera una nuova password.
 3. Il giocatore entra, carica la propria foto profilo (D-020) e vede subito "Le mie partite". Senza foto si mostra un avatar con le iniziali.
-4. Login, tutto nella stessa schermata: inserisce l'email → "Inviami il codice" → sotto compare il campo del codice (anche nell'oggetto dell'email, così si legge dalla notifica) → alla sesta cifra entra da solo, oppure "Entra" → sessione di 90 giorni in cookie httpOnly (D-049).
-   - Il codice vale 15 minuti e una volta sola; dopo 5 tentativi sbagliati non vale più; vale solo l'ultimo inviato; massimo 3 codici all'ora per email.
-   - Se si cambia l'email dopo l'invio, il campo del codice sparisce. "Invia un nuovo codice" sotto il pulsante.
-   - Mentre si va a leggere l'email, l'app ricorda a quale indirizzo l'ha mandato: se il telefono la chiude, alla riapertura il campo del codice è ancora lì.
-5. Le email non presenti tra i giocatori/admin non ricevono nulla: l'app è privata (D-009). Risposta neutra per non rivelare chi è iscritto.
+4. Login (D-060): email e password ricevute con l'invito → "Entra" → sessione di 90 giorni in cookie httpOnly.
+   - Email non iscritta: "Email non registrata". Password sbagliata: "Password errata"; alla quinta di fila l'accesso con password si blocca per 15 minuti.
+   - **Password dimenticata**: "Password dimenticata? Ricevi un codice", tutto nella stessa schermata (D-049): "Inviami il codice" → sotto compare il campo del codice (anche nell'oggetto dell'email) → alla sesta cifra entra da solo. Il codice vale 15 minuti, una volta sola, 5 tentativi, massimo 3 all'ora; entrare col codice sblocca anche la password.
+   - Mentre si va a leggere l'email, l'app ricorda a quale indirizzo ha mandato il codice: se il telefono la chiude, alla riapertura il campo è ancora lì.
+   - Dal profilo, "Cambia password" (minimo 8 caratteri), senza chiedere quella vecchia.
 
 Caso limite: un giocatore senza email resta in anagrafica ma senza accesso; l'admin può agire al suo posto.
 
@@ -168,7 +168,7 @@ Canale unico: **email**. Niente push in v1.
 
 | Evento | Destinatari | Contenuto | Stato |
 |---|---|---|---|
-| Invito | giocatore | indirizzo dell'app, si entra con la propria email | fatto |
+| Invito | giocatore | indirizzo dell'app, email e password generata | fatto |
 | Login | giocatore | codice di 6 cifre | fatto |
 | Partita programmata o riprogrammata | entrambi | data, ora, luogo, allegato `.ics` + link Google Calendar | fatto |
 | Risultato inserito | avversario | riepilogo + link per confermare o contestare | fatto |

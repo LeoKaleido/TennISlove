@@ -1,6 +1,6 @@
 # Runbook — avvio in locale e in produzione
 
-> Stato al 26/10/2026: **locale pronto**. **Produzione pronta nei file e provata in locale nel container unico**, dietro un proxy simulato, mai ancora installata su un VPS. Mancano il VPS, la scelta e l'acquisto del dominio (D-050) e la casella email su Plesk.
+> Stato al 26/10/2026: **locale pronto**. **Produzione installata sul server** (container unico dietro il web server del server, che fa l'HTTPS); in corso la messa a punto dell'invio email da Plesk, mai ancora installata su un VPS. Mancano il VPS, la scelta e l'acquisto del dominio (D-050) e la casella email su Plesk.
 
 ## Panoramica
 
@@ -162,14 +162,30 @@ Script di avvio: `docker/dev-start.sh` e `docker/prod-start.sh`. L'app gira semp
       - Crea torneo, giocatori, calendario, circoli, admin e i risultati del JSON, tutti confermati.
       - Se la stagione esiste già non fa niente: rilanciarlo per errore non fa danni.
    - Da quel momento la fonte è l'app: l'Excel non si usa più per aggiornare i dati.
+   - Il seed in produzione **va lanciato a mano**: l'avvio del container applica solo le migrazioni (tabelle vuote). Senza seed non esistono utenti e nessuna email del codice parte.
 6. **Verifica**:
    - `https://<dominio>/api/health` risponde `{"ok":true}`;
    - un login di prova con l'email di un admin arriva davvero nella casella;
    - una foto caricata da telefono si vede in gallery;
-   - https://www.ssllabs.com/ssltest/ dà almeno A.
+   - https://www.ssllabs.com/ssltest/ dà almeno A: verifica il certificato e l'HTTPS del server (D-056).
 7. **Backup notturno**: `crontab -e` e aggiungi
    `30 3 * * * /home/deploy/tentennis/scripts/backup.sh /home/deploy/backups`
-8. **Inviti**: dal gestionale, sezione Giocatori, invia l'invito a ciascun giocatore.
+8. **Primo accesso al gestionale** (nessuno ha ancora una password): sul server `scripts/password.sh tua@email 'password-scelta'` (minimo 8 caratteri), poi entra su `/admin` con quella. Funziona per qualunque utente esistente, anche senza email.
+9. **Inviti**: dal gestionale, sezione Giocatori, invia l'invito a ciascun giocatore: riceve indirizzo dell'app e una password (D-060). Gli admin senza giocatore (es. `giuseppe@kalei.do`) entrano con il codice via email.
+
+### Uso quotidiano e problemi in produzione
+I comandi passano da `docker compose -f docker-compose.prod.yml`, dalla cartella del progetto. Per usarli da qualunque cartella serve il nome del container: `docker ps --format '{{.Names}}'` (con il compose del repository è `tentennis-prod-app-1`).
+- **Log di tutto**: `docker compose -f docker-compose.prod.yml logs -f`
+- **Email**: all'avvio il log scrive le impostazioni in uso (`Email: SMTP host:porta, SSL, utente, mittente`, mai la password); poi una riga per ogni invio:
+  - `Email inviata a … (server: 250 …)`: partita e accettata dal server di posta. Se non arriva: spam, SPF/DKIM/DMARC su Plesk, log della posta di Plesk;
+  - `Invio email fallito a …`: subito sotto c'è il motivo (certificato, password, mittente diverso dalla casella, connessione). Con porta e SSL sbagliati l'errore può comparire dopo 2-3 minuti;
+  - nessuna riga dopo la richiesta: l'app ha risposto con un errore ("Email non registrata" se il seed non è fatto, oppure 3 codici già chiesti nell'ultima ora);
+  - i codici nell'oggetto sono mascherati (`******`): nei log non finisce mai un codice valido.
+- **Password**: con 5 errori di fila l'accesso con password si blocca per 15 minuti; entrare col codice lo sblocca. "Reinvia invito" dal gestionale manda una password nuova.
+- **Password impostata dal server**: `scripts/password.sh nome@email.it 'password-scelta'`, quando la posta non funziona o per il primo accesso.
+- **Codice d'emergenza senza email**: `scripts/codice.sh nome@email.it` crea un codice valido 15 minuti e lo stampa. Va scritto nell'app dopo aver chiesto "Inviami il codice" con la stessa email.
+- **Dopo aver cambiato il `.env`**: `docker compose -f docker-compose.prod.yml up -d` (`restart` non rilegge il file).
+- **Riavvii e dati**: riavviare, fermare, ricostruire con `up -d --build` o riavviare il server non tocca i dati (volumi). Si perdono solo con `down -v`, cancellando i volumi o **cambiando il `name:` del progetto** nel compose: Docker cercherebbe volumi con il nome nuovo e partirebbe con un database vuoto.
 
 ### Variabili d'ambiente
 - **`HTTP_BIND`** (facoltativa): dove ascolta il container, predefinito `127.0.0.1:8080`.
@@ -211,7 +227,8 @@ Script di avvio: `docker/dev-start.sh` e `docker/prod-start.sh`. L'app gira semp
   - Content-Security-Policy: script solo dal sito, font solo da Google Fonts;
   - pagina non incorporabile in altri siti;
   - nessun Referer verso altri siti;
-  - nessuna versione di Nginx esposta.
+  - nessuna versione di Nginx esposta;
+  - niente motori di ricerca: `X-Robots-Tag: noindex, nofollow` su ogni risposta, meta `robots` nella pagina e `robots.txt` che vieta tutto.
 - **Limiti per IP**:
   - login: 10 richieste al minuto con piccola tolleranza, poi risposta 429;
   - resto dell'API: 20 richieste al secondo.

@@ -71,7 +71,7 @@ export function MatchPage() {
             <div style={{ position: 'absolute', left: '50%', top: '50%', width: 200, height: 400, transform: 'translate(-50%,-50%) rotate(-12deg)', border: '2px solid rgba(198,238,219,.13)' }} />
             <Logo size={92} inverted />
             <div className="display brand" style={{ position: 'relative', fontSize: 26, color: '#C6EEDB' }}>
-              TennISlove
+              TennIsLove
             </div>
           </div>
         )}

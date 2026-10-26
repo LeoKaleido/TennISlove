@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router';
 import { api } from '../api';
 import { MatchRow } from '../components/MatchRow';
-import { Avatar, BackButton, ButtonLoader, Collapse, ErrorState, Loading, useToast } from '../components/ui';
+import { Avatar, BackButton, ButtonLoader, Collapse, ErrorState, Loading, TextField, useToast } from '../components/ui';
 import { compressImage, uploadImage } from '../photos';
 import { isMine, opponentOf, playerIndex, useMe, useSeason, ZONE_STYLE } from '../data';
 import { clearLocalData } from '../drafts';
@@ -20,6 +20,22 @@ export function ProfilePage() {
   const [theme, setThemeState] = useState<Theme>(getTheme());
   const install = useInstall();
   const [installHelp, setInstallHelp] = useState(false);
+  const [pwOpen, setPwOpen] = useState(false);
+  const [newPassword, setNewPassword] = useState('');
+  const [pwError, setPwError] = useState('');
+  const savePassword = useMutation({
+    mutationFn: () => api('/api/me/password', { method: 'POST', body: { password: newPassword } }),
+    onSuccess: () => {
+      setPwOpen(false);
+      setNewPassword('');
+      toast('Password cambiata');
+    },
+    onError: (e) => setPwError(e.message),
+  });
+  const submitPassword = () => {
+    if (newPassword.length < 8) return setPwError('Almeno 8 caratteri');
+    savePassword.mutate();
+  };
 
   const toast = useToast();
   const uploadPhoto = useMutation({
@@ -73,6 +89,33 @@ export function ProfilePage() {
       </Collapse>
     </>
   );
+  const passwordButton = (
+    <>
+      <button className="btn btn-outline" style={{ height: 50, fontSize: 14.5 }} onClick={() => setPwOpen(!pwOpen)}>
+        Cambia password
+      </button>
+      <Collapse open={pwOpen}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8, padding: '6px 0 4px' }}>
+          <TextField
+            label="Nuova password"
+            type="password"
+            autoComplete="new-password"
+            value={newPassword}
+            onChange={(e) => {
+              setNewPassword(e.target.value);
+              setPwError('');
+            }}
+            onKeyDown={(e) => e.key === 'Enter' && submitPassword()}
+            error={!!pwError}
+          />
+          {pwError && <div style={{ fontSize: 13, color: 'var(--errFg)', fontWeight: 600 }}>{pwError}</div>}
+          <button className="btn btn-primary" style={{ height: 50 }} onClick={submitPassword} disabled={!newPassword || savePassword.isPending}>
+            {savePassword.isPending ? <ButtonLoader /> : 'Salva'}
+          </button>
+        </div>
+      </Collapse>
+    </>
+  );
   const logoutButton = (
     <button className="btn btn-outline" style={{ height: 50, color: 'var(--errFg)', fontSize: 14.5 }} onClick={() => logout.mutate()}>
       Esci
@@ -89,6 +132,7 @@ export function ProfilePage() {
         </div>
         <div style={{ padding: '0 14px', display: 'flex', flexDirection: 'column', gap: 8 }}>
           {installButton}
+          {passwordButton}
           {themeButton}
           {logoutButton}
         </div>
@@ -244,6 +288,7 @@ export function ProfilePage() {
       {isMe && (
         <div style={{ padding: '0 14px', display: 'flex', flexDirection: 'column', gap: 8 }}>
           {installButton}
+          {passwordButton}
           {themeButton}
           {logoutButton}
         </div>

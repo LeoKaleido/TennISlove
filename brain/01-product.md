@@ -4,7 +4,7 @@
 
 ## 1. Contesto
 
-**TennISlove** (D-050) è la web app di **ATP Umbria Tournament**, un torneo amatoriale di tennis tra amici ("Amici Tennis · Pre-cena"), stagione 2026/27, partito il 12 ottobre 2026.
+**TennIsLove** (D-050) è la web app di **ATP Umbria Tournament**, un torneo amatoriale di tennis tra amici ("Amici Tennis · Pre-cena"), stagione 2026/27, partito il 12 ottobre 2026.
 Oggi è gestito con un PDF (regolamento + calendario) e un foglio Excel che calcola punti e classifica. L'organizzatore e committente è **Giuseppe De Francesca**, anche lui giocatore.
 
 Problemi di oggi:
@@ -89,7 +89,7 @@ Il progetto è gratuito e senza scadenza (D-015), quindi si rilascia a piccoli p
 - Prenotazione dei campi presso i circoli.
 - Pagamenti/quote.
 - Chat tra giocatori (si organizzano già su WhatsApp).
-- App native: TennISlove è una web app installabile (PWA, D-048).
+- App native: TennIsLove è una web app installabile (PWA, D-048).
 - Notifiche push (v1 solo email, D-013).
 
 ## 8. Idee da valutare (non richieste)

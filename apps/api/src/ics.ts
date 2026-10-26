@@ -19,7 +19,7 @@ export function toIcs(e: CalendarEvent): string {
   return [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
-    'PRODID:-//TennISlove//IT',
+    'PRODID:-//TennIsLove//IT',
     'METHOD:PUBLISH',
     'BEGIN:VEVENT',
     `UID:${e.uid}@tennislove`,

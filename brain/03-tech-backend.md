@@ -9,10 +9,11 @@
 | Server | Fastify 5 (`apps/api/src/server.ts`) |
 | Database | PostgreSQL 17 via Prisma 6 |
 | Validazione | Zod 4 sui body delle richieste |
-| Login | codice di 6 cifre via email + sessione in cookie httpOnly di 90 giorni (D-049) |
-| Email | nodemailer via SMTP: Mailpit in sviluppo, casella su Plesk in produzione (D-055) |
+| Login | password dell'invito (hash scrypt, blocco dopo 5 errori) o codice di 6 cifre via email + sessione in cookie httpOnly di 90 giorni (D-049, D-060) |
+| Email | nodemailer via SMTP: Mailpit in sviluppo, casella su Plesk in produzione (D-055). Log delle impostazioni all'avvio e di ogni invio, con i codici mascherati |
 | Foto | su disco (`UPLOAD_DIR`), servite solo con login (D-038) |
 | Calendario | file `.ics` scritto a mano (`ics.ts`) + link Google Calendar |
+| Script | `scripts/backup.sh` (database e foto), `scripts/codice.sh` (codice d'emergenza), `scripts/password.sh` (imposta una password dal server), `pnpm seed:excel` (risultati del seed dall'Excel) |
 | Lavori periodici | `setInterval` ogni 5 minuti (`jobs.ts`): conferma automatica dei risultati, pulizia di sessioni e codici scaduti |
 | Test | Vitest sul motore in `packages/shared` |
 
@@ -33,7 +34,7 @@ Tutto sotto `/api`. Tranne `/api/auth/*` e `/api/health`, serve il login. Le rot
 
 | Area | Rotte |
 |---|---|
-| Accesso | `POST auth/code` (manda il codice), `POST auth/login` (email + codice), `POST auth/logout`, `GET me` |
+| Accesso | `POST auth/password` (email + password), `POST auth/code` (manda il codice), `POST auth/login` (email + codice), `POST auth/logout`, `GET me`, `POST me/password` (cambia password) |
 | Torneo | `GET season` (in corso, o `?id=`), `GET seasons` |
 | Partite | `GET matches/:id`, `GET matches/:id/calendar.ics`, `PUT matches/:id/schedule`, `POST matches/:id/postpone` |
 | Risultati | `PUT matches/:id/result`, `POST matches/:id/result/confirm`, `POST matches/:id/result/dispute` |
@@ -50,4 +51,4 @@ Chi può fare cosa:
 Dettaglio delle protezioni attive in `05-runbook.md`, sezione "Protezioni già attive".
 
 ## Hosting
-VPS con un **unico container** (D-054, `docker-compose.prod.yml`): Postgres, API, **Nginx** (D-039) che serve la build del web, inoltra `/api` e gestisce l'HTTPS con Let's Encrypt, e il rinnovo dei certificati. Stessa impostazione in sviluppo, con Vite e Mailpit al posto di Nginx e certbot. Procedura completa in `05-runbook.md`.
+VPS con un **unico container** (D-054, `docker-compose.prod.yml`): Postgres, API e **Nginx**, che serve la build del web e inoltra `/api`, solo HTTP su `127.0.0.1:8080`. **HTTPS e certificati li gestisce il web server del server** (D-056), che inoltra al container. Stessa impostazione in sviluppo, con Vite e Mailpit al posto di Nginx. Procedura completa in `05-runbook.md`.

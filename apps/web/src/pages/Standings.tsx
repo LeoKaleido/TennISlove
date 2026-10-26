@@ -4,14 +4,14 @@ import { Avatar, Chevron, Collapse, ErrorState, Loading, ZonePill } from '../com
 import { playerIndex, useMe, useSeason, useSeasons } from '../data';
 
 const COLUMNS = [
-  { key: 'played', title: 'Giocate' },
-  { key: 'won', title: 'Vinte' },
-  { key: 'lost', title: 'Perse' },
-  { key: 'noResult', title: 'Senza esito' },
-  { key: 'gamesWon', title: 'Game fatti' },
-  { key: 'gamesLost', title: 'Game subiti' },
-  { key: 'gamesDiff', title: 'Differenza game' },
-  { key: 'bonus', title: 'Bonus e compensazioni' },
+  { key: 'played', label: 'G', title: 'Giocate' },
+  { key: 'won', label: 'V', title: 'Vinte' },
+  { key: 'lost', label: 'P', title: 'Perse' },
+  { key: 'noResult', label: 'SE', title: 'Senza esito' },
+  { key: 'gamesWon', label: 'GF', title: 'Game fatti' },
+  { key: 'gamesLost', label: 'GS', title: 'Game subiti' },
+  { key: 'gamesDiff', label: 'DG', title: 'Differenza game' },
+  { key: 'bonus', label: 'B', title: 'Bonus e compensazioni' },
 ] as const;
 
 export function StandingsPage() {
@@ -33,7 +33,7 @@ export function StandingsPage() {
   const q = data.season.qualifiers;
 
   return (
-    <div className="screen" style={{ gap: 16 }}>
+    <div className="screen standings" style={{ gap: 16 }}>
       <div className="page-head">
         <h1 className="display">Classifica</h1>
         <div className="sub">
@@ -66,7 +66,54 @@ export function StandingsPage() {
         </div>
       )}
 
-        <div style={{ padding: '0 16px', display: 'flex', flexDirection: 'column', gap: 8 }}>
+        {/* tabella se c'è spazio, altrimenti schede (decide la larghezza disponibile, non il dispositivo) */}
+        <div className="st-board">
+          <div className="st-table">
+            <div className="card">
+              <table style={{ borderCollapse: 'collapse', width: '100%', fontSize: 14 }}>
+                <thead>
+                  <tr style={{ fontSize: 10.5, color: 'var(--ink3)', textTransform: 'uppercase', letterSpacing: '.06em' }}>
+                    <th style={{ textAlign: 'left', padding: '14px 10px 14px 18px' }}>#</th>
+                    <th style={{ textAlign: 'left', padding: '14px 10px' }}>Giocatore</th>
+                    <th style={{ padding: '14px 10px' }}>
+                      <ColumnTip label="Pt" title="Punti" />
+                    </th>
+                    {COLUMNS.map((c, i) => (
+                      <th key={c.key} style={{ padding: i === COLUMNS.length - 1 ? '14px 18px 14px 10px' : '14px 10px', fontWeight: 700 }}>
+                        <ColumnTip label={c.label} title={c.title} end={i >= COLUMNS.length - 3} />
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {data.standings.map((r, i) => {
+                    const p = players.get(r.playerId)!;
+                    const next = data.standings[i + 1];
+                    const cut = q > 0 && r.position <= q && !!next && next.position > q;
+                    const bg = r.playerId === myId ? 'color-mix(in oklch, var(--mint) 35%, var(--surface))' : undefined;
+                    return (
+                      <tr key={r.playerId} style={{ borderTop: '1px solid var(--line)', borderBottom: cut ? '2px solid var(--accent)' : undefined, background: bg }}>
+                        <td style={{ padding: '13px 10px 13px 18px', fontWeight: 900, fontStretch: '70%', fontSize: 18 }}>{r.position}</td>
+                        <td style={{ padding: '11px 10px' }}>
+                          <Link to={`/giocatori/${p.id}`} style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'inherit', textDecoration: 'none', fontWeight: 700, whiteSpace: 'nowrap' }}>
+                            <Avatar player={p} size={28} />
+                            {p.firstName} {p.lastName}
+                          </Link>
+                        </td>
+                        <td style={{ textAlign: 'center', padding: '0 10px', fontWeight: 900, fontStretch: '70%', fontSize: 20 }}>{r.points}</td>
+                        {COLUMNS.map((c, i) => (
+                          <td key={c.key} style={{ textAlign: 'center', color: 'var(--ink2)', padding: i === COLUMNS.length - 1 ? '0 18px 0 10px' : '0 10px' }}>
+                            {c.key === 'gamesDiff' && r.gamesDiff > 0 ? `+${r.gamesDiff}` : r[c.key]}
+                          </td>
+                        ))}
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        <div className="st-list" style={{ padding: '0 16px', display: 'flex', flexDirection: 'column', gap: 8 }}>
           {data.standings.map((r, i) => {
             const p = players.get(r.playerId)!;
             const open = expanded === r.playerId;
@@ -121,8 +168,9 @@ export function StandingsPage() {
             );
           })}
         </div>
+        </div>
 
-      <div style={{ margin: '4px 16px 0', padding: 18, borderRadius: 22, background: 'var(--hero)', color: '#fff', display: 'flex', flexDirection: 'column', gap: 12 }}>
+      <div className="st-rules" style={{ margin: '4px 16px 0', padding: 18, borderRadius: 22, background: 'var(--hero)', color: '#fff', display: 'flex', flexDirection: 'column', gap: 12 }}>
         <div className="title" style={{ fontSize: 22, color: '#C6EEDB' }}>
           Come si fanno i punti
         </div>
@@ -137,6 +185,15 @@ export function StandingsPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+/** Sigla di colonna con il significato: al passaggio del mouse o toccandola (su telefono non ci sono tooltip nativi) */
+function ColumnTip({ label, title, end = false }: { label: string; title: string; end?: boolean }) {
+  return (
+    <span className={`col-tip${end ? ' end' : ''}`} data-tip={title} tabIndex={0} aria-label={title}>
+      {label}
+    </span>
   );
 }
 

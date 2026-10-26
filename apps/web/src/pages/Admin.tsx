@@ -39,7 +39,7 @@ export function AdminPage() {
           <Logo size={34} inverted />
           <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
             <span className="title brand" style={{ fontSize: 17, fontStretch: '72%', lineHeight: 1 }}>
-              TennISlove
+              TennIsLove
             </span>
             <span className="mono" style={{ fontSize: 10.5, color: '#C6EEDB' }}>
               /admin, {data.season.label}

@@ -145,6 +145,81 @@ a {
   }
 }
 
+/* telefono in orizzontale e tablet: colonna più larga (così, per esempio, la classifica diventa tabella) */
+@media (min-width: 600px) and (max-width: 899px) {
+  .app {
+    max-width: 760px;
+  }
+}
+
+/* Classifica: tabella se ci sta, altrimenti schede. Decide la larghezza disponibile, non il dispositivo */
+.st-board {
+  container-type: inline-size;
+}
+
+.st-table {
+  padding: 0 16px;
+}
+
+/* righe alternate per seguire la riga con l'occhio (la riga del giocatore resta evidenziata) */
+.st-table tbody tr:nth-child(even) {
+  background: color-mix(in oklch, var(--surface2) 60%, var(--surface));
+}
+
+/* significato delle sigle di colonna: sotto la sigla, al passaggio del mouse o al tocco */
+.col-tip {
+  position: relative;
+  cursor: help;
+  border-bottom: 1px dotted currentColor;
+  outline: none;
+}
+
+.col-tip::after {
+  content: attr(data-tip);
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 50%;
+  z-index: 3;
+  transform: translateX(-50%);
+  padding: 5px 9px;
+  border-radius: 8px;
+  background: #c6eedb;
+  color: #0b1a24;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+}
+
+.col-tip.end::after {
+  left: auto;
+  right: -6px;
+  transform: none;
+}
+
+.col-tip:hover::after,
+.col-tip:focus-visible::after,
+.col-tip:focus::after {
+  opacity: 1;
+}
+
+@container (min-width: 620px) {
+  .st-list {
+    display: none !important;
+  }
+}
+
+@container (max-width: 619.98px) {
+  .st-table {
+    display: none;
+  }
+}
+
 .screen {
   flex: 1 0 auto;
   display: flex;
@@ -166,7 +241,7 @@ a {
   margin: 0;
 }
 
-/* il nome si scrive sempre TennISlove: mai tutto maiuscolo */
+/* il nome si scrive sempre TennIsLove: mai tutto maiuscolo */
 .display.brand,
 .title.brand {
   text-transform: none;
@@ -453,6 +528,11 @@ a {
   color: var(--accent);
 }
 
+/* marchio della barra laterale: solo su desktop */
+.tabbar-brand {
+  display: none;
+}
+
 /* Barra fissa in fondo ai form */
 .sticky-footer {
   position: sticky;
@@ -625,11 +705,11 @@ textarea.input {
   color: var(--errFg);
 }
 
-/* Bottom sheet */
+/* Bottom sheet (sopra anche le finestre) */
 .sheet-wrap {
   position: fixed;
   inset: 0;
-  z-index: 40;
+  z-index: 60;
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
@@ -740,6 +820,13 @@ textarea.input {
   .chevron {
     transition: none;
   }
+}
+
+/* fogli e finestre hanno un'altezza massima: il contenuto scorre, gli elementi (pulsanti compresi) non si schiacciano */
+.sheet > *,
+.modal > *,
+.route-modal-scroll > * {
+  flex-shrink: 0;
 }
 
 .sheet-handle {
@@ -877,6 +964,34 @@ textarea.input {
   animation: modalIn 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
+/* Pagine della partita in finestra (desktop) */
+.route-modal {
+  width: min(720px, 100%);
+  max-height: calc(100dvh - 48px);
+  padding: 0;
+  gap: 0;
+  overflow: hidden;
+}
+
+.route-modal-scroll {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--line2) transparent;
+}
+
+.route-modal .screen {
+  min-height: 0;
+}
+
+.route-modal .sticky-header,
+.route-modal .sticky-footer {
+  border-radius: 0;
+}
+
 .admin-score {
   border-collapse: collapse;
   width: 100%;
@@ -1012,4 +1127,290 @@ textarea.input {
 [data-theme='dark'] .btn-dark {
   background: #c6eedb;
   color: #0b1a24;
+}
+
+/* ===== Desktop (da 900 px): barra laterale, contenuto largo, pagine su più colonne. Il telefono non cambia. ===== */
+@media (min-width: 900px) {
+  /* pagine con le sezioni: barra laterale a sinistra, contenuto a destra */
+  .app-tabs {
+    max-width: none;
+    display: grid;
+    grid-template-columns: 240px minmax(0, 1fr);
+    box-shadow: none;
+  }
+
+  .app-tabs > :not(.dock) {
+    grid-column: 2;
+    grid-row: 1;
+    width: 100%;
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 28px 32px 48px;
+  }
+
+  .app-tabs .dock {
+    grid-column: 1;
+    grid-row: 1;
+    position: sticky;
+    top: 0;
+    height: 100dvh;
+    margin: 0;
+  }
+
+  .tabbar {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 18px 14px;
+    background: #0b1a24;
+    border-top: 0;
+  }
+
+  .tabbar-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 4px 6px 18px;
+    color: #fff;
+    font-size: 19px;
+  }
+
+  .tabbar a {
+    flex-direction: row;
+    gap: 12px;
+    padding: 10px 12px;
+    border-radius: 12px;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 14.5px;
+  }
+
+  .tabbar a:hover {
+    background: rgba(255, 255, 255, 0.06);
+    color: #fff;
+  }
+
+  .tabbar a.active {
+    background: rgba(198, 238, 219, 0.12);
+    color: #c6eedb;
+  }
+
+  /* pagine singole (partita, risultato, foto): colonna centrata più larga; il login usa tutto lo schermo */
+  .app-plain {
+    max-width: 720px;
+  }
+
+  .app-plain:has(.login-page) {
+    max-width: none;
+  }
+
+  /* Home: giornata a sinistra, settimana, risultati e classifica a destra */
+  .home {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+    grid-template-areas:
+      'hero week'
+      'hero recent'
+      'hero table';
+    align-items: start;
+    align-content: start;
+    column-gap: 28px;
+  }
+
+  .home-head {
+    display: none !important;
+  }
+
+  .home-hero {
+    grid-area: hero;
+    margin: 0 !important;
+    position: sticky !important;
+    top: 28px;
+  }
+
+  .home-week {
+    grid-area: week;
+  }
+
+  .home-recent {
+    grid-area: recent;
+  }
+
+  .home-table {
+    grid-area: table;
+  }
+
+  .home-week,
+  .home-recent,
+  .home-table {
+    padding: 0 !important;
+  }
+
+  /* Classifica: elenco a sinistra, regole a destra */
+  .standings {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) 340px;
+    column-gap: 28px;
+    align-items: start;
+    align-content: start;
+  }
+
+  .standings > :not(.st-board):not(.st-rules) {
+    grid-column: 1 / -1;
+  }
+
+  .st-board {
+    grid-column: 1;
+  }
+
+  .st-list,
+  .st-table {
+    padding: 0 !important;
+  }
+
+  .st-rules {
+    grid-column: 2;
+    margin: 0 !important;
+    position: sticky;
+    top: 28px;
+  }
+
+  /* Calendario: elenco delle giornate a sinistra, partite della giornata scelta a destra */
+  .cal-desktop {
+    display: grid;
+    grid-template-columns: 320px minmax(0, 1fr);
+    gap: 24px;
+    align-items: start;
+  }
+
+  .cal-list {
+    border-radius: 20px;
+  }
+
+  .cal-list .list-row {
+    padding: 10px 14px;
+    border-radius: 0;
+    transition: background 0.15s ease;
+  }
+
+  .cal-list .list-row:hover {
+    background: var(--surface2);
+  }
+
+  .cal-list .list-row[aria-current='true'] {
+    background: color-mix(in oklch, var(--mint) 30%, var(--surface));
+    box-shadow: inset 3px 0 0 var(--accent);
+  }
+
+  .cal-num {
+    width: 34px;
+    height: 34px;
+    flex: none;
+    display: grid;
+    place-items: center;
+    border-radius: 10px;
+    background: var(--surface2);
+    color: var(--ink);
+    font-weight: 900;
+    font-stretch: 70%;
+    font-size: 17px;
+  }
+
+  .cal-num.past {
+    background: var(--night);
+    color: #c6eedb;
+  }
+
+  .cal-num.current {
+    background: var(--accent);
+    color: var(--onAccent);
+  }
+
+  .cal-pause {
+    padding: 8px 14px;
+    border-top: 1px dashed var(--line2);
+    border-bottom: 1px dashed var(--line2);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink2);
+    text-align: center;
+  }
+
+  .cal-detail {
+    position: sticky;
+    top: 28px;
+    border-radius: 20px;
+    animation: fadeIn 0.2s ease;
+  }
+
+  .cal-detail-head {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 16px 18px 14px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  /* Gallery: più foto per riga */
+  .gallery-grid {
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)) !important;
+    gap: 8px !important;
+    padding: 0 !important;
+  }
+
+  .gallery-grid > a {
+    border-radius: 14px !important;
+  }
+
+  /* intestazioni e blocchi con margini da telefono */
+  .app-tabs .page-head,
+  .app-tabs .pad {
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  /* Programma partita: finestra al centro invece che pannello dal basso */
+  .sheet-wrap {
+    max-width: none;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+  }
+
+  .sheet {
+    width: min(560px, 100%);
+    border-radius: 24px;
+    padding: 18px 22px 22px;
+    animation: modalIn 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+
+  .sheet-handle {
+    display: none;
+  }
+
+  .sheet-wrap.closing .sheet {
+    animation: modalOut 0.18s ease forwards;
+  }
+
+  /* Login: foto a sinistra, modulo a destra. Foto orizzontale di Bernd Dittrich (Unsplash), solo su desktop */
+  .login-page {
+    flex-direction: row !important;
+    background:
+      linear-gradient(90deg, rgba(11, 26, 36, 0.55) 0%, rgba(11, 26, 36, 0.2) 60%),
+      #0b1a24 url('/login-court-desktop.jpg') center / cover;
+  }
+
+  .login-hero {
+    padding: 56px !important;
+  }
+
+  .login-panel {
+    width: 460px;
+    flex: none;
+    justify-content: center;
+    border-radius: 0 !important;
+    padding: 48px 44px !important;
+  }
 }

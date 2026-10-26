@@ -43,7 +43,7 @@ Monorepo pnpm: `apps/web`, `apps/api`, `packages/shared` (motore di punteggio e 
   - si riapre l'ultima pagina vista, se è di meno di 12 ore fa;
   - i form tornano come li avevi lasciati (`src/drafts.ts`: risultato, contestazione, programmazione, email a cui è stato mandato il codice), per 24 ore o fino all'invio;
   - all'uscita ("Esci") bozze e ultima pagina si cancellano.
-- **Login con codice** (D-049): su iPhone l'app installata non condivide il login con Safari, quindi un link nell'email non servirebbe. Si entra solo con il codice di 6 cifre, scritto nell'app.
+- **Login** (D-060): email e password dell'invito; in alternativa il codice di 6 cifre via email (D-049), che funziona anche nell'app installata su iPhone, dove un link aprirebbe Safari.
 - **In sviluppo** il service worker è spento e un indirizzo `http://IP` non è sicuro per il browser: dal telefono si provano aggiunta alla Home (solo iPhone), schermata di avvio, login e ripresa della pagina, ma cache e aggiornamenti si vedono solo in HTTPS, cioè in produzione.
 
 ## Testi: minimalismo (D-045)
@@ -58,8 +58,16 @@ L'app è ovvia per chi la usa: i testi devono essere pochi e brevi.
 - Nel dubbio, si toglie.
 
 ## Linee guida UX
-- **Sfondo del login** (telefono): foto di un campo in terra rossa dall'alto, `public/login-court.jpg` (1080×1920, 182 KB, senza metadati). Autore Maurits Bausenhart, [Unsplash](https://unsplash.com/photos/tennis-court-with-white-lines-XtcZbSPVJ3A), licenza Unsplash (uso libero). Per il desktop servirà una foto orizzontale.
-- **Classifica solo a schede** (D-053): ogni giocatore si apre per vedere le statistiche. Niente vista a tabella.
+- **Sfondo del login** (telefono): foto di un campo in terra rossa dall'alto, `public/login-court.jpg` (1080×1920, 182 KB, senza metadati). Autore Maurits Bausenhart, [Unsplash](https://unsplash.com/photos/tennis-court-with-white-lines-XtcZbSPVJ3A), licenza Unsplash (uso libero). Su desktop si usa una foto orizzontale (vedi Desktop).
+- **Classifica: tabella o schede** (D-057): tabella quando la classifica ha almeno 620 px (desktop, tablet, telefono in orizzontale), schede che si aprono sotto quella misura. Decide la larghezza disponibile (container query su `.st-board`), non il tipo di dispositivo. Nella tabella le sigle di colonna hanno un tooltip (passaggio del mouse o tocco, al posto della legenda) e le righe sono alternate per seguirle con l'occhio.
+- **Desktop** (da 900 px, D-057), il telefono non cambia:
+  - la barra in basso diventa una barra laterale scura con logo e sezioni;
+  - contenuto largo fino a 1080 px: Home su due colonne (giornata ferma a sinistra, senza intestazione perché logo e nome sono nella barra laterale), Classifica con "Come si fanno i punti" a destra, Calendario con l'elenco delle giornate a sinistra e le partite della giornata scelta a destra (niente accordion: su più colonne lascerebbe buchi), Gallery con più foto per riga;
+  - **pagine della partita in finestra** (scheda, foto, risultato, conferma): si aprono sopra la pagina di provenienza, che resta sotto con il suo scroll; senza provenienza (ricarica, link nelle email) sotto c'è la Home. L'indirizzo resta `/partite/…`. Si chiudono con la freccia indietro, un clic fuori o Esc (niente ×: copriva i pulsanti). Lo scorrimento è interno, così la barra non rovina gli angoli; mentre la finestra è aperta la pagina sotto non scorre e, se aveva la barra, ne viene riservato lo spazio (`lockPageScroll`), così niente si sposta. Sul telefono restano pagine intere (`useMatchModal` in `App.tsx`);
+  - "Programma partita" diventa una finestra al centro;
+  - login con foto a sinistra e modulo a destra: `public/login-court-desktop.jpg` (1920×1160, 186 KB, senza metadati), campo in terra rossa dall'alto con l'ombra di un giocatore, di Bernd Dittrich, [Unsplash](https://unsplash.com/photos/a-picture-of-a-tennis-court-with-a-shadow-of-a-tennis-player-_AYNT8tkRqI), licenza Unsplash. Si scarica solo su desktop.
+- **Telefono in orizzontale e tablet** (600–899 px): colonna larga fino a 760 px.
+- **Fogli e finestre** con altezza massima: il contenuto scorre, gli elementi non si schiacciano (prima il "Salva" di Programma partita era alto 17 px).
 - **Aperture e chiusure animate** (D-053):
   - accordion (classifica, calendario, aiuto installazione) con `Collapse` e freccia `Chevron`;
   - fogli e finestre si chiudono con un'animazione (`useClosing`), non spariscono di colpo;

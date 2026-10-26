@@ -1,4 +1,4 @@
-# TennISlove
+# TennIsLove
 
 Web app privata per il torneo di tennis "ATP Umbria Tournament": classifica, calendario, programmazione delle partite e risultati.
 La documentazione di progetto (prodotto, decisioni, flussi) è in [`brain/`](brain/README.md).

@@ -58,7 +58,7 @@ export function GalleryPage() {
           </div>
         </div>
       ) : (
-        <div style={{ padding: '0 10px', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 4 }}>
+        <div className="gallery-grid" style={{ padding: '0 10px', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 4 }}>
           {photos.map((p) => (
             <Link key={p.id} to={`/partite/${p.matchId}`} style={{ aspectRatio: '1', borderRadius: 10, background: `var(--surface2) url(${p.url}) center/cover`, position: 'relative', overflow: 'hidden' }}>
               <span
