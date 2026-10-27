@@ -2662,6 +2662,8 @@ textarea.input {
 .guide-shots {
   display: flex;
   flex-wrap: wrap;
+  /* in cima, non allungate: affiancate a una più alta, le immagini basse si deformerebbero */
+  align-items: flex-start;
   gap: 12px;
 }
 
