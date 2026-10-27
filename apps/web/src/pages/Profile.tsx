@@ -7,7 +7,7 @@ import { Avatar, BackButton, ButtonLoader, Collapse, ErrorState, Loading, TextFi
 import { compressImage, uploadImage } from '../photos';
 import { isMine, opponentOf, playerIndex, useMe, useSeason, ZONE_STYLE } from '../data';
 import { clearLocalData } from '../drafts';
-import { useInstall } from '../pwa';
+import { iosInstallHint, useInstall } from '../pwa';
 import { getTheme, setTheme, type Theme } from '../theme';
 
 export function ProfilePage() {
@@ -85,7 +85,7 @@ export function ProfilePage() {
         Installa l'app
       </button>
       <Collapse open={installHelp}>
-        <div className="note note-info">In Safari tocca Condividi, poi «Aggiungi alla schermata Home».</div>
+        <div className="note note-info">{iosInstallHint()}</div>
       </Collapse>
     </>
   );

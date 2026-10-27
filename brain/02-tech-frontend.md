@@ -26,7 +26,7 @@ Monorepo pnpm: `apps/web`, `apps/api`, `packages/shared` (motore di punteggio e 
 
 ## App installabile (D-048)
 
-- **Installazione**: dal Profilo, "Installa l'app", e con un banner sul telefono quando si usa il browser (login e pagine con la barra in basso; la × lo nasconde per 14 giorni; mai su desktop né nell'app installata). Su Android apre il prompt di sistema, che Chrome offre solo in HTTPS; su iPhone mostra i passi da fare (Condividi → Aggiungi alla schermata Home).
+- **Installazione**: dal Profilo, "Installa l'app", e con un popup sul telefono quando si usa il browser: compare 1,5 secondi dopo l'apertura, sopra la pagina (sopra la barra in basso, oppure in alto nel login per non coprire il modulo); la × lo chiude solo per quella visita (a ogni apertura ricompare, finché l'app non è installata); mai su desktop né nell'app installata. Su Android apre il prompt di sistema, che Chrome offre solo in HTTPS; su iPhone e iPad (Safari, ma anche Chrome e gli altri browser iOS, che usano lo stesso motore) nessun sito può installare con un pulsante: mostra i passi da fare (Condividi → Aggiungi alla schermata Home; in Chrome iOS Condividi è in alto a destra).
 - **Loader unico** (D-052): il cuore-pallina che rimbalza, `public/loader.svg` (animazione SVG, nessun JavaScript). Si usa ovunque si aspetta:
   - schermata di avvio, con il cuore a riposo nello stesso punto della schermata nativa;
   - caricamento delle pagine (`Loading`), solo dopo 250 ms;

@@ -10,6 +10,13 @@ export const isStandalone = () =>
 
 export const isIOS = () => /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.maxTouchPoints > 1 && /macintosh/i.test(navigator.userAgent));
 
+/** Chrome su iPhone/iPad: stesso motore di Safari, ma il pulsante Condividi è in alto a destra */
+export const isChromeIOS = () => /crios/i.test(navigator.userAgent);
+
+/** Come installare su iPhone/iPad, dove nessun sito può aprire l'installazione con un pulsante */
+export const iosInstallHint = () =>
+  isChromeIOS() ? 'Tocca Condividi in alto a destra, poi «Aggiungi alla schermata Home».' : 'Tocca Condividi, poi «Aggiungi alla schermata Home».';
+
 /** Telefono o tablet (anche iPad, che si presenta come Mac) */
 export const isMobileDevice = () => isIOS() || /android/i.test(navigator.userAgent);
 
@@ -82,8 +89,10 @@ export function useResumeRoute() {
   }, [location, navigate]);
 }
 
+/** Evento beforeinstallprompt (Chrome, Edge, Samsung Internet su Android; Safari e iOS non lo supportano) */
 interface InstallPromptEvent extends Event {
   prompt: () => Promise<void>;
+  userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
 }
 
 // Android e Chrome offrono l'installazione con un evento che arriva presto: lo si tiene da parte
@@ -99,6 +108,16 @@ window.addEventListener('appinstalled', () => {
   listeners.forEach((l) => l());
 });
 
+/** La finestra di sistema si può aprire una volta sola: dopo la scelta l'evento non vale più (MDN) */
+async function promptInstall() {
+  const event = deferredPrompt;
+  if (!event) return;
+  await event.prompt();
+  await event.userChoice;
+  deferredPrompt = null;
+  listeners.forEach((l) => l());
+}
+
 /** Installazione: su Android si apre il prompt di sistema, su iPhone si mostrano i passi da fare */
 export function useInstall() {
   const [, rerender] = useState(0);
@@ -109,6 +128,6 @@ export function useInstall() {
   }, []);
   return {
     available: !isStandalone() && (!!deferredPrompt || isIOS()),
-    prompt: deferredPrompt ? () => deferredPrompt!.prompt() : null,
+    prompt: deferredPrompt ? promptInstall : null,
   };
 }

@@ -45,9 +45,9 @@ function WithTabs() {
     <div className="app app-tabs">
       <Outlet />
       <div className="dock">
-        <InstallBanner />
         <TabBar />
       </div>
+      <InstallBanner aboveTabs />
     </div>
   );
 }

@@ -488,14 +488,46 @@ a {
   z-index: 10;
 }
 
-.install-banner {
-  margin: 0 10px 8px;
-  padding: 8px 8px 8px 10px;
-  border-radius: 18px;
+.install-popup {
+  position: fixed;
+  z-index: 45;
+  left: 50%;
+  bottom: calc(16px + env(safe-area-inset-bottom));
+  width: calc(100% - 24px);
+  max-width: 456px;
+  padding: 10px 10px 10px 12px;
+  border-radius: 20px;
   background: var(--surface);
   border: 1px solid var(--line);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-  animation: reveal 0.3s ease;
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.3);
+  transform: translateX(-50%);
+  animation: popupIn 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+/* sopra la barra delle sezioni */
+.install-popup.above-tabs {
+  bottom: calc(84px + env(safe-area-inset-bottom));
+}
+
+/* in alto, dove non copre il modulo (login) */
+.install-popup.at-top {
+  bottom: auto;
+  top: calc(12px + env(safe-area-inset-top));
+  animation-name: popupInTop;
+}
+
+@keyframes popupIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 16px);
+  }
+}
+
+@keyframes popupInTop {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -16px);
+  }
 }
 
 .install-row {

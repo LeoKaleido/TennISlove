@@ -184,9 +184,7 @@ export function LoginPage() {
             </div>
           </>
         )}
-        <div style={{ margin: '4px -10px 0' }}>
-          <InstallBanner />
-        </div>
+        <InstallBanner atTop />
       </div>
     </div>
   );
