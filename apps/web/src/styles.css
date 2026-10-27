@@ -2793,3 +2793,10 @@ textarea.input {
   color: inherit;
   text-decoration: underline;
 }
+
+/* Attesa dopo l'avvio (Splash): il cuore piccolo al centro, non a tutto schermo come le palline della schermata di avvio */
+.boot img.boot-heart {
+  position: static;
+  width: 140px;
+  height: auto;
+}

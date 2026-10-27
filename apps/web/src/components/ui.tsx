@@ -5,7 +5,7 @@ import { Link, NavLink, useLocation, useNavigate } from 'react-router';
 import type { MatchStatus, Zone } from '@tentennis/shared';
 import type { Match, Player } from '../api';
 import { useLogout } from '../account';
-import { BOOT_IMAGE, bootVisible } from '../boot';
+import { bootVisible } from '../boot';
 import { SeasonPicker } from './SeasonPicker';
 import { iosInstallHint, isMobileDevice, useInstall } from '../pwa';
 import { avatarColors, initials, STATUS_STYLE, useMe, ZONE_STYLE } from '../data';
@@ -318,11 +318,15 @@ export function ButtonLoader({ height = 30 }: { height?: number }) {
  * Attesa a tutto schermo prima della prima pagina. All'avvio copre già la schermata di index.html, quindi non disegna niente;
  * se serve più tardi (es. dopo un nuovo login) mostra lo stesso cuore su sfondo scuro.
  */
+/**
+ * Attesa a tutto schermo dopo l'avvio (per esempio subito dopo il login): il cuore, non le palline.
+ * Le palline sono solo per l'apertura dell'app, nella schermata di avvio di index.html (D-073).
+ */
 export function Splash() {
   if (bootVisible()) return null;
   return (
     <div className="boot">
-      <img className="in" src={BOOT_IMAGE} alt="" />
+      <img className="in boot-heart" src="/loader.svg" alt="" />
     </div>
   );
 }

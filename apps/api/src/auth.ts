@@ -7,6 +7,7 @@ import { z } from 'zod';
 import { db } from './db';
 import { env } from './env';
 import { sendMail } from './mail';
+import { playerView } from './views';
 
 export const SESSION_COOKIE = 'atp_session';
 
@@ -165,7 +166,9 @@ export async function authPlugin(app: FastifyInstance) {
 
   app.get('/api/me', async (req, reply) => {
     if (!req.user) return reply.code(401).send({ error: 'Non autenticato' });
-    return req.user;
+    // il proprio giocatore anche se non è in nessun torneo: il profilo lo mostra comunque (foto, badge)
+    const player = req.user.playerId ? await db.player.findUnique({ where: { id: req.user.playerId } }) : null;
+    return { ...req.user, player: player && playerView(player) };
   });
 }
 

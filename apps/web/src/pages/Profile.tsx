@@ -32,7 +32,9 @@ export function ProfilePage() {
   const playerId = params.id ?? me.data?.playerId;
   const isMe = !params.id || params.id === me.data?.playerId;
   const players = playerIndex(data.players);
-  const p = playerId ? players.get(playerId) : undefined;
+  // il proprio giocatore c'è anche se non è iscritto al torneo che si sta guardando
+  const p = (playerId ? players.get(playerId) : undefined) ?? (isMe ? (me.data?.player ?? undefined) : undefined);
+  const inSeason = !!p && players.has(p.id);
 
   // Account solo amministratore, senza giocatore
   if (!p) {
@@ -141,7 +143,12 @@ export function ProfilePage() {
             </div>
           ))}
         </div>
-        {isMe && <ShareCardButton data={data} player={p} />}
+        {!inSeason && (
+          <span style={{ fontSize: 13.5, color: 'rgba(255,255,255,.8)', lineHeight: 1.45 }}>
+            Non sei iscritto al torneo {data.season.label}: quando un amministratore ti aggiunge a un torneo qui trovi posizione, numeri e partite.
+          </span>
+        )}
+        {isMe && inSeason && <ShareCardButton data={data} player={p} />}
         {!isMe && me.data?.playerId && players.has(me.data.playerId) && (
           <Link to={`/confronto/${me.data.playerId}/${p.id}`} className="btn" style={{ background: '#C6EEDB', color: '#0B1A24' }}>
             Confronta con te
@@ -149,7 +156,7 @@ export function ProfilePage() {
         )}
       </div>
 
-      {timeline.length > 1 && (
+      {inSeason && timeline.length > 1 && (
         <div style={{ padding: '0 14px', display: 'flex', flexDirection: 'column', gap: 10 }}>
           <div className="section-head">
             <h2 className="title with-help">
@@ -162,64 +169,68 @@ export function ProfilePage() {
         </div>
       )}
 
-      <BadgeSection playerId={p.id} />
+      <BadgeSection player={p} />
 
-      <div style={{ padding: '0 14px', display: 'flex', flexDirection: 'column', gap: 10 }}>
-        <div className="segmented">
-          {(
-            [
-              ['next', 'Da giocare', next.length],
-              ['played', 'Giocate', played.length],
-            ] as const
-          ).map(([key, label, n]) => (
-            <button key={key} aria-pressed={tab === key} onClick={() => setTab(key)} style={{ height: 42 }}>
-              {label}
-              <span
-                style={{
-                  minWidth: 24,
-                  height: 22,
-                  padding: '0 7px',
-                  borderRadius: 99,
-                  display: 'grid',
-                  placeItems: 'center',
-                  fontSize: 12,
-                  fontWeight: 800,
-                  background: tab === key ? 'var(--accent)' : 'var(--mint)',
-                  color: tab === key ? 'var(--onAccent)' : 'var(--mintInk)',
-                }}
-              >
-                {n}
-              </span>
-            </button>
-          ))}
+      {inSeason && (
+        <div style={{ padding: '0 14px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+          <div className="segmented">
+            {(
+              [
+                ['next', 'Da giocare', next.length],
+                ['played', 'Giocate', played.length],
+              ] as const
+            ).map(([key, label, n]) => (
+              <button key={key} aria-pressed={tab === key} onClick={() => setTab(key)} style={{ height: 42 }}>
+                {label}
+                <span
+                  style={{
+                    minWidth: 24,
+                    height: 22,
+                    padding: '0 7px',
+                    borderRadius: 99,
+                    display: 'grid',
+                    placeItems: 'center',
+                    fontSize: 12,
+                    fontWeight: 800,
+                    background: tab === key ? 'var(--accent)' : 'var(--mint)',
+                    color: tab === key ? 'var(--onAccent)' : 'var(--mintInk)',
+                  }}
+                >
+                  {n}
+                </span>
+              </button>
+            ))}
+          </div>
+          <div className="card">
+            {list.map((m) => (
+              <MatchRow key={m.id} match={m} data={data} title={`G${m.round} vs ${players.get(opponentOf(m, p.id))!.shortName}`} />
+            ))}
+            {list.length === 0 && (
+              <div className="muted" style={{ padding: 20, textAlign: 'center', fontSize: 13.5 }}>
+                {tab === 'next' ? 'Nessuna partita da giocare.' : 'Nessuna partita giocata finora.'}
+              </div>
+            )}
+          </div>
         </div>
-        <div className="card">
-          {list.map((m) => (
-            <MatchRow key={m.id} match={m} data={data} title={`G${m.round} vs ${players.get(opponentOf(m, p.id))!.shortName}`} />
-          ))}
-          {list.length === 0 && (
-            <div className="muted" style={{ padding: 20, textAlign: 'center', fontSize: 13.5 }}>
-              {tab === 'next' ? 'Nessuna partita da giocare.' : 'Nessuna partita giocata finora.'}
-            </div>
-          )}
-        </div>
-      </div>
 
-      <div style={{ padding: '0 14px', display: 'flex', flexDirection: 'column', gap: 10 }}>
-        <h2 className="title with-help" style={{ fontSize: 22, padding: '0 2px' }}>
-          Scontri diretti <HelpLink to="testa-a-testa" label="testa a testa" />
-        </h2>
-        <div className="card">
-          {h2h.map(({ o, res, color }) => (
-            <Link key={o.id} to={`/confronto/${p.id}/${o.id}`} className="list-row" style={{ padding: '9px 14px' }}>
-              <Avatar player={o} size={30} />
-              <span style={{ flex: 1, fontWeight: 600, fontSize: 14.5 }}>{o.shortName}</span>
-              <span style={{ fontSize: 12.5, fontWeight: 700, color, whiteSpace: 'nowrap' }}>{res}</span>
-            </Link>
-          ))}
-        </div>
-      </div>
+      )}
 
+      {inSeason && (
+        <div style={{ padding: '0 14px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+          <h2 className="title with-help" style={{ fontSize: 22, padding: '0 2px' }}>
+            Scontri diretti <HelpLink to="testa-a-testa" label="testa a testa" />
+          </h2>
+          <div className="card">
+            {h2h.map(({ o, res, color }) => (
+              <Link key={o.id} to={`/confronto/${p.id}/${o.id}`} className="list-row" style={{ padding: '9px 14px' }}>
+                <Avatar player={o} size={30} />
+                <span style={{ flex: 1, fontWeight: 600, fontSize: 14.5 }}>{o.shortName}</span>
+                <span style={{ fontSize: 12.5, fontWeight: 700, color, whiteSpace: 'nowrap' }}>{res}</span>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

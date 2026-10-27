@@ -28,6 +28,8 @@ export interface Me {
   email: string;
   isAdmin: boolean;
   playerId: string | null;
+  /** il proprio giocatore, anche se non è in nessun torneo */
+  player: Player | null;
 }
 
 export interface Player {

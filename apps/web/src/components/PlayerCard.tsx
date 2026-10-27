@@ -29,7 +29,7 @@ export function ShareCardButton({ data, player }: { data: SeasonOverview; player
 function CardModal({ data, player, onClose }: { data: SeasonOverview; player: Player; onClose: () => void }) {
   const [closing, close] = useClosing(onClose);
   const toast = useToast();
-  const book = useBadgesAcrossSeasons(player.id);
+  const book = useBadgesAcrossSeasons(player.id, player.memberSince);
   const { loading } = book;
   const [blob, setBlob] = useState<Blob | null>(null);
   const [url, setUrl] = useState<string | null>(null);

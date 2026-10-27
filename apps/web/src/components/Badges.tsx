@@ -82,7 +82,8 @@ export interface BadgeBook {
 }
 
 /** Badge del giocatore in tutte le stagioni a cui ha partecipato */
-export function useBadgesAcrossSeasons(playerId: string) {
+/** `memberSince`: per Veterano quando il giocatore non è ancora in nessun torneo (la data viene dal suo account) */
+export function useBadgesAcrossSeasons(playerId: string, memberSince?: string) {
   const seasons = useSeasons();
   const results = useQueries({
     queries: (seasons.data ?? []).map((s) => ({
@@ -97,20 +98,22 @@ export function useBadgesAcrossSeasons(playerId: string) {
     // una stagione una volta sola, anche se due voci dell'elenco portano agli stessi dati
     .filter((d, i, all) => all.findIndex((x) => x.season.id === d.season.id) === i)
     .map((data) => ({ data, badges: badgesFor(data, playerId) }));
-  const since = list[0]?.data.players.find((p) => p.id === playerId)?.memberSince;
+  const since = list[0]?.data.players.find((p) => p.id === playerId)?.memberSince ?? memberSince;
   const veteran = since ? { since, ...membershipYears(since, today()) } : null;
   return { list, veteran, loading: seasons.isLoading || results.some((r) => r.isLoading) };
 }
 
-export function BadgeSection({ playerId }: { playerId: string }) {
-  const book = useBadgesAcrossSeasons(playerId);
-  const { list, veteran } = book;
+/** Badge del giocatore; anche senza tornei (tutti da sbloccare, Veterano dalla data di iscrizione) */
+export function BadgeSection({ player }: { player: { id: string; memberSince: string } }) {
+  const playerId = player.id;
+  const book = useBadgesAcrossSeasons(playerId, player.memberSince);
+  const { list } = book;
   const [selected, setSelected] = useState<BadgeId | null>(null);
   const gridRef = useRef<HTMLDivElement>(null);
-  if (book.loading || list.length === 0) return null;
+  if (book.loading) return null;
 
-  // la stagione in corso decide l'avanzamento di quelli ancora da ottenere
-  const current = list.find((s) => s.data.season.status === 'ACTIVE') ?? list[0]!;
+  // la stagione in corso decide l'avanzamento di quelli ancora da ottenere; senza tornei non c'è
+  const current = list.find((s) => s.data.season.status === 'ACTIVE') ?? list[0] ?? null;
   const earnedIn = (id: BadgeId) => list.filter((s) => s.badges.find((b) => b.id === id)!.earned);
   const total = BADGE_ORDER.filter((id) => badgeLevel(book, id) > 0).length;
 
@@ -128,7 +131,7 @@ export function BadgeSection({ playerId }: { playerId: string }) {
         <div className="badge-grid" ref={gridRef}>
           {BADGE_ORDER.map((id) => {
             const seasons = earnedIn(id);
-            const state = current.badges.find((b) => b.id === id)!;
+            const state = stateIn(current, id);
             const lvl = badgeLevel(book, id);
             const sub =
               id === 'VETERAN'
@@ -198,9 +201,13 @@ function BadgeSheet({ grid, onClose, children }: { grid: RefObject<HTMLDivElemen
   );
 }
 
-function BadgeDetail({ id, book, current, playerId }: { id: BadgeId; book: BadgeBook; current: SeasonBadges; playerId: string }) {
+/** Stato di un badge nel torneo indicato; senza tornei, da sbloccare da zero */
+const stateIn = (current: SeasonBadges | null, id: BadgeId): Pick<BadgeState, 'earned' | 'progress' | 'target'> =>
+  current?.badges.find((b) => b.id === id) ?? { earned: false, progress: 0, target: BADGES[id].target };
+
+function BadgeDetail({ id, book, current, playerId }: { id: BadgeId; book: BadgeBook; current: SeasonBadges | null; playerId: string }) {
   if (id === 'VETERAN') return <VeteranDetail book={book} />;
-  const state = current.badges.find((b) => b.id === id)!;
+  const state = stateIn(current, id);
   const earned = book.list.flatMap((s) => {
     const b = s.badges.find((x) => x.id === id)!;
     return b.earned ? [{ s, b }] : [];
@@ -208,7 +215,8 @@ function BadgeDetail({ id, book, current, playerId }: { id: BadgeId; book: Badge
   const level = badgeLevel(book, id);
   const seasonEnd = id === 'CHAMPION' || id === 'ORACLE' || id === 'PODIUM';
   // un badge da una volta a stagione, già preso in questo torneo, non ha un livello da raggiungere qui
-  const nextHere = current.data.season.status === 'ACTIVE' && !(ONCE_PER_SEASON.includes(id) && state.earned);
+  // senza tornei si mostra cosa serve per sbloccarlo, come per il torneo in corso
+  const nextHere = (!current || current.data.season.status === 'ACTIVE') && !(ONCE_PER_SEASON.includes(id) && state.earned);
   // Presenze: il prossimo livello arriva con il prossimo torneo, anche se in questo c'è già
   const nextTournament = id === 'PRESENCE' && !nextHere;
   return (

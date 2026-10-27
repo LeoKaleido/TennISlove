@@ -26,7 +26,7 @@ export function useFontsReady() {
 export const bootVisible = () => !!document.getElementById('boot');
 
 /**
- * Immagine della schermata di avvio, solo all'apertura dell'app (i caricamenti interni usano il cuore, public/loader.svg).
+ * Immagine della schermata di avvio, solo all'apertura dell'app: le attese successive (Splash, caricamenti) usano il cuore, public/loader.svg.
  * È il loader delle palline, generato da scripts/avvio/genera.mjs. Cambiandola, aggiorna anche `src` di #boot in index.html.
  */
 export const BOOT_IMAGE = '/avvio.svg';
