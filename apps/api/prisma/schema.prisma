@@ -67,6 +67,8 @@ model User {
   /// password sbagliate di fila: alla quinta l'accesso con password si blocca per 15 minuti
   failedLogins Int       @default(0)
   lockedUntil  DateTime?
+  /// accesso revocato dal gestionale: il giocatore resta in calendario e classifica, ma non entra più (D-063)
+  disabledAt   DateTime?
   createdAt DateTime @default(now())
 
   player      Player?

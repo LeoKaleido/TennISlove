@@ -1,4 +1,4 @@
-// Gestionale: giocatori e inviti (D-035).
+// Gestionale: giocatori, amministratori e inviti (D-035, D-063).
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
@@ -10,9 +10,11 @@ interface Person {
   userId: string | null;
   email: string | null;
   isAdmin: boolean;
+  /** accesso revocato: resta in calendario e classifica ma non entra */
+  disabledAt: string | null;
   invitedAt: string | null;
   lastLoginAt: string | null;
-  player: { id: string; firstName: string; lastName: string; shortName: string; seasons: string[] } | null;
+  player: { id: string; firstName: string; lastName: string; shortName: string; seasons: string[]; hasMatches: boolean } | null;
 }
 
 interface PlayerForm {
@@ -31,6 +33,7 @@ export function AdminPlayers() {
   const queryClient = useQueryClient();
   const toast = useToast();
   const [editing, setEditing] = useState<Person | 'new' | null>(null);
+  const [newAdmin, setNewAdmin] = useState(false);
 
   const invite = useMutation({
     mutationFn: (p: Person) => api(`/api/admin/users/${p.userId}/invite`, { method: 'POST' }),
@@ -47,6 +50,7 @@ export function AdminPlayers() {
   const adminsOnly = people.data.people.filter((p) => !p.player);
 
   const status = (p: Person) => {
+    if (p.disabledAt) return { text: 'Accesso revocato', color: 'var(--errFg)' };
     if (!p.email) return { text: 'Senza email', color: 'var(--errFg)' };
     if (p.lastLoginAt) return { text: `Entrato ${day(p.lastLoginAt)}`, color: 'var(--accent)' };
     if (p.invitedAt) return { text: `Invitato ${day(p.invitedAt)}`, color: 'var(--warnFg)' };
@@ -61,9 +65,14 @@ export function AdminPlayers() {
             Giocatori
           </h1>
         </div>
-        <button className="btn btn-primary" style={{ height: 44, fontSize: 14 }} onClick={() => setEditing('new')}>
-          + Nuovo giocatore
-        </button>
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          <button className="btn btn-outline" style={{ height: 44, fontSize: 14 }} onClick={() => setNewAdmin(true)}>
+            + Nuovo amministratore
+          </button>
+          <button className="btn btn-primary" style={{ height: 44, fontSize: 14 }} onClick={() => setEditing('new')}>
+            + Nuovo giocatore
+          </button>
+        </div>
       </div>
 
       <div className="card">
@@ -95,7 +104,7 @@ export function AdminPlayers() {
               </button>
               {p.userId && (
                 <button className="btn btn-outline btn-sm" disabled={invite.isPending} onClick={() => invite.mutate(p)}>
-                  {p.invitedAt || p.lastLoginAt ? 'Reinvia invito' : 'Invita'}
+                  {p.disabledAt ? 'Riattiva e invita' : p.invitedAt || p.lastLoginAt ? 'Reinvia invito' : 'Invita'}
                 </button>
               )}
             </div>
@@ -110,14 +119,15 @@ export function AdminPlayers() {
           </h2>
           <div className="card">
             {adminsOnly.map((p) => (
-              <div key={p.userId} className="list-row" style={{ padding: '10px 14px' }}>
-                <span className="mono" style={{ flex: 1, fontSize: 13 }}>
+              <div key={p.userId} className="list-row" style={{ flexWrap: 'wrap', padding: '10px 14px' }}>
+                <span className="mono ellipsis" style={{ flex: '1 1 220px', minWidth: 0, fontSize: 13 }}>
                   {p.email}
                 </span>
-                <span style={{ fontSize: 12, fontWeight: 600, color: status(p).color }}>{status(p).text}</span>
+                <span style={{ fontSize: 12, fontWeight: 600, width: 140, color: status(p).color }}>{status(p).text}</span>
                 <button className="btn btn-outline btn-sm" disabled={invite.isPending} onClick={() => invite.mutate(p)}>
                   {p.invitedAt || p.lastLoginAt ? 'Reinvia invito' : 'Invita'}
                 </button>
+                <ConfirmButton label="Cancella" confirm="Conferma" url={`/api/admin/users/${p.userId}`} method="DELETE" done={`${p.email} cancellato`} />
               </div>
             ))}
           </div>
@@ -125,6 +135,7 @@ export function AdminPlayers() {
       )}
 
       {editing && <PlayerDialog person={editing === 'new' ? null : editing} onClose={() => setEditing(null)} />}
+      {newAdmin && <AdminDialog onClose={() => setNewAdmin(false)} />}
     </>
   );
 }
@@ -139,6 +150,7 @@ function PlayerDialog({ person, onClose }: { person: Person | null; onClose: () 
       : EMPTY,
   );
   const [invite, setInvite] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [shortTouched, setShortTouched] = useState(!!person);
   const isNew = !person;
 
@@ -151,7 +163,7 @@ function PlayerDialog({ person, onClose }: { person: Person | null; onClose: () 
   const save = useMutation({
     mutationFn: () =>
       isNew
-        ? api('/api/admin/players', { method: 'POST', body: { ...form, invite } })
+        ? api('/api/admin/players', { method: 'POST', body: { ...form, invite, isAdmin } })
         : api(`/api/admin/players/${person!.player!.id}`, { method: 'PATCH', body: form }),
     onSuccess: () => {
       queryClient.invalidateQueries();
@@ -196,11 +208,18 @@ function PlayerDialog({ person, onClose }: { person: Person | null; onClose: () 
           <TextField label="Email" style={{ height: 48 }} type="email" value={form.email} onChange={set('email')} placeholder="nome@email.it" />
         </div>
         {isNew && (
-          <label style={{ display: 'flex', alignItems: 'center', gap: 10, fontWeight: 700, fontSize: 14.5 }}>
-            <input type="checkbox" checked={invite} onChange={(e) => setInvite(e.target.checked)} style={{ width: 18, height: 18 }} />
-            Invia subito l'invito
-          </label>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            <label style={{ display: 'flex', alignItems: 'center', gap: 10, fontWeight: 700, fontSize: 14.5 }}>
+              <input type="checkbox" checked={invite} onChange={(e) => setInvite(e.target.checked)} style={{ width: 18, height: 18 }} />
+              Invia subito l'invito
+            </label>
+            <label style={{ display: 'flex', alignItems: 'center', gap: 10, fontWeight: 700, fontSize: 14.5 }}>
+              <input type="checkbox" checked={isAdmin} onChange={(e) => setIsAdmin(e.target.checked)} style={{ width: 18, height: 18 }} />
+              Anche amministratore (entra nel gestionale)
+            </label>
+          </div>
         )}
+        {person && <AccessSection person={person} onDone={close} />}
         {emailChanged && <div className="note note-warn">Cambiando email il giocatore viene scollegato e dovrà essere invitato di nuovo.</div>}
         <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
           <button type="button" className="btn btn-outline" onClick={close}>
@@ -208,6 +227,158 @@ function PlayerDialog({ person, onClose }: { person: Person | null; onClose: () 
           </button>
           <button type="submit" className="btn btn-primary" style={{ height: 46, fontSize: 14 }} disabled={!valid || save.isPending}>
             {save.isPending ? <ButtonLoader /> : isNew ? (invite ? 'Crea e invita' : 'Crea giocatore') : 'Salva'}
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+}
+
+/** Ruolo admin, revoca dell'accesso e cancellazione di un giocatore */
+function AccessSection({ person, onDone }: { person: Person; onDone: () => void }) {
+  const pl = person.player!;
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 10, borderTop: '1px solid var(--line)', paddingTop: 14 }}>
+      <span className="kicker faint">Accesso</span>
+      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+        {person.userId && !person.disabledAt && (
+          <ConfirmButton
+            label={person.isAdmin ? 'Togli il ruolo admin' : 'Rendi amministratore'}
+            url={`/api/admin/users/${person.userId}/admin`}
+            method="PUT"
+            body={{ isAdmin: !person.isAdmin }}
+            done={person.isAdmin ? 'Non è più amministratore' : 'Ora è amministratore'}
+          />
+        )}
+        {pl.hasMatches
+          ? person.userId &&
+            !person.disabledAt && (
+              <ConfirmButton
+                label="Revoca accesso"
+                confirm="Conferma revoca"
+                danger
+                url={`/api/admin/users/${person.userId}/revoke`}
+                method="POST"
+                done="Accesso revocato"
+                onDone={onDone}
+              />
+            )
+          : (
+            <ConfirmButton label="Cancella giocatore" confirm="Conferma cancellazione" danger url={`/api/admin/players/${pl.id}`} method="DELETE" done="Giocatore cancellato" onDone={onDone} />
+          )}
+      </div>
+      <span className="faint" style={{ fontSize: 12.5, lineHeight: 1.4 }}>
+        {pl.hasMatches
+          ? 'Ha partite in calendario, quindi non si cancella: revocando l’accesso non entra più, ma partite e risultati restano. Reinvitarlo lo riattiva.'
+          : 'Non ha partite: si può cancellare del tutto.'}
+      </span>
+    </div>
+  );
+}
+
+/** Pulsante che agisce subito, oppure al secondo tocco se ha `confirm` (niente finestre del browser) */
+function ConfirmButton({
+  label,
+  confirm,
+  danger = false,
+  url,
+  method,
+  body,
+  done,
+  onDone,
+}: {
+  label: string;
+  confirm?: string;
+  danger?: boolean;
+  url: string;
+  method: string;
+  body?: unknown;
+  done: string;
+  onDone?: () => void;
+}) {
+  const queryClient = useQueryClient();
+  const toast = useToast();
+  const [armed, setArmed] = useState(false);
+  const run = useMutation({
+    mutationFn: () => api(url, { method, body }),
+    onSuccess: () => {
+      queryClient.invalidateQueries();
+      toast(done);
+      onDone?.();
+    },
+    onError: (e) => {
+      setArmed(false);
+      toast(e.message);
+    },
+  });
+  // il secondo tocco vale solo per qualche secondo
+  useEffect(() => {
+    if (!armed) return;
+    const t = setTimeout(() => setArmed(false), 4000);
+    return () => clearTimeout(t);
+  }, [armed]);
+  return (
+    <button
+      type="button"
+      className={`btn btn-sm ${armed || (danger && !confirm) ? 'btn-danger' : 'btn-outline'}`}
+      style={danger && !armed ? { color: 'var(--errFg)' } : undefined}
+      disabled={run.isPending}
+      onClick={() => (confirm && !armed ? setArmed(true) : run.mutate())}
+    >
+      {run.isPending ? <ButtonLoader height={22} /> : armed ? confirm : label}
+    </button>
+  );
+}
+
+function AdminDialog({ onClose }: { onClose: () => void }) {
+  const [closing, close] = useClosing(onClose);
+  const queryClient = useQueryClient();
+  const toast = useToast();
+  const [email, setEmail] = useState('');
+  const [invite, setInvite] = useState(true);
+  const save = useMutation({
+    mutationFn: () => api('/api/admin/admins', { method: 'POST', body: { email, invite } }),
+    onSuccess: () => {
+      queryClient.invalidateQueries();
+      toast(invite ? `Amministratore creato, invito inviato a ${email}` : 'Amministratore creato');
+      close();
+    },
+    onError: (e) => toast(e.message),
+  });
+  const valid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+  return (
+    <div className={`modal-wrap${closing ? ' closing' : ''}`} role="dialog" aria-modal="true" aria-label="Nuovo amministratore">
+      <div className="modal-backdrop" onClick={close} />
+      <form
+        className="modal"
+        style={{ width: 'min(480px, 100%)' }}
+        onSubmit={(e) => {
+          e.preventDefault();
+          if (valid) save.mutate();
+        }}
+      >
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <h2 className="display" style={{ fontSize: 32 }}>
+            Nuovo amministratore
+          </h2>
+          <button type="button" className="icon-btn" aria-label="Chiudi" onClick={close}>
+            ✕
+          </button>
+        </div>
+        <span className="muted" style={{ fontSize: 13.5 }}>
+          Entra solo nel gestionale. Per un giocatore che è anche amministratore usa "Nuovo giocatore" con la spunta.
+        </span>
+        <TextField label="Email" style={{ height: 48 }} type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="nome@email.it" autoFocus />
+        <label style={{ display: 'flex', alignItems: 'center', gap: 10, fontWeight: 700, fontSize: 14.5 }}>
+          <input type="checkbox" checked={invite} onChange={(e) => setInvite(e.target.checked)} style={{ width: 18, height: 18 }} />
+          Invia subito l'invito
+        </label>
+        <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+          <button type="button" className="btn btn-outline" onClick={close}>
+            Annulla
+          </button>
+          <button type="submit" className="btn btn-primary" style={{ height: 46, fontSize: 14 }} disabled={!valid || save.isPending}>
+            {save.isPending ? <ButtonLoader /> : invite ? 'Crea e invita' : 'Crea'}
           </button>
         </div>
       </form>

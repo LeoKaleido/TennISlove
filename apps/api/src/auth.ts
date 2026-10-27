@@ -27,6 +27,7 @@ const hash = (token: string) => createHash('sha256').update(token).digest('hex')
 const newToken = () => randomBytes(32).toString('base64url');
 const newCode = () => String(randomInt(0, 1_000_000)).padStart(6, '0');
 const MAX_CODE_ATTEMPTS = 5;
+const ACCESS_REVOKED = "L'accesso per questa email è stato revocato: chiedi a un amministratore";
 const MAX_PASSWORD_ATTEMPTS = 5;
 const LOCK_MINUTES = 15;
 
@@ -77,6 +78,7 @@ export async function authPlugin(app: FastifyInstance) {
     });
     if (!session || session.expiresAt < new Date()) return;
     const u = session.user;
+    if (u.disabledAt) return;
     req.user = { id: u.id, email: u.email, isAdmin: u.isAdmin, playerId: u.player?.id ?? null };
   });
 
@@ -85,6 +87,7 @@ export async function authPlugin(app: FastifyInstance) {
     const user = await db.user.findUnique({ where: { email } });
     // L'app dice se l'email non è iscritta (D-060): più semplice per i giocatori, a costo di rivelare chi partecipa
     if (!user) return reply.code(404).send({ error: 'Email non registrata' });
+    if (user.disabledAt) return reply.code(403).send({ error: ACCESS_REVOKED });
     // Al massimo 3 codici all'ora per email: protegge la quota di invio (D-030)
     const recent = await db.loginCode.count({ where: { userId: user.id, createdAt: { gt: new Date(Date.now() - 3_600_000) } } });
     if (recent >= 3) return reply.code(429).send({ error: "Troppi codici richiesti: riprova tra un'ora" });
@@ -97,6 +100,7 @@ export async function authPlugin(app: FastifyInstance) {
     const { email, password } = z.object({ email: z.string().trim().toLowerCase().email(), password: z.string().min(1).max(200) }).parse(req.body);
     const user = await db.user.findUnique({ where: { email } });
     if (!user) return reply.code(404).send({ error: 'Email non registrata' });
+    if (user.disabledAt) return reply.code(403).send({ error: ACCESS_REVOKED });
     if (user.lockedUntil && user.lockedUntil > new Date()) {
       return reply.code(429).send({ error: 'Troppi tentativi: riprova tra qualche minuto o ricevi un codice' });
     }
