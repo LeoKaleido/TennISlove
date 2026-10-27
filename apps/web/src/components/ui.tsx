@@ -4,6 +4,7 @@ import { createContext, useCallback, useContext, useEffect, useId, useRef, useSt
 import { NavLink, useNavigate } from 'react-router';
 import type { MatchStatus, Zone } from '@tentennis/shared';
 import type { Match, Player } from '../api';
+import { useLogout, useTheme } from '../account';
 import { bootVisible } from '../boot';
 import { iosInstallHint, isMobileDevice, useInstall } from '../pwa';
 import { avatarColors, initials, STATUS_STYLE, ZONE_STYLE } from '../data';
@@ -199,7 +200,34 @@ export function TabBar() {
           {t.label}
         </NavLink>
       ))}
+      <TabBarFoot />
     </nav>
+  );
+}
+
+/** In fondo alla barra laterale (solo desktop): tema ed esci */
+function TabBarFoot() {
+  const [theme, toggleTheme] = useTheme();
+  const logout = useLogout();
+  return (
+    <div className="tabbar-foot">
+      <button onClick={toggleTheme} aria-label={theme === 'dark' ? 'Passa al tema chiaro' : 'Passa al tema scuro'}>
+        <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden>
+          {theme === 'dark' ? (
+            <path d="M12 3.5v2M12 18.5v2M3.5 12h2M18.5 12h2M6 6l1.4 1.4M16.6 16.6L18 18M6 18l1.4-1.4M16.6 7.4L18 6M12 8.2a3.8 3.8 0 100 7.6 3.8 3.8 0 000-7.6z" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+          ) : (
+            <path d="M19.5 14.5A7.5 7.5 0 019.5 4.5a7.5 7.5 0 1010 10z" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinejoin="round" />
+          )}
+        </svg>
+        {theme === 'dark' ? 'Tema chiaro' : 'Tema scuro'}
+      </button>
+      <button onClick={() => logout.mutate()} disabled={logout.isPending}>
+        <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden>
+          <path d="M14 4.5H7a2 2 0 00-2 2v11a2 2 0 002 2h7M11 12h9M16.5 8.5L20 12l-3.5 3.5" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+        Esci
+      </button>
+    </div>
   );
 }
 

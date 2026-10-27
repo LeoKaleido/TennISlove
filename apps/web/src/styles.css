@@ -25,6 +25,10 @@
   --ph1: #dce6e1;
   --ph2: #d0ddd7;
   --phInk: #4f5f68;
+  /* grafici: un giocatore da solo, oppure due a confronto (blu e arancio: distinti anche per chi confonde rosso e verde) */
+  --chart-one: #1d8a5f;
+  --chart-a: #2f6fd0;
+  --chart-b: #d0601f;
   color-scheme: light;
 }
 
@@ -50,6 +54,9 @@
   --ph1: #142a35;
   --ph2: #10232d;
   --phInk: #a6b7be;
+  --chart-one: #2ea676;
+  --chart-a: #4a8ae6;
+  --chart-b: #d86a2c;
   color-scheme: dark;
 }
 
@@ -561,8 +568,9 @@ a {
   color: var(--accent);
 }
 
-/* marchio della barra laterale: solo su desktop */
-.tabbar-brand {
+/* marchio, tema ed esci della barra laterale: solo su desktop */
+.tabbar-brand,
+.tabbar-foot {
   display: none;
 }
 
@@ -1228,6 +1236,40 @@ textarea.input {
     color: #c6eedb;
   }
 
+  .tabbar-foot {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-top: auto;
+    padding-top: 12px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .tabbar-foot button {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    border: 0;
+    border-radius: 12px;
+    background: none;
+    color: rgba(255, 255, 255, 0.7);
+    font: inherit;
+    font-size: 14.5px;
+    font-weight: 700;
+    text-align: left;
+  }
+
+  .tabbar-foot button:hover {
+    background: rgba(255, 255, 255, 0.06);
+    color: #fff;
+  }
+
+  /* su desktop lo fa la barra laterale (tema, esci) */
+  .hide-desktop {
+    display: none !important;
+  }
+
   /* pagine singole (partita, risultato, foto): colonna centrata più larga; il login usa tutto lo schermo */
   .app-plain {
     max-width: 720px;
@@ -1612,4 +1654,292 @@ textarea.input {
 /* Classifica a righe attaccate (torneo e pronostici) */
 .rank-list > * + * {
   border-top: 1px solid var(--line);
+}
+
+/* Badge (D-062) */
+.badge-icon {
+  display: inline-block;
+  flex: none;
+  line-height: 0;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.18));
+}
+
+.badge-icon.locked {
+  filter: grayscale(1);
+  opacity: 0.32;
+}
+
+.badge-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(92px, 1fr));
+  gap: 4px;
+}
+
+.badge-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 10px 4px;
+  border: 1.5px solid transparent;
+  border-radius: 16px;
+  background: none;
+  color: inherit;
+  text-align: center;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.badge-tile[aria-pressed='true'] {
+  background: var(--bg);
+  border-color: var(--line2);
+}
+
+.badge-name {
+  font-weight: 700;
+  font-size: 12.5px;
+  line-height: 1.15;
+}
+
+.badge-sub {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ink3);
+}
+
+.badge-detail {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  margin-top: 8px;
+  padding: 14px 6px 4px;
+  border-top: 1px solid var(--line);
+}
+
+.badge-progress {
+  height: 6px;
+  border-radius: 99px;
+  background: var(--surface2);
+  overflow: hidden;
+}
+
+.badge-progress > span {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+  border-radius: 99px;
+}
+
+.badge-wrap {
+  position: relative;
+  display: inline-block;
+  flex: none;
+}
+
+/* livello del badge (×2, ×3): tondino in basso a destra */
+.badge-level {
+  position: absolute;
+  right: -4px;
+  bottom: -2px;
+  min-width: 1.75em;
+  padding: 0.1em 0.35em;
+  border-radius: 99px;
+  background: var(--ink);
+  color: var(--bg);
+  border: 2px solid var(--surface);
+  font-weight: 800;
+  line-height: 1.3;
+  text-align: center;
+}
+
+/* Grafici (D-064) */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.chart-tick {
+  font-size: 11px;
+  font-weight: 600;
+  fill: var(--ink3);
+}
+
+.chart-end {
+  font-size: 12.5px;
+  font-weight: 800;
+  fill: var(--ink);
+}
+
+.chart-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-bottom: 6px;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--ink2);
+}
+
+.chart-legend span,
+.chart-tip span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* chiave a linea, come il segno nel grafico */
+.chart-legend i,
+.chart-tip i {
+  width: 14px;
+  height: 3px;
+  border-radius: 2px;
+  flex: none;
+}
+
+.chart-tip {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 7px 10px;
+  border-radius: 10px;
+  background: var(--surface);
+  border: 1px solid var(--line2);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+  font-size: 12px;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+/* Testa a testa (D-064) */
+.cmp-row {
+  display: grid;
+  grid-template-columns: 56px 1fr 56px;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+}
+
+.cmp-row + .cmp-row {
+  border-top: 1px solid var(--line);
+}
+
+.cmp-val {
+  font-weight: 700;
+  font-size: 16px;
+  color: var(--ink2);
+}
+
+.cmp-val:last-child {
+  text-align: right;
+}
+
+.cmp-val.lead {
+  font-weight: 900;
+  font-stretch: 75%;
+  font-size: 20px;
+  color: var(--ink);
+}
+
+.cmp-mid {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.cmp-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ink2);
+  text-align: center;
+}
+
+/* barre speculari: crescono dal centro verso l'esterno */
+.cmp-bars {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2px;
+  width: 100%;
+}
+
+.cmp-half {
+  display: flex;
+  height: 6px;
+}
+
+.cmp-half.left {
+  justify-content: flex-end;
+}
+
+.cmp-half i {
+  display: block;
+  height: 100%;
+  border-radius: 0 3px 3px 0;
+}
+
+.cmp-half.left i {
+  border-radius: 3px 0 0 3px;
+}
+
+.cmp-common {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 14px;
+}
+
+.cmp-common + .cmp-common {
+  border-top: 1px solid var(--line);
+}
+
+.cmp-common.head {
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ink3);
+}
+
+.cmp-common > :last-child {
+  text-align: right;
+}
+
+.cmp-opp {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+  font-size: 13.5px;
+}
+
+.cmp-res {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--ink2);
+  text-decoration: none;
+}
+
+.cmp-res.won {
+  color: var(--accent);
+}
+
+.cmp-res.lost {
+  color: var(--errFg);
+}
+
+/* Impostazioni dell'account (ingranaggio del profilo) */
+.settings-list .list-row {
+  justify-content: space-between;
+  min-height: 52px;
+}
+
+.settings-label {
+  font-weight: 700;
+  font-size: 15px;
 }

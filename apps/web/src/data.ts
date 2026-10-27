@@ -2,11 +2,13 @@
 
 import { useQuery } from '@tanstack/react-query';
 import {
+  COUNTS_IN_STANDINGS,
   formatDayWithWeekday,
   formatRange,
   formatScore,
   romeDay,
   romeTime,
+  standingsTimeline,
   type MatchStatus,
   type Zone,
 } from '@tentennis/shared';
@@ -109,3 +111,33 @@ export function avatarColors(id: string) {
 }
 
 export const initials = (p: Player) => `${p.firstName[0] ?? ''}${p.lastName[0] ?? ''}`.toUpperCase();
+
+/**
+ * Giorno in cui si è giocata una partita: quello programmato; altrimenti l'inserimento del risultato,
+ * ma non oltre la fine della sua settimana (i risultati importati dall'Excel sono stati inseriti tutti dopo)
+ */
+export function playedOn(m: Match, rounds: Round[]): string | null {
+  if (m.scheduledAt) return romeDay(m.scheduledAt);
+  if (!m.result) return null;
+  const submitted = romeDay(m.result.submittedAt);
+  const endsOn = rounds.find((r) => r.number === m.round && r.phase === m.phase)?.endsOn;
+  return endsOn && endsOn < submitted ? endsOn : submitted;
+}
+
+/** Classifica a fine di ogni giornata del girone iniziata finora (D-064) */
+export function timelineFor(data: SeasonOverview) {
+  const matches = data.matches.flatMap((m) => {
+    const r = m.result;
+    const day = playedOn(m, data.rounds);
+    return m.phase === 'ROUND_ROBIN' && r && day && COUNTS_IN_STANDINGS.includes(r.status)
+      ? [{ playerAId: m.playerAId, playerBId: m.playerBId, score: r, playedOn: day }]
+      : [];
+  });
+  return standingsTimeline(
+    data.players.map((p) => p.id),
+    matches,
+    data.rounds.filter((r) => r.phase === 'ROUND_ROBIN'),
+    today(),
+    data.season.qualifiers,
+  );
+}

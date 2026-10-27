@@ -14,6 +14,16 @@ export function getTheme(): Theme {
   return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
 }
 
+const listeners = new Set<() => void>();
+
+/** Per chi mostra il tema (profilo, barra laterale): avvisato a ogni cambio */
+export function subscribeTheme(listener: () => void) {
+  listeners.add(listener);
+  return () => {
+    listeners.delete(listener);
+  };
+}
+
 export function setTheme(theme: Theme) {
   try {
     localStorage.setItem(KEY, theme);
@@ -21,6 +31,7 @@ export function setTheme(theme: Theme) {
     // ignorato
   }
   document.documentElement.dataset.theme = theme;
+  listeners.forEach((l) => l());
 }
 
 export function applyStoredTheme() {

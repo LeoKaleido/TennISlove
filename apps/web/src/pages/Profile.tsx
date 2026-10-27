@@ -1,42 +1,21 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router';
-import { api } from '../api';
+import { Link, useParams } from 'react-router';
+import { BadgeSection } from '../components/Badges';
 import { MatchRow } from '../components/MatchRow';
-import { Avatar, BackButton, ButtonLoader, Collapse, ErrorState, Loading, TextField, useToast } from '../components/ui';
+import { ShareCardButton } from '../components/PlayerCard';
+import { PositionChart } from '../components/PositionChart';
+import { SettingsButton, SettingsList } from '../components/Settings';
+import { Avatar, BackButton, ButtonLoader, ErrorState, Loading, useToast } from '../components/ui';
 import { compressImage, uploadImage } from '../photos';
-import { isMine, opponentOf, playerIndex, useMe, useSeason, ZONE_STYLE } from '../data';
-import { clearLocalData } from '../drafts';
-import { iosInstallHint, useInstall } from '../pwa';
-import { getTheme, setTheme, type Theme } from '../theme';
+import { isMine, opponentOf, playerIndex, timelineFor, useMe, useSeason, ZONE_STYLE } from '../data';
 
 export function ProfilePage() {
   const params = useParams<{ id?: string }>();
   const me = useMe();
   const season = useSeason();
-  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [tab, setTab] = useState<'next' | 'played'>('next');
-  const [theme, setThemeState] = useState<Theme>(getTheme());
-  const install = useInstall();
-  const [installHelp, setInstallHelp] = useState(false);
-  const [pwOpen, setPwOpen] = useState(false);
-  const [newPassword, setNewPassword] = useState('');
-  const [pwError, setPwError] = useState('');
-  const savePassword = useMutation({
-    mutationFn: () => api('/api/me/password', { method: 'POST', body: { password: newPassword } }),
-    onSuccess: () => {
-      setPwOpen(false);
-      setNewPassword('');
-      toast('Password cambiata');
-    },
-    onError: (e) => setPwError(e.message),
-  });
-  const submitPassword = () => {
-    if (newPassword.length < 8) return setPwError('Almeno 8 caratteri');
-    savePassword.mutate();
-  };
-
   const toast = useToast();
   const uploadPhoto = useMutation({
     mutationFn: async (file: File) => uploadImage('/api/me/photo', await compressImage(file, 800)),
@@ -47,15 +26,6 @@ export function ProfilePage() {
     onError: (e) => toast(e.message),
   });
 
-  const logout = useMutation({
-    mutationFn: () => api('/api/auth/logout', { method: 'POST' }),
-    onSuccess: () => {
-      clearLocalData();
-      queryClient.clear();
-      navigate('/login', { replace: true });
-    },
-  });
-
   if (season.isLoading) return <Loading />;
   if (!season.data) return <ErrorState error={season.error} />;
   const data = season.data;
@@ -63,64 +33,6 @@ export function ProfilePage() {
   const isMe = !params.id || params.id === me.data?.playerId;
   const players = playerIndex(data.players);
   const p = playerId ? players.get(playerId) : undefined;
-
-  const themeButton = (
-    <button
-      className="btn btn-outline"
-      style={{ height: 50, justifyContent: 'space-between', padding: '0 16px', fontSize: 14.5 }}
-      onClick={() => {
-        const next = theme === 'dark' ? 'light' : 'dark';
-        setTheme(next);
-        setThemeState(next);
-      }}
-    >
-      <span>Tema</span>
-      <span className="muted">{theme === 'dark' ? 'Scuro' : 'Chiaro'}</span>
-    </button>
-  );
-  // Android apre il prompt di sistema; su iPhone l'installazione si fa solo da Safari
-  const installButton = install.available && (
-    <>
-      <button className="btn btn-outline" style={{ height: 50, fontSize: 14.5 }} onClick={() => (install.prompt ? install.prompt() : setInstallHelp(!installHelp))}>
-        Installa l'app
-      </button>
-      <Collapse open={installHelp}>
-        <div className="note note-info">{iosInstallHint()}</div>
-      </Collapse>
-    </>
-  );
-  const passwordButton = (
-    <>
-      <button className="btn btn-outline" style={{ height: 50, fontSize: 14.5 }} onClick={() => setPwOpen(!pwOpen)}>
-        Cambia password
-      </button>
-      <Collapse open={pwOpen}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8, padding: '6px 0 4px' }}>
-          <TextField
-            label="Nuova password"
-            type="password"
-            autoComplete="new-password"
-            value={newPassword}
-            onChange={(e) => {
-              setNewPassword(e.target.value);
-              setPwError('');
-            }}
-            onKeyDown={(e) => e.key === 'Enter' && submitPassword()}
-            error={!!pwError}
-          />
-          {pwError && <div style={{ fontSize: 13, color: 'var(--errFg)', fontWeight: 600 }}>{pwError}</div>}
-          <button className="btn btn-primary" style={{ height: 50 }} onClick={submitPassword} disabled={!newPassword || savePassword.isPending}>
-            {savePassword.isPending ? <ButtonLoader /> : 'Salva'}
-          </button>
-        </div>
-      </Collapse>
-    </>
-  );
-  const logoutButton = (
-    <button className="btn btn-outline" style={{ height: 50, color: 'var(--errFg)', fontSize: 14.5 }} onClick={() => logout.mutate()}>
-      Esci
-    </button>
-  );
 
   // Account solo amministratore, senza giocatore
   if (!p) {
@@ -130,17 +42,15 @@ export function ProfilePage() {
           <h1 className="display">Profilo</h1>
           <div className="sub">{me.data?.email}</div>
         </div>
-        <div style={{ padding: '0 14px', display: 'flex', flexDirection: 'column', gap: 8 }}>
-          {installButton}
-          {passwordButton}
-          {themeButton}
-          {logoutButton}
+        <div style={{ padding: '0 14px' }}>
+          <SettingsList />
         </div>
       </div>
     );
   }
 
   const row = data.standings.find((s) => s.playerId === p.id);
+  const timeline = timelineFor(data);
   const mine = data.matches.filter((m) => isMine(m, p.id) && m.phase === 'ROUND_ROBIN');
   const next = mine.filter((m) => !m.result).sort((x, y) => x.round - y.round);
   const played = mine.filter((m) => m.result).sort((x, y) => y.round - x.round);
@@ -178,10 +88,14 @@ export function ProfilePage() {
     <div className="screen">
       <div style={{ background: 'var(--hero)', color: '#fff', padding: '16px 16px 22px', display: 'flex', flexDirection: 'column', gap: 16, borderRadius: '0 0 28px 28px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', minHeight: 42 }}>
-          {!isMe ? <BackButton /> : <span />}
-          <span className="kicker" style={{ color: '#C6EEDB' }}>
-            {isMe ? 'Il tuo profilo' : 'Giocatore'}
-          </span>
+          {!isMe ? <BackButton /> : <span className="kicker" style={{ color: '#C6EEDB' }}>Il tuo profilo</span>}
+          {isMe ? (
+            <SettingsButton />
+          ) : (
+            <span className="kicker" style={{ color: '#C6EEDB' }}>
+              Giocatore
+            </span>
+          )}
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
           {isMe ? (
@@ -227,7 +141,26 @@ export function ProfilePage() {
             </div>
           ))}
         </div>
+        {isMe && <ShareCardButton data={data} player={p} />}
+        {!isMe && me.data?.playerId && players.has(me.data.playerId) && (
+          <Link to={`/confronto/${me.data.playerId}/${p.id}`} className="btn" style={{ background: '#C6EEDB', color: '#0B1A24' }}>
+            Confronta con te
+          </Link>
+        )}
       </div>
+
+      {timeline.length > 1 && (
+        <div style={{ padding: '0 14px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+          <div className="section-head">
+            <h2 className="title">Andamento in classifica</h2>
+          </div>
+          <div className="card" style={{ padding: '14px 14px 8px' }}>
+            <PositionChart timeline={timeline} series={[{ player: p, color: 'var(--chart-one)' }]} playerCount={data.players.length} qualifiers={data.season.qualifiers} />
+          </div>
+        </div>
+      )}
+
+      <BadgeSection playerId={p.id} />
 
       <div style={{ padding: '0 14px', display: 'flex', flexDirection: 'column', gap: 10 }}>
         <div className="segmented">
@@ -275,8 +208,8 @@ export function ProfilePage() {
           Scontri diretti
         </h2>
         <div className="card">
-          {h2h.map(({ o, m, res, color }) => (
-            <Link key={o.id} to={m ? `/partite/${m.id}` : `/giocatori/${o.id}`} className="list-row" style={{ padding: '9px 14px' }}>
+          {h2h.map(({ o, res, color }) => (
+            <Link key={o.id} to={`/confronto/${p.id}/${o.id}`} className="list-row" style={{ padding: '9px 14px' }}>
               <Avatar player={o} size={30} />
               <span style={{ flex: 1, fontWeight: 600, fontSize: 14.5 }}>{o.shortName}</span>
               <span style={{ fontSize: 12.5, fontWeight: 700, color, whiteSpace: 'nowrap' }}>{res}</span>
@@ -285,14 +218,6 @@ export function ProfilePage() {
         </div>
       </div>
 
-      {isMe && (
-        <div style={{ padding: '0 14px', display: 'flex', flexDirection: 'column', gap: 8 }}>
-          {installButton}
-          {passwordButton}
-          {themeButton}
-          {logoutButton}
-        </div>
-      )}
     </div>
   );
 }

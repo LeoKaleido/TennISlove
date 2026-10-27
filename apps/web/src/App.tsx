@@ -10,6 +10,7 @@ import { GalleryPage } from './pages/Gallery';
 import { HomePage } from './pages/Home';
 import { LoginPage } from './pages/Login';
 import { MatchPage } from './pages/Match';
+import { ComparePage } from './pages/Compare';
 import { ProfilePage } from './pages/Profile';
 import { ResultPage } from './pages/Result';
 import { SelfiePage } from './pages/Selfie';
@@ -144,6 +145,7 @@ export function App() {
             <Route path="/gallery" element={<GalleryPage />} />
             <Route path="/profilo" element={<ProfilePage />} />
             <Route path="/giocatori/:id" element={<ProfilePage />} />
+            <Route path="/confronto/:a/:b" element={<ComparePage />} />
           </Route>
           <Route element={<Plain />}>
             <Route path="/partite/:id" element={<MatchPage />} />

@@ -4,3 +4,5 @@ export * from './match-status';
 export * from './dates';
 export * from './calendar';
 export * from './predictions';
+export * from './badges';
+export * from './timeline';

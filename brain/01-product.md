@@ -117,3 +117,35 @@ Gioco a parte tra i giocatori: si pronostica l'esito delle partite degli altri. 
 - **Risultati**: i provvisori danno punti subito, come in classifica (D-017); i contestati restano fuori finché l'admin non decide.
 - **Calcolo**: i punti si ricalcolano sempre dai risultati, mai salvati (come D-006). Si salva solo il pronostico: partita, giocatore, vincitore, modo, data; uno per giocatore e partita.
 - **Dove**: in Home un riquadro con le partite da pronosticare della settimana, con voto diretto; nella scheda partita la sezione pronostici; in Classifica una scheda "Pronostici" (punti, indovinati su giocati, colpi grossi). A fine stagione il primo è **l'Oracolo**.
+
+## 10. Badge e card del giocatore (D-062)
+
+Riconoscimenti calcolati dai dati che l'app ha già (risultati, date, foto, pronostici): **nessun dato salvato**, si ricalcolano come la classifica. Contano i risultati provvisori e confermati, non i contestati (come D-017). Ogni badge ha un suo logo.
+
+| Badge | Si ottiene |
+|---|---|
+| Prima vittoria | la prima partita vinta della stagione |
+| Cappotto | un set vinto 6-0 |
+| Rimonta | una partita vinta dopo aver perso il primo set |
+| Muro | una vittoria concedendo al massimo 3 game in tutta la partita |
+| Tris | 3 vittorie di fila (una partita senza vincitore interrompe la serie) |
+| Re del tie break | 3 partite vinte al super tie break |
+| Ammazzagrandi | battuto chi in quel momento era primo in classifica (anche a pari merito), con almeno una partita giocata |
+| Fotografo | foto in 3 delle proprie partite |
+| Indovino | 5 pronostici con il vincitore giusto |
+| Colpo grosso | un colpo grosso nei pronostici (§9) |
+| Campione | vincitore del torneo, indicato dall'admin |
+| Oracolo | primo nella classifica dei pronostici a stagione chiusa |
+| Podio | tra i primi 3 a stagione chiusa |
+
+- **Ordine delle partite** (Tris, Ammazzagrandi): per giorno giocato: la data programmata, altrimenti quella di inserimento del risultato ma non oltre la fine della settimana della giornata (i risultati importati dall'Excel sono stati inseriti tutti insieme, dopo).
+- **Livelli**: un badge si ottiene più volte e mostra il numero (×2, ×3), sommando tutti i tornei. Ogni set vinto 6-0 (anche in una partita persa), ogni rimonta, ogni Muro, ogni capolista battuto e ogni colpo grosso vale un livello; Tris un livello ogni 3 vittorie di fila (6 di fila = 2), Re del tie break ogni 3 vittorie al super tie break, Fotografo ogni 3 partite con foto, Indovino ogni 5 pronostici giusti. Prima vittoria e i badge di fine stagione valgono una volta per torneo.
+- **Bordo**: oro per Campione e Oracolo; argento per Podio, Ammazzagrandi, Tris e Re del tie break; bronzo per Cappotto, Rimonta, Muro, Indovino e Colpo grosso.
+- **Nel profilo**: tutti i badge con il livello e i tornei in cui sono stati ottenuti (con le partite); gli altri in grigio. Per ciascuno, quanto manca al prossimo livello nel torneo in corso.
+- **Card del giocatore**: dal proprio profilo, "Condividi la card" crea un'immagine 1080×1350 con foto, nome, posizione, punti, statistiche e badge ottenuti; si condivide (WhatsApp, Instagram…) o si scarica. È una scelta del giocatore: l'app resta privata (D-009).
+
+## 11. Testa a testa e andamento in classifica (D-064)
+
+- **Andamento**: nel profilo, la posizione in classifica a fine di ogni giornata già iniziata, in un grafico a linea (1° in alto, linea della fase finale segnata). Conta le partite giocate entro la fine della settimana, qualunque sia la loro giornata: un recupero pesa nella settimana in cui si gioca. Toccando il grafico si vedono posizione e punti di quella giornata.
+- **Testa a testa** (`/confronto/:a/:b`): si apre dagli "Scontri diretti" del profilo e con "Confronta con te" sul profilo di un altro giocatore. Mostra lo scontro diretto, i numeri affiancati (punti, vinte, giocate, game, differenza game, punti a partita, vittorie al super tie break, badge, punti dei pronostici), l'andamento di tutti e due sullo stesso grafico e i risultati contro gli avversari affrontati da entrambi.
+- **Colori**: blu e arancio per i due giocatori, verificati anche per chi confonde rosso e verde; un verde per il grafico di un solo giocatore.
