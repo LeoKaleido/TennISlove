@@ -6,6 +6,7 @@ import {
   formatDayWithWeekday,
   formatScore,
   fromRomeLocal,
+  predictionsOpen,
   type MatchScoreInput,
 } from '@tentennis/shared';
 import { z } from 'zod';
@@ -160,6 +161,31 @@ export async function matchRoutes(app: FastifyInstance) {
       });
     }
     return { ok: true, scheduleSeq: updated.scheduleSeq };
+  });
+
+  /** Pronostico su una partita altrui (D-061): si può cambiare fino all'inizio della partita */
+  app.put<{ Params: { id: string } }>('/api/matches/:id/prediction', async (req, reply) => {
+    const body = z
+      .object({ pick: z.enum(['A', 'B']), how: z.enum(['TWO_SETS', 'SUPER_TIEBREAK']).nullable() })
+      .parse(req.body);
+    const playerId = req.user!.playerId;
+    const m = await fullMatch(req.params.id);
+    if (!m) return reply.code(404).send({ error: 'Partita non trovata' });
+    if (!playerId || !(await db.seasonPlayer.findUnique({ where: { seasonId_playerId: { seasonId: m.seasonId, playerId } } }))) {
+      return reply.code(403).send({ error: 'Pronosticano solo i giocatori del torneo' });
+    }
+    if (playerId === m.playerAId || playerId === m.playerBId) {
+      return reply.code(403).send({ error: 'Non puoi pronosticare le tue partite' });
+    }
+    if (m.season.status !== 'ACTIVE' || !predictionsOpen({ scheduledAt: m.scheduledAt, hasResult: m.result !== null })) {
+      return reply.code(409).send({ error: 'I pronostici per questa partita sono chiusi' });
+    }
+    await db.prediction.upsert({
+      where: { matchId_playerId: { matchId: m.id, playerId } },
+      create: { matchId: m.id, playerId, ...body },
+      update: body,
+    });
+    return { ok: true };
   });
 
   app.post<{ Params: { id: string } }>('/api/matches/:id/postpone', async (req, reply) => {

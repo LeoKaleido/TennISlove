@@ -1,12 +1,16 @@
 // Serializzazione verso il frontend: partite con stato derivato e punti calcolati.
 
-import type { Club, Match, MatchPhoto, MatchResult, Player, Round, Season } from '@prisma/client';
+import type { Club, Match, MatchPhoto, MatchResult, Player, Prediction, Round, Season } from '@prisma/client';
 import {
+  computePredictionStandings,
   computeStandings,
   COUNTS_IN_STANDINGS,
   evaluateMatch,
   matchStatus,
+  predictionsOpen,
+  scorePredictions,
   type MatchScoreInput,
+  type PredictionPick,
 } from '@tentennis/shared';
 import { db } from './db';
 
@@ -82,9 +86,40 @@ type FullMatch = MatchRow & { result: (MatchResult & { submittedBy: { player: Pl
 
 export const toView = (m: FullMatch) => matchView(m, m.result?.submittedBy?.player?.id ?? null);
 
+/** Il risultato che conta per classifica e pronostici (D-017): provvisorio o confermato */
+const countingScore = (m: MatchRow) => (m.result && COUNTS_IN_STANDINGS.includes(m.result.status) ? scoreInput(m.result) : null);
+
+const toPick = (p: Prediction): PredictionPick => ({ playerId: p.playerId, pick: p.pick, how: p.how });
+
+/**
+ * Pronostici di una partita visti da `viewerId` (D-061): prima di votare solo quanti sono,
+ * dopo il voto le percentuali, a pronostici chiusi anche chi ha scelto cosa e i punti.
+ */
+function predictionsView(m: MatchRow, preds: Prediction[], viewerId: string | null, seasonPlayerIds: Set<string>, seasonActive: boolean) {
+  const open = seasonActive && predictionsOpen({ scheduledAt: m.scheduledAt, hasResult: m.result !== null });
+  const mine = preds.find((p) => p.playerId === viewerId);
+  const canPredict =
+    open && viewerId !== null && seasonPlayerIds.has(viewerId) && viewerId !== m.playerAId && viewerId !== m.playerBId;
+  const showSplit = !open || !!mine;
+  const scores = open ? null : scorePredictions(preds.map(toPick), countingScore(m));
+  return {
+    open,
+    canPredict,
+    count: preds.length,
+    mine: mine ? { pick: mine.pick, how: mine.how } : null,
+    split: showSplit ? { A: preds.filter((p) => p.pick === 'A').length, B: preds.filter((p) => p.pick === 'B').length } : null,
+    voters: open
+      ? null
+      : preds.map((p) => {
+          const s = scores?.find((x) => x.playerId === p.playerId);
+          return { playerId: p.playerId, pick: p.pick, how: p.how, points: s?.points ?? null, upset: s?.upset ?? false };
+        }),
+  };
+}
+
 /** Tutto quello che serve all'app per una stagione, in una sola risposta (66 partite: pochi KB) */
-export async function seasonOverview(season: Season) {
-  const [players, rounds, matches, clubs] = await Promise.all([
+export async function seasonOverview(season: Season, viewerPlayerId: string | null = null) {
+  const [players, rounds, matches, clubs, predictions] = await Promise.all([
     db.seasonPlayer.findMany({
       where: { seasonId: season.id },
       include: { player: { include: { user: true } } },
@@ -93,15 +128,26 @@ export async function seasonOverview(season: Season) {
     db.round.findMany({ where: { seasonId: season.id }, orderBy: [{ phase: 'asc' }, { number: 'asc' }] }),
     db.match.findMany({ where: { seasonId: season.id }, include: matchInclude, orderBy: { code: 'asc' } }),
     db.seasonClub.findMany({ where: { seasonId: season.id, club: { active: true } }, include: { club: true }, orderBy: { club: { name: 'asc' } } }),
+    db.prediction.findMany({ where: { match: { seasonId: season.id } }, orderBy: { createdAt: 'asc' } }),
   ]);
 
-  const views = matches.map(toView);
+  const playerIds = new Set(players.map((p) => p.playerId));
+  const predsOf = (matchId: string) => predictions.filter((p) => p.matchId === matchId);
+  const views = matches.map((m) => ({
+    ...toView(m),
+    predictions: predictionsView(m, predsOf(m.id), viewerPlayerId, playerIds, season.status === 'ACTIVE'),
+  }));
   const standings = computeStandings(
     players.map((p) => p.playerId),
     matches
       .filter((m) => m.round.phase === 'ROUND_ROBIN' && m.result && COUNTS_IN_STANDINGS.includes(m.result.status))
       .map((m) => ({ playerAId: m.playerAId, playerBId: m.playerBId, score: scoreInput(m.result!) })),
     { qualifiers: season.qualifiers },
+  );
+  // classifica a parte: i pronostici non toccano i punti del torneo
+  const predictionStandings = computePredictionStandings(
+    players.map((p) => p.playerId),
+    matches.map((m) => ({ picks: predsOf(m.id).map(toPick), score: countingScore(m) })),
   );
 
   return {
@@ -126,6 +172,7 @@ export async function seasonOverview(season: Season) {
     matches: views,
     clubs: clubs.map(({ club }) => clubView(club)),
     standings,
+    predictionStandings,
     provisionalCount: views.filter((m) => m.result?.status === 'PENDING').length,
   };
 }

@@ -33,6 +33,7 @@ Registro cronologico di eventi, decisioni e domande aperte. Le voci nuove si agg
 | 26/10/2026 | Sviluppo e produzione passano a un unico container (D-054), provati in locale (produzione con certificato di prova). |
 | 26/10/2026 | Email di produzione da una casella su Plesk invece di Resend (D-055). |
 | 26/10/2026 | HTTPS gestito dal server, non più dal container (D-056). Versione desktop e classifica a tabella quando c'è spazio (D-057). Il nome diventa TennIsLove (D-058). Partita in finestra su desktop e nuovo calendario desktop (D-059). Login con password mandata nell'invito, codice come alternativa (D-060). |
+| 27/10/2026 | Decisi i pronostici tra giocatori, con classifica separata (D-061). Idee per l'identità dell'app: simulatore "cosa mi serve per salire", figurina del giocatore, riassunto della giornata, testa a testa, badge, meteo della partita. |
 
 ## Decisioni
 
@@ -98,6 +99,7 @@ Registro cronologico di eventi, decisioni e domande aperte. Le voci nuove si agg
 | D-058 | 26/10/2026 | Il nome si scrive **TennIsLove** (T, I e L maiuscole). Sostituisce la grafia TennISlove di D-050 | Preferenza dell'utente | Accettata |
 | D-059 | 26/10/2026 | **Partita in finestra su desktop**: scheda partita, foto, risultato e conferma si aprono in una finestra sopra la pagina di provenienza (Home se si arriva da ricarica o email); sul telefono restano pagine intere. Calendario desktop con elenco delle giornate e dettaglio a fianco, Home senza intestazione su desktop | Su desktop si resta nel contesto; sul telefono una finestra non aggiunge niente e complica scorrimento, foto e tasto indietro | Accettata |
 | D-060 | 26/10/2026 | **Login con password**: l'invito genera una password casuale (10 caratteri, senza 0/O/1/l/I) e la manda in chiaro nell'email; salvata solo come hash scrypt. Si entra con email e password; se dimenticata, con il codice via email (D-049). Reinvitare genera una nuova password. 5 password sbagliate di fila bloccano l'accesso con password per 15 minuti (il codice sblocca). Password cambiabile dal profilo (minimo 8 caratteri). Il login dice **"Email non registrata"**, accettando di rivelare chi è iscritto. Modifica D-035, D-043 e D-049 | Richiesta dell'utente: più comodo di un codice a ogni accesso; password in chiaro nell'email accettata consapevolmente | Accettata |
+| D-061 | 27/10/2026 | **Pronostici**: i giocatori pronosticano vincitore e modo (2 set / super tie break) delle partite altrui; 2 punti per il vincitore, +1 per il modo, +2 di "colpo grosso" se il vincitore giusto l'ha scelto al massimo 1 votante su 4. Classifica separata, **nessun effetto sui punti del torneo**. Chiusura all'ora della partita, nomi visibili a chiusura. Dettagli in `01-product.md` §9 | Richiesta dell'utente: una funzione che renda l'app riconoscibile e coinvolga anche chi quella settimana non gioca | Accettata |
 
 ## Domande aperte
 

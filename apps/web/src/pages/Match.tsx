@@ -4,6 +4,7 @@ import { Link, useParams, useSearchParams } from 'react-router';
 import { formatDayWithWeekday, romeDay, romeTime } from '@tentennis/shared';
 import { api, type MatchDetail } from '../api';
 import { Avatar, BackButton, ErrorState, Loading, Logo, ScoreTable, StatusPill, useClosing, useToast } from '../components/ui';
+import { PredictionPanel } from '../components/Predictions';
 import { isMine, playerIndex, roundRange, today, useMe, useSeason } from '../data';
 import { ScheduleSheet } from './ScheduleSheet';
 
@@ -40,6 +41,7 @@ export function MatchPage() {
   const canAct = mine;
   const sheetOpen = params.has('programma') && canAct && !m.result;
   const r = m.result;
+  const predictions = season.data.matches.find((x) => x.id === m.id)?.predictions;
 
   const day = m.scheduledAt ? romeDay(m.scheduledAt) : null;
   const awaitingMe = r?.status === 'PENDING' && mine && r.submittedByPlayerId !== myId;
@@ -156,6 +158,14 @@ export function MatchPage() {
           </div>
         </div>
       </div>
+
+      {predictions && (predictions.open || predictions.count > 0) && (
+        <section style={{ padding: '22px 14px 0' }}>
+          <div className="card" style={{ padding: 16 }}>
+            <PredictionPanel match={m} predictions={predictions} players={players} />
+          </div>
+        </section>
+      )}
 
       {(detail.data.photos.length > 0 || mine) && (
         <section style={{ padding: '22px 14px 0', display: 'flex', flexDirection: 'column', gap: 10 }}>

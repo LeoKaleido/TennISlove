@@ -91,6 +91,7 @@ model Player {
   seasons SeasonPlayer[]
   matchesAsA Match[]    @relation("playerA")
   matchesAsB Match[]    @relation("playerB")
+  predictions Prediction[]
 }
 
 model SeasonPlayer {
@@ -153,6 +154,7 @@ model Match {
   result     MatchResult?
   photos     MatchPhoto[] @relation("matchPhotos")
   coverPhoto MatchPhoto?  @relation("cover", fields: [coverPhotoId], references: [id])
+  predictions Prediction[]
 
   @@unique([seasonId, code])
 }
@@ -200,6 +202,32 @@ model MatchPhoto {
   match      Match  @relation("matchPhotos", fields: [matchId], references: [id], onDelete: Cascade)
   uploadedBy User   @relation(fields: [uploadedById], references: [id])
   coverOf    Match? @relation("cover")
+}
+
+enum PredictionSide {
+  A
+  B
+}
+
+enum PredictionHow {
+  TWO_SETS
+  SUPER_TIEBREAK
+}
+
+/// Pronostico di un giocatore su una partita altrui (D-061). I punti si calcolano, non si salvano
+model Prediction {
+  matchId   String
+  playerId  String
+  pick      PredictionSide
+  /// facoltativo: in 2 set o al super tie break
+  how       PredictionHow?
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+
+  match  Match  @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  player Player @relation(fields: [playerId], references: [id])
+
+  @@id([matchId, playerId])
 }
 
 /// Codice di 6 cifre per entrare, mandato per email (D-049)

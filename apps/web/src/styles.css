@@ -1243,6 +1243,7 @@ textarea.input {
     grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
     grid-template-areas:
       'hero week'
+      'hero predict'
       'hero recent'
       'hero table';
     align-items: start;
@@ -1265,6 +1266,10 @@ textarea.input {
     grid-area: week;
   }
 
+  .home-predict {
+    grid-area: predict;
+  }
+
   .home-recent {
     grid-area: recent;
   }
@@ -1274,6 +1279,7 @@ textarea.input {
   }
 
   .home-week,
+  .home-predict,
   .home-recent,
   .home-table {
     padding: 0 !important;
@@ -1297,7 +1303,8 @@ textarea.input {
   }
 
   .st-list,
-  .st-table {
+  .st-table,
+  .pr-list {
     padding: 0 !important;
   }
 
@@ -1455,4 +1462,154 @@ textarea.input {
   font-weight: 600;
   margin-top: -6px;
   padding-left: 16px;
+}
+
+/* Pronostici (D-061) */
+.pred {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.pred-head {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 12.5px;
+}
+
+.pred-title {
+  font-weight: 800;
+  font-size: 15px;
+}
+
+.pred-picks {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.pred-pick {
+  height: 52px;
+  padding: 0 12px;
+  border-radius: 16px;
+  border: 1.5px solid var(--line2);
+  background: var(--surface);
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-weight: 700;
+  font-size: 14.5px;
+  min-width: 0;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.pred-pick > span:last-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pred-pick[aria-pressed='true'] {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--onAccent);
+}
+
+.pred-how {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+}
+
+.pred-how .faint {
+  flex-basis: 100%;
+}
+
+.pred-how .chip {
+  height: 34px;
+  font-size: 13px;
+  border-radius: 99px;
+}
+
+.pred-split {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.pred-bar {
+  height: 8px;
+  border-radius: 99px;
+  background: var(--mint);
+  overflow: hidden;
+}
+
+.pred-bar > span {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+  border-radius: 99px 0 0 99px;
+  transition: width 0.3s ease;
+}
+
+.pred-legend {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12.5px;
+  color: var(--ink2);
+}
+
+.pred-voters {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  font-size: 12.5px;
+}
+
+.pred-side {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.pred-names {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.pred-voter {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 9px 3px 3px;
+  border-radius: 99px;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.pred-pts {
+  color: var(--accent);
+}
+
+.pred-upset {
+  padding: 1px 6px;
+  border-radius: 99px;
+  background: var(--warnBg);
+  color: var(--warnFg);
+  font-size: 10.5px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* Classifica a righe attaccate (torneo e pronostici) */
+.rank-list > * + * {
+  border-top: 1px solid var(--line);
 }

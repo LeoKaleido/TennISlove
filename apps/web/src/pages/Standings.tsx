@@ -1,6 +1,9 @@
-import { useState } from 'react';
-import { Link } from 'react-router';
-import { Avatar, Chevron, Collapse, ErrorState, Loading, ZonePill } from '../components/ui';
+import { Fragment, useState } from 'react';
+import { Link, useSearchParams } from 'react-router';
+import type { SeasonOverview } from '../api';
+import { PredictionRules } from '../components/Predictions';
+import { RankingDivider, RankingList, RankingRow } from '../components/Ranking';
+import { Avatar, ErrorState, Loading, ZonePill } from '../components/ui';
 import { playerIndex, useMe, useSeason, useSeasons } from '../data';
 
 const COLUMNS = [
@@ -20,6 +23,10 @@ export function StandingsPage() {
   const [seasonId, setSeasonId] = useState<string | undefined>();
   const [expanded, setExpanded] = useState<string | null>(null);
   const season = useSeason(seasonId);
+  // classifica del torneo o dei pronostici (D-061), nell'URL così il link dalla Home apre quella giusta
+  const [params, setParams] = useSearchParams();
+  const predictionsView = params.get('vista') === 'pronostici';
+  const setView = (pred: boolean) => setParams(pred ? { vista: 'pronostici' } : {}, { replace: true });
 
   if (season.isLoading) return <Loading />;
   if (!season.data) return <ErrorState error={season.error} />;
@@ -42,6 +49,15 @@ export function StandingsPage() {
         </div>
       </div>
 
+      <div style={{ padding: '0 16px', display: 'flex', gap: 6 }}>
+        <button className="chip" aria-pressed={!predictionsView} onClick={() => setView(false)} style={{ height: 34, borderRadius: 99 }}>
+          Torneo
+        </button>
+        <button className="chip" aria-pressed={predictionsView} onClick={() => setView(true)} style={{ height: 34, borderRadius: 99 }}>
+          Pronostici
+        </button>
+      </div>
+
       {(seasons.data?.length ?? 0) > 1 && (
         <div style={{ padding: '0 16px', display: 'flex', gap: 6, overflowX: 'auto' }}>
           {seasons.data!.map((s) => {
@@ -55,6 +71,10 @@ export function StandingsPage() {
         </div>
       )}
 
+      {predictionsView ? (
+        <PredictionBoard data={data} myId={myId} />
+      ) : (
+        <>
       {archived && champion && (
         <div style={{ margin: '0 16px', padding: '16px 18px', borderRadius: 22, background: 'var(--hero)', color: '#fff', display: 'flex', flexDirection: 'column', gap: 6 }}>
           <span className="kicker" style={{ color: '#C6EEDB' }}>
@@ -113,35 +133,23 @@ export function StandingsPage() {
               </table>
             </div>
           </div>
-        <div className="st-list" style={{ padding: '0 16px', display: 'flex', flexDirection: 'column', gap: 8 }}>
-          {data.standings.map((r, i) => {
-            const p = players.get(r.playerId)!;
-            const open = expanded === r.playerId;
-            const next = data.standings[i + 1];
-            const showCut = q > 0 && r.position <= q && (!next || next.position > q) && i < data.standings.length - 1;
-            return (
-              <div key={r.playerId}>
-                <div className="card" style={{ borderRadius: 18, background: r.playerId === myId ? 'color-mix(in oklch, var(--mint) 28%, var(--surface))' : undefined }}>
-                  <button className="list-row" onClick={() => setExpanded(open ? null : r.playerId)}>
-                    <span style={{ width: 24, fontWeight: 900, fontStretch: '70%', fontSize: 24 }}>{r.position}</span>
-                    <Avatar player={p} size={36} />
-                    <span style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 4 }}>
-                      <span style={{ fontWeight: 700, fontSize: 15 }}>
-                        {p.firstName} {p.lastName}
-                      </span>
-                      <span>
-                        {q > 0 && <ZonePill zone={r.zone} qualifiers={q} />}
-                      </span>
-                    </span>
-                    <span style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
-                      <span style={{ fontWeight: 900, fontStretch: '70%', fontSize: 28, lineHeight: 1 }}>{r.points}</span>
-                      <span className="faint" style={{ fontSize: 10.5, fontWeight: 700, textTransform: 'uppercase' }}>
-                        punti
-                      </span>
-                    </span>
-                    <Chevron open={open} />
-                  </button>
-                  <Collapse open={open}>
+        <div className="st-list" style={{ padding: '0 16px' }}>
+          <RankingList>
+            {data.standings.map((r, i) => {
+              const p = players.get(r.playerId)!;
+              const next = data.standings[i + 1];
+              const showCut = q > 0 && r.position <= q && (!next || next.position > q) && i < data.standings.length - 1;
+              return (
+                <Fragment key={r.playerId}>
+                  <RankingRow
+                    player={p}
+                    position={r.position}
+                    points={r.points}
+                    sub={q > 0 && <ZonePill zone={r.zone} qualifiers={q} />}
+                    highlight={r.playerId === myId}
+                    open={expanded === r.playerId}
+                    onToggle={() => setExpanded(expanded === r.playerId ? null : r.playerId)}
+                    details={
                       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 1, background: 'var(--line)', borderTop: '1px solid var(--line)' }}>
                         {COLUMNS.map((c) => (
                           <div key={c.key} style={{ background: 'var(--surface)', padding: '10px 8px', display: 'flex', flexDirection: 'column', gap: 2, alignItems: 'center' }}>
@@ -152,21 +160,13 @@ export function StandingsPage() {
                           </div>
                         ))}
                       </div>
-                      <Link to={`/giocatori/${p.id}`} className="btn" style={{ width: '100%', height: 42, borderRadius: 0, borderTop: '1px solid var(--line)', color: 'var(--accent)', fontWeight: 700, fontSize: 13 }}>
-                        Apri profilo
-                      </Link>
-                  </Collapse>
-                </div>
-                {showCut && (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 2px 2px', fontSize: 11, fontWeight: 800, letterSpacing: '.08em', textTransform: 'uppercase', color: 'var(--accent)' }}>
-                    <span style={{ flex: 1, borderTop: '2px solid var(--accent)' }} />
-                    Linea di taglio
-                    <span style={{ flex: 1, borderTop: '2px solid var(--accent)' }} />
-                  </div>
-                )}
-              </div>
-            );
-          })}
+                    }
+                  />
+                  {showCut && <RankingDivider label="Linea di taglio" />}
+                </Fragment>
+              );
+            })}
+          </RankingList>
         </div>
         </div>
 
@@ -184,7 +184,63 @@ export function StandingsPage() {
           punti conta lo scontro diretto; tra tre o più, i punti negli scontri tra loro e poi la differenza game.{q > 0 && ` I primi ${q} vanno alla fase finale.`}
         </div>
       </div>
+        </>
+      )}
     </div>
+  );
+}
+
+/** Classifica dei pronostici: punti a parte, non toccano quella del torneo */
+function PredictionBoard({ data, myId }: { data: SeasonOverview; myId: string | null | undefined }) {
+  const players = playerIndex(data.players);
+  const leader = data.predictionStandings[0];
+  const oracle = data.season.status === 'ARCHIVED' && leader && leader.points > 0 ? players.get(leader.playerId) : undefined;
+  return (
+    <>
+      <div className="st-board">
+        <div className="pr-list" style={{ padding: '0 16px', display: 'flex', flexDirection: 'column', gap: 8 }}>
+          {oracle && (
+            <div style={{ padding: '16px 18px', borderRadius: 22, background: 'var(--hero)', color: '#fff', display: 'flex', flexDirection: 'column', gap: 6 }}>
+              <span className="kicker" style={{ color: '#C6EEDB' }}>
+                Oracolo {data.season.label}
+              </span>
+              <span className="display" style={{ fontSize: 34 }}>
+                {oracle.firstName} {oracle.lastName}
+              </span>
+            </div>
+          )}
+          <RankingList>
+            {data.predictionStandings.map((r) => (
+              <RankingRow
+                key={r.playerId}
+                player={players.get(r.playerId)!}
+                position={r.position}
+                points={r.points}
+                highlight={r.playerId === myId}
+                sub={
+                  <span className="faint" style={{ fontSize: 12.5 }}>
+                    {[
+                      r.played === 0 ? 'Nessun pronostico concluso' : `${r.correct} su ${r.played} indovinati`,
+                      r.upsets > 0 && (r.upsets === 1 ? '1 colpo grosso' : `${r.upsets} colpi grossi`),
+                    ]
+                      .filter(Boolean)
+                      .join(', ')}
+                  </span>
+                }
+              />
+            ))}
+          </RankingList>
+        </div>
+      </div>
+      <div className="st-rules" style={{ margin: '4px 16px 0', padding: 18, borderRadius: 22, background: 'var(--hero)', color: '#fff', display: 'flex', flexDirection: 'column', gap: 12 }}>
+        <div className="title" style={{ fontSize: 22, color: '#C6EEDB' }}>
+          Come funzionano i pronostici
+        </div>
+        <div style={{ fontSize: 13.5, lineHeight: 1.45, color: 'rgba(255,255,255,.85)' }}>
+          <PredictionRules />
+        </div>
+      </div>
+    </>
   );
 }
 

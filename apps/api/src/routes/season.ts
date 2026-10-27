@@ -18,6 +18,6 @@ export async function seasonRoutes(app: FastifyInstance) {
       : await db.season.findFirst({ where: { status: 'ACTIVE' }, orderBy: { createdAt: 'desc' } });
     // un torneo in preparazione lo vede solo l'admin, dal gestionale
     if (!season || (season.status === 'DRAFT' && !req.user!.isAdmin)) return reply.code(404).send({ error: 'Nessun torneo in corso' });
-    return seasonOverview(season);
+    return seasonOverview(season, req.user!.playerId);
   });
 }

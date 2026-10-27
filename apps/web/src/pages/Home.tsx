@@ -2,6 +2,7 @@ import { Link } from 'react-router';
 import { formatDayWithWeekday, romeDay } from '@tentennis/shared';
 import type { Match, SeasonOverview } from '../api';
 import { MatchRow } from '../components/MatchRow';
+import { PredictionPanel } from '../components/Predictions';
 import { Avatar, ErrorState, Loading, Logo, ScoreTable } from '../components/ui';
 import { currentRound, isMine, matchInfo, opponentOf, playerIndex, roundRange, STATUS_STYLE, today, useMe, useSeason } from '../data';
 
@@ -48,6 +49,10 @@ export function HomePage() {
     .sort((a, b) => (b.result!.submittedAt > a.result!.submittedAt ? 1 : -1))
     .slice(0, 4);
   const clubName = (id: string | null) => data.clubs.find((c) => c.id === id)?.name;
+  // pronostici aperti fino alla giornata in corso, compresi i recuperi; prima quelli ancora da votare
+  const toPredict = data.matches
+    .filter((m) => m.predictions.canPredict && round && m.round <= round.number)
+    .sort((x, y) => Number(!!x.predictions.mine) - Number(!!y.predictions.mine) || x.round - y.round);
 
   return (
     <div className="screen home" style={{ gap: 24 }}>
@@ -109,6 +114,28 @@ export function HomePage() {
             {others.map((m) => (
               <MatchRow key={m.id} match={m} data={data} />
             ))}
+          </div>
+        </section>
+      )}
+
+      {toPredict.length > 0 && (
+        <section className="home-predict" style={{ display: 'flex', flexDirection: 'column', gap: 10, padding: '0 14px' }}>
+          <div className="section-head">
+            <h2 className="title">Pronostici</h2>
+            <Link to="/classifica?vista=pronostici" className="link-btn">
+              Classifica
+            </Link>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {toPredict.map((m) => {
+              const a = players.get(m.playerAId)!;
+              const b = players.get(m.playerBId)!;
+              return (
+                <div key={m.id} className="card" style={{ padding: 14, borderRadius: 18 }}>
+                  <PredictionPanel match={m} predictions={m.predictions} players={players} title={`${a.shortName} vs ${b.shortName}`} />
+                </div>
+              );
+            })}
           </div>
         </section>
       )}

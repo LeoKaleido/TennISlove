@@ -96,3 +96,24 @@ Il progetto è gratuito e senza scadenza (D-015), quindi si rilascia a piccoli p
 - Email a metà settimana alle coppie che non hanno ancora programmato.
 - Link "condividi su WhatsApp" per risultato e classifica.
 - Statistiche avanzate: striscia di vittorie, andamento della posizione per giornata, % di partite al super tie break.
+
+## 9. Pronostici (D-061)
+
+Gioco a parte tra i giocatori: si pronostica l'esito delle partite degli altri. **I punti dei pronostici sono una classifica separata e non toccano in alcun modo i punti del torneo.**
+
+- **Chi**: tutti i giocatori della stagione, tranne i due della partita.
+- **Cosa**: il **vincitore** (obbligatorio) e, facoltativo, il **modo**: in 2 set o al super tie break.
+- **Punti**:
+
+  | | Punti |
+  |---|---|
+  | Vincitore giusto | 2 |
+  | Modo giusto (solo se anche il vincitore è giusto) | +1 |
+  | **Colpo grosso**: vincitore giusto scelto da non più di 1 votante su 4 | +2 |
+
+- **Chiusura**: all'ora programmata della partita; se non è programmata, quando viene inserito il risultato. Fino alla chiusura il pronostico si può cambiare; una partita rinviata prima dell'inizio resta aperta.
+- **Visibilità**: prima di votare solo il numero di pronostici; dopo aver votato le percentuali; a pronostici chiusi anche i nomi, visibili a tutti compresi i due giocatori.
+- **Annullati** (non contano per nessuno): tempo scaduto senza vincitore, partita mai giocata.
+- **Risultati**: i provvisori danno punti subito, come in classifica (D-017); i contestati restano fuori finché l'admin non decide.
+- **Calcolo**: i punti si ricalcolano sempre dai risultati, mai salvati (come D-006). Si salva solo il pronostico: partita, giocatore, vincitore, modo, data; uno per giocatore e partita.
+- **Dove**: in Home un riquadro con le partite da pronosticare della settimana, con voto diretto; nella scheda partita la sezione pronostici; in Classifica una scheda "Pronostici" (punti, indovinati su giocati, colpi grossi). A fine stagione il primo è **l'Oracolo**.

@@ -1,6 +1,6 @@
 // Client dell'API e tipi delle risposte.
 
-import type { MatchScoreInput, MatchStatus, ResultStatus, StandingRow } from '@tentennis/shared';
+import type { MatchScoreInput, MatchStatus, PredictionHow, PredictionStandingRow, ResultStatus, Side, StandingRow } from '@tentennis/shared';
 
 export class ApiError extends Error {
   constructor(
@@ -89,6 +89,18 @@ export interface Match {
   result: MatchResult | null;
 }
 
+/** Pronostici di una partita, già filtrati per chi guarda (D-061) */
+export interface MatchPredictions {
+  open: boolean;
+  canPredict: boolean;
+  count: number;
+  mine: { pick: Side; how: PredictionHow | null } | null;
+  /** dopo aver votato o a pronostici chiusi */
+  split: { A: number; B: number } | null;
+  /** a pronostici chiusi; `points` solo con un risultato che conta */
+  voters: { playerId: string; pick: Side; how: PredictionHow | null; points: number | null; upset: boolean }[] | null;
+}
+
 export interface SeasonOverview {
   season: {
     id: string;
@@ -102,9 +114,10 @@ export interface SeasonOverview {
   };
   players: Player[];
   rounds: Round[];
-  matches: Match[];
+  matches: (Match & { predictions: MatchPredictions })[];
   clubs: Club[];
   standings: StandingRow[];
+  predictionStandings: PredictionStandingRow[];
   provisionalCount: number;
 }
 
