@@ -156,3 +156,9 @@ Riconoscimenti calcolati dai dati che l'app ha già (risultati, date, foto, pron
 - **Cosa**: tempo (il peggiore nelle 2 ore della partita), temperatura all'inizio, probabilità di pioggia massima, vento. Con pioggia probabile (≥ 50%) la riga si colora.
 - **Fonte**: Open-Meteo, gratuito e senza chiave. Le previsioni le chiede il server (l'indirizzo dei giocatori non esce verso terzi) e le tiene 30 minuti.
 - **Posizione dei circoli**: ricavata dal link Google Maps (anche dai link brevi, seguendo i rimandi); se il link non la contiene, dalla città con la ricerca luoghi di Open-Meteo, scegliendo tra gli omonimi quello che corrisponde (es. "Santa Maria degli Angeli, Assisi"). Si ricava all'avvio per i circoli senza posizione e di nuovo quando dal gestionale cambiano link o città; il gestionale segnala i circoli senza posizione.
+
+## 13. Simulatore "cosa ti serve" (D-066)
+
+- **Dove**: nella scheda di una propria partita del girone ancora da giocare, a torneo in corso.
+- **Cosa**: otto risultati tipici visti dal giocatore (vinci 6-0 6-0, 6-3 6-3, 7-6 7-6, al super tie break; perdi al super tie break, 6-7 6-7, 3-6 3-6, 0-6 0-6). Per ognuno: i punti presi, la posizione in cui si finirebbe (con quante posizioni si sale o si scende rispetto a oggi) e quella dell'avversario. Toccando un risultato si vede la parte di classifica intorno ai due giocatori come sarebbe.
+- **Calcolo**: la classifica vera (stessi risultati, provvisori compresi, e stessi spareggi) con in più la partita simulata. Nessun dato salvato.

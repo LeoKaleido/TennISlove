@@ -6,3 +6,4 @@ export * from './calendar';
 export * from './predictions';
 export * from './badges';
 export * from './timeline';
+export * from './simulator';

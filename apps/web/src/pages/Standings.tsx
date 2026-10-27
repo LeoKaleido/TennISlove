@@ -1,5 +1,6 @@
 import { Fragment, useState } from 'react';
 import { Link, useSearchParams } from 'react-router';
+import type { PredictionStandingRow } from '@tentennis/shared';
 import type { SeasonOverview } from '../api';
 import { PredictionRules } from '../components/Predictions';
 import { RankingDivider, RankingList, RankingRow } from '../components/Ranking';
@@ -190,6 +191,13 @@ export function StandingsPage() {
   );
 }
 
+const PRED_COLUMNS: { label: string; title: string; value: (r: PredictionStandingRow) => string | number }[] = [
+  { label: 'G', title: 'Pronostici conclusi', value: (r) => r.played },
+  { label: 'I', title: 'Vincitori indovinati', value: (r) => r.correct },
+  { label: '%', title: 'Percentuale indovinati', value: (r) => (r.played > 0 ? `${Math.round((r.correct / r.played) * 100)}%` : '-') },
+  { label: 'CG', title: 'Colpi grossi', value: (r) => r.upsets },
+];
+
 /** Classifica dei pronostici: punti a parte, non toccano quella del torneo */
 function PredictionBoard({ data, myId }: { data: SeasonOverview; myId: string | null | undefined }) {
   const players = playerIndex(data.players);
@@ -197,18 +205,61 @@ function PredictionBoard({ data, myId }: { data: SeasonOverview; myId: string | 
   const oracle = data.season.status === 'ARCHIVED' && leader && leader.points > 0 ? players.get(leader.playerId) : undefined;
   return (
     <>
+      {oracle && (
+        <div style={{ margin: '0 16px', padding: '16px 18px', borderRadius: 22, background: 'var(--hero)', color: '#fff', display: 'flex', flexDirection: 'column', gap: 6 }}>
+          <span className="kicker" style={{ color: '#C6EEDB' }}>
+            Oracolo {data.season.label}
+          </span>
+          <span className="display" style={{ fontSize: 34 }}>
+            {oracle.firstName} {oracle.lastName}
+          </span>
+        </div>
+      )}
+      {/* come la classifica del torneo: tabella se c'è spazio, altrimenti righe */}
       <div className="st-board">
-        <div className="pr-list" style={{ padding: '0 16px', display: 'flex', flexDirection: 'column', gap: 8 }}>
-          {oracle && (
-            <div style={{ padding: '16px 18px', borderRadius: 22, background: 'var(--hero)', color: '#fff', display: 'flex', flexDirection: 'column', gap: 6 }}>
-              <span className="kicker" style={{ color: '#C6EEDB' }}>
-                Oracolo {data.season.label}
-              </span>
-              <span className="display" style={{ fontSize: 34 }}>
-                {oracle.firstName} {oracle.lastName}
-              </span>
-            </div>
-          )}
+        <div className="st-table">
+          <div className="card">
+            <table style={{ borderCollapse: 'collapse', width: '100%', fontSize: 14 }}>
+              <thead>
+                <tr style={{ fontSize: 10.5, color: 'var(--ink3)', textTransform: 'uppercase', letterSpacing: '.06em' }}>
+                  <th style={{ textAlign: 'left', padding: '14px 10px 14px 18px' }}>#</th>
+                  <th style={{ textAlign: 'left', padding: '14px 10px' }}>Giocatore</th>
+                  <th style={{ padding: '14px 10px' }}>
+                    <ColumnTip label="Pt" title="Punti" />
+                  </th>
+                  {PRED_COLUMNS.map((c, i) => (
+                    <th key={c.label} style={{ padding: i === PRED_COLUMNS.length - 1 ? '14px 18px 14px 10px' : '14px 10px', fontWeight: 700 }}>
+                      <ColumnTip label={c.label} title={c.title} end={i >= PRED_COLUMNS.length - 2} />
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {data.predictionStandings.map((r) => {
+                  const p = players.get(r.playerId)!;
+                  return (
+                    <tr key={r.playerId} style={{ borderTop: '1px solid var(--line)', background: r.playerId === myId ? 'color-mix(in oklch, var(--mint) 35%, var(--surface))' : undefined }}>
+                      <td style={{ padding: '13px 10px 13px 18px', fontWeight: 900, fontStretch: '70%', fontSize: 18 }}>{r.position}</td>
+                      <td style={{ padding: '11px 10px' }}>
+                        <Link to={`/giocatori/${p.id}`} style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'inherit', textDecoration: 'none', fontWeight: 700, whiteSpace: 'nowrap' }}>
+                          <Avatar player={p} size={28} />
+                          {p.firstName} {p.lastName}
+                        </Link>
+                      </td>
+                      <td style={{ textAlign: 'center', padding: '0 10px', fontWeight: 900, fontStretch: '70%', fontSize: 20 }}>{r.points}</td>
+                      {PRED_COLUMNS.map((c, i) => (
+                        <td key={c.label} style={{ textAlign: 'center', color: 'var(--ink2)', padding: i === PRED_COLUMNS.length - 1 ? '0 18px 0 10px' : '0 10px' }}>
+                          {c.value(r)}
+                        </td>
+                      ))}
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div className="st-list" style={{ padding: '0 16px' }}>
           <RankingList>
             {data.predictionStandings.map((r) => (
               <RankingRow

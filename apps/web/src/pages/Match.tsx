@@ -5,6 +5,7 @@ import { formatDayWithWeekday, romeDay, romeTime } from '@tentennis/shared';
 import { api, type MatchDetail } from '../api';
 import { Avatar, BackButton, ErrorState, Loading, Logo, ScoreTable, StatusPill, useClosing, useToast } from '../components/ui';
 import { PredictionPanel } from '../components/Predictions';
+import { Simulator } from '../components/Simulator';
 import { isMine, playerIndex, roundRange, today, useMe, useSeason } from '../data';
 import { ScheduleSheet } from './ScheduleSheet';
 import { WeatherLine } from '../components/Weather';
@@ -161,6 +162,15 @@ export function MatchPage() {
           </div>
         </div>
       </div>
+
+      {mine && myId && !r && m.phase === 'ROUND_ROBIN' && season.data.season.status === 'ACTIVE' && (
+        <section style={{ padding: '22px 14px 0', display: 'flex', flexDirection: 'column', gap: 10 }}>
+          <div className="section-head">
+            <h2 className="title">Cosa ti serve</h2>
+          </div>
+          <Simulator match={m} data={season.data} myId={myId} />
+        </section>
+      )}
 
       {predictions && (predictions.open || predictions.count > 0) && (
         <section style={{ padding: '22px 14px 0' }}>
