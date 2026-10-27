@@ -78,11 +78,12 @@ export function useSeason(id?: string) {
 export const useCurrentSeason = () => useSeasonData(undefined);
 
 /** Un torneo preciso, senza guardare la scelta dell'app (il gestionale ha la sua); undefined = in corso */
-export function useSeasonData(id: string | undefined) {
+export function useSeasonData(id: string | undefined, enabled = true) {
   return useQuery({
     queryKey: ['season', id ?? 'current'],
     queryFn: () => api<SeasonOverview>(id ? `/api/season?id=${id}` : '/api/season'),
     staleTime: 30_000,
+    enabled,
   });
 }
 

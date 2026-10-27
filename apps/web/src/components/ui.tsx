@@ -8,8 +8,8 @@ import type { Match, Player } from '../api';
 import { useLogout } from '../account';
 import { bootVisible } from '../boot';
 import { SeasonPicker } from './SeasonPicker';
-import { iosInstallHint, isMobileDevice, useInstall } from '../pwa';
-import { avatarColors, initials, STATUS_STYLE, useMe, ZONE_STYLE } from '../data';
+import { iosInstallHint, isIOS, isMobileDevice, useInstall } from '../pwa';
+import { avatarColors, initials, STATUS_STYLE, useMe, useSeasonData, ZONE_STYLE } from '../data';
 
 /** Logo TennIsLove: cuore a forma di pallina da tennis. `inverted` per gli sfondi scuri: riquadro un po' più chiaro */
 export function Logo({ size = 38, inverted = false }: { size?: number; inverted?: boolean }) {
@@ -273,6 +273,19 @@ export function TabBar() {
   );
 }
 
+/** Firma sotto la barra delle sezioni: sotto le icone sul telefono, in fondo alla barra laterale su desktop */
+export function MadeBy() {
+  return (
+    <div className="made-by">
+      Made with love by{' '}
+      <a href="https://www.kalei.do" target="_blank" rel="noopener noreferrer">
+        Kaleido
+      </a>{' '}
+      for Giuseppe
+    </div>
+  );
+}
+
 /**
  * In fondo alla barra laterale (solo desktop): guida ed esci. Anche nel gestionale, senza la guida.
  * Qui c'è l'unico passaggio tra sito e gestionale (D-036): "Gestionale" per gli admin, "Sito" per gli admin che giocano.
@@ -443,15 +456,26 @@ export function useClosing(onClose: () => void, ms = 220) {
  * che compare poco dopo l'apertura: sopra la barra in basso, oppure in alto (login, per non coprire il modulo).
  * La × lo chiude solo per questa visita: a ogni apertura ricompare, finché l'app non è installata.
  */
-// Riquadro "Installa l'app" chiuso con la ×: non torna per una settimana (resta "Installa l'app" nelle impostazioni)
-const INSTALL_SNOOZE_KEY = 'tennislove:install-snoozed';
+/**
+ * Riquadro "Installa l'app" chiuso con la ×: resta "Installa l'app" nelle impostazioni.
+ * - iPhone/iPad (Safari): nessun sito può sapere se l'app è già installata, quindi chiuso una volta non torna più,
+ *   tranne una volta al primo ingresso in un torneo a cui si è iscritti;
+ * - Android: non torna per 7 giorni (se l'app è installata il browser non la propone e il riquadro non compare comunque).
+ */
+const INSTALL_CLOSED_KEY = 'tennislove:install-closed';
 const INSTALL_SNOOZE_MS = 7 * 24 * 60 * 60_000;
 
-function installSnoozed() {
+interface InstallClosed {
+  at: number;
+  /** torneo in corso a cui si era iscritti quando è stato chiuso */
+  season: string | null;
+}
+
+function readInstallClosed(): InstallClosed | null {
   try {
-    return Date.now() - Number(localStorage.getItem(INSTALL_SNOOZE_KEY) ?? 0) < INSTALL_SNOOZE_MS;
+    return JSON.parse(localStorage.getItem(INSTALL_CLOSED_KEY) ?? 'null') as InstallClosed | null;
   } catch {
-    return false;
+    return null;
   }
 }
 
@@ -464,11 +488,18 @@ export function InstallBanner({ aboveTabs = false, atTop = false }: { aboveTabs?
     const t = setTimeout(() => setReady(true), 1500);
     return () => clearTimeout(t);
   }, []);
-  const [hidden, setHidden] = useState(installSnoozed);
+  // torneo in corso a cui si è iscritti (nessuna richiesta prima del login: c'è già in memoria dopo l'avvio)
+  const me = useMe().data;
+  const current = useSeasonData(undefined, !!me?.playerId).data;
+  const memberOf = me?.playerId && current?.season.status === 'ACTIVE' && current.players.some((p) => p.id === me.playerId) ? current.season.id : null;
+  const [closed, setClosed] = useState(readInstallClosed);
+  const hidden =
+    !!closed && (isIOS() ? memberOf === null || memberOf === closed.season : Date.now() - closed.at < INSTALL_SNOOZE_MS);
   const snooze = () => {
-    setHidden(true);
+    const next = { at: Date.now(), season: memberOf };
+    setClosed(next);
     try {
-      localStorage.setItem(INSTALL_SNOOZE_KEY, String(Date.now()));
+      localStorage.setItem(INSTALL_CLOSED_KEY, JSON.stringify(next));
     } catch {
       // storage non disponibile: resta chiuso finché la pagina è aperta
     }

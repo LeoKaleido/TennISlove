@@ -2,7 +2,7 @@ import { useEffect, useRef, type ReactNode } from 'react';
 import { Navigate, Outlet, Route, Routes, useLocation, useNavigate, useNavigationType, type Location } from 'react-router';
 import { hideBoot, useFontsReady } from './boot';
 import { SeasonBanner } from './components/SeasonPicker';
-import { InstallBanner, lockPageScroll, Splash, TabBar, useClosing, useDesktop } from './components/ui';
+import { InstallBanner, lockPageScroll, MadeBy, Splash, TabBar, useClosing, useDesktop } from './components/ui';
 import { useMe, useSeason } from './data';
 import { AdminPage } from './pages/Admin';
 import { CalendarPage } from './pages/Calendar';
@@ -51,6 +51,7 @@ function WithTabs() {
       <Outlet />
       <div className="dock">
         <TabBar />
+        <MadeBy />
       </div>
       <InstallBanner aboveTabs />
     </div>

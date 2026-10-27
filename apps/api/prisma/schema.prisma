@@ -120,6 +120,8 @@ model Club {
   latitude    Float?
   longitude   Float?
   active      Boolean @default(true)
+  /// superfici dei campi (D-075): TERRA, CEMENTO, ERBA_SINTETICA, SINTETICO (packages/shared/src/surfaces.ts)
+  surfaces    String[] @default([])
 
   matches Match[]
   seasons SeasonClub[]
@@ -147,6 +149,8 @@ model Match {
   clubId      String?
   /// campo fuori dalla lista dei circoli, scritto dai giocatori (in alternativa a clubId)
   venue       String?
+  /// superficie su cui si gioca, tra quelle del circolo (D-075)
+  surface     String?
   /// versione della programmazione, per il SEQUENCE del file .ics
   scheduleSeq Int       @default(0)
   /// rinviata senza ancora una nuova data

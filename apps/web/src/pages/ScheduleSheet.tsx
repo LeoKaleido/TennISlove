@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
-import { addDays, formatDayWithWeekday, romeDay, romeTime } from '@tentennis/shared';
+import { addDays, formatDayWithWeekday, romeDay, romeTime, SURFACE_LABEL, SURFACES, type Surface } from '@tentennis/shared';
 import { api, type Club, type Match, type Round } from '../api';
 import { ButtonLoader, HelpLink, useClosing, useToast } from '../components/ui';
 import { clearDraft, loadDraft, saveDraft } from '../drafts';
@@ -16,9 +16,10 @@ interface Draft {
   clubId: string | null;
   venueOn: boolean;
   venue: string;
+  surface: Surface | null;
 }
 
-/** Bottom sheet "Programma partita": giorno della settimana (o altra data), ora, circolo */
+/** Bottom sheet "Programma partita": giorno della settimana (o altra data), ora, circolo e superficie */
 export function ScheduleSheet({
   match,
   round,
@@ -49,11 +50,12 @@ export function ScheduleSheet({
   // campo non in lista: testo libero al posto del circolo
   const [venueOn, setVenueOn] = useState(draft ? draft.venueOn : !!match.venue);
   const [venue, setVenue] = useState(draft ? draft.venue : (match.venue ?? ''));
+  const [surface, setSurface] = useState<Surface | null>(draft ? (draft.surface ?? null) : match.surface);
   // focus sul campo libero solo dopo un tocco: su iPhone un focus senza tocco non apre la tastiera
   const [venueTapped, setVenueTapped] = useState(false);
   useEffect(
-    () => saveDraft<Draft>(draftKey, { day, otherOn, otherDate, time, clubId, venueOn, venue }),
-    [draftKey, day, otherOn, otherDate, time, clubId, venueOn, venue],
+    () => saveDraft<Draft>(draftKey, { day, otherOn, otherDate, time, clubId, venueOn, venue, surface }),
+    [draftKey, day, otherOn, otherDate, time, clubId, venueOn, venue, surface],
   );
   const [closing, animateClose] = useClosing(onClose);
   const close = () => {
@@ -65,10 +67,18 @@ export function ScheduleSheet({
   const outside = !!date && date > round.endsOn;
   const before = !!date && date < round.startsOn;
   const place = venueOn ? venue.trim().length >= 2 : !!clubId;
-  const ready = !!date && !!time && place && !before;
+  // superfici tra cui scegliere: quelle del circolo; con un campo fuori lista tutte (facoltativa)
+  const club = venueOn ? undefined : clubs.find((c) => c.id === clubId);
+  const offered: readonly Surface[] = venueOn ? SURFACES : (club?.surfaces ?? []);
+  const chosen = offered.length === 1 && !venueOn ? offered[0]! : surface && offered.includes(surface) ? surface : null;
+  const ready = !!date && !!time && place && !before && (venueOn || offered.length <= 1 || !!chosen);
 
   const save = useMutation({
-    mutationFn: () => api(`/api/matches/${match.id}/schedule`, { method: 'PUT', body: venueOn ? { date, time, venue: venue.trim() } : { date, time, clubId } }),
+    mutationFn: () =>
+      api(`/api/matches/${match.id}/schedule`, {
+        method: 'PUT',
+        body: venueOn ? { date, time, venue: venue.trim(), surface: chosen } : { date, time, clubId, surface: chosen },
+      }),
     onSuccess: () => {
       queryClient.invalidateQueries();
       toast('Partita programmata');
@@ -205,6 +215,24 @@ export function ScheduleSheet({
           </div>
         </div>
 
+        {place && offered.length > 0 && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <SheetLabel>Superficie</SheetLabel>
+            {offered.length === 1 && !venueOn ? (
+              <span className="muted" style={{ fontSize: 13.5 }}>
+                {club?.name}: campi in {SURFACE_LABEL[offered[0]!].toLowerCase()}.
+              </span>
+            ) : (
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                {offered.map((s) => (
+                  <button key={s} className="chip" aria-pressed={chosen === s} onClick={() => setSurface(chosen === s && venueOn ? null : s)}>
+                    {SURFACE_LABEL[s]}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
         <button className="btn btn-primary" disabled={!ready || save.isPending} onClick={() => save.mutate()}>
           {save.isPending ? <ButtonLoader /> : 'Salva'}
         </button>

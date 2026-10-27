@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router';
-import { formatDayWithWeekday, romeDay, romeTime } from '@tentennis/shared';
+import { formatDayWithWeekday, romeDay, romeTime, SURFACE_LABEL } from '@tentennis/shared';
 import { api, type MatchDetail } from '../api';
 import { Avatar, BackButton, ErrorState, HelpLink, Loading, Logo, ScoreTable, StatusPill, useClosing, useToast } from '../components/ui';
 import { PredictionPanel } from '../components/Predictions';
@@ -125,6 +125,7 @@ export function MatchPage() {
           <Info label="Data" value={day ? formatDayWithWeekday(day) : 'Da decidere'} />
           <Info label="Ora" value={m.scheduledAt ? romeTime(m.scheduledAt) : 'Da decidere'} />
           <Info label="Circolo" value={club ? club.name : (m.venue ?? 'Da decidere')} href={club?.mapsUrl ?? undefined} />
+          {m.surface && <Info label="Superficie" value={SURFACE_LABEL[m.surface]} wide />}
         </div>
 
         <WeatherLine matchId={m.id} enabled={!!m.scheduledAt && !!club && !r} />
@@ -245,9 +246,10 @@ export function MatchPage() {
   );
 }
 
-function Info({ label, value, href }: { label: string; value: string; href?: string }) {
+/** `wide`: su tutta la larghezza della griglia (la quinta casella, la superficie) */
+function Info({ label, value, href, wide = false }: { label: string; value: string; href?: string; wide?: boolean }) {
   return (
-    <div style={{ background: 'var(--surface)', padding: '10px 12px', display: 'flex', flexDirection: 'column', gap: 2 }}>
+    <div style={{ background: 'var(--surface)', padding: '10px 12px', display: 'flex', flexDirection: 'column', gap: 2, gridColumn: wide ? '1 / -1' : undefined }}>
       <span className="faint" style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.06em' }}>
         {label}
       </span>

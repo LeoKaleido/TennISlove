@@ -7,3 +7,4 @@ export * from './predictions';
 export * from './badges';
 export * from './timeline';
 export * from './simulator';
+export * from './surfaces';

@@ -69,7 +69,7 @@ const SECTIONS: Section[] = [
     images: ['programma'],
     body: (
       <>
-        <p>Ogni giornata dura una settimana: tu e il tuo avversario decidete giorno, ora e circolo. Dalla partita tocca “Programma la partita”, scegli il giorno (o “Altra data” se giocate dopo la settimana), l’ora e il circolo, oppure scrivi tu dove giocate se il campo non è in lista.</p>
+        <p>Ogni giornata dura una settimana: tu e il tuo avversario decidete giorno, ora e circolo. Dalla partita tocca “Programma la partita”, scegli il giorno (o “Altra data” se giocate dopo la settimana), l’ora e il circolo, oppure scrivi tu dove giocate se il campo non è in lista. Se il circolo ha campi diversi (terra, cemento, erba sintetica…) scegli anche la superficie; se ne ha uno solo è già indicata.</p>
         <p>Salvando, a entrambi arriva un’email con il file da aggiungere al calendario del telefono. Se non riuscite a giocare, “Segna come rinviata”: la partita si recupera quando volete.</p>
       </>
     ),

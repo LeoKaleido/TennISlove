@@ -10,7 +10,7 @@ import { AdminPhotos } from './AdminPhotos';
 import { AdminPlayers } from './AdminPlayers';
 import { AdminSeasons, type SeasonRow } from './AdminSeasons';
 import { AdminHeader as Header } from '../components/AdminHeader';
-import { ErrorState, Loading, Logo, StatusPill, TabBarFoot, useToast } from '../components/ui';
+import { ErrorState, Loading, Logo, MadeBy, StatusPill, TabBarFoot, useToast } from '../components/ui';
 import { matchInfo, playerIndex, useSeasonData } from '../data';
 
 type Tab = 'dash' | 'seasons' | 'players' | 'clubs' | 'results' | 'photos';
@@ -157,6 +157,8 @@ export function AdminPage() {
           ))}
         </div>
         <TabBarFoot place="admin" />
+        {/* la stessa firma del sito: i tasti in fondo restano alla stessa altezza nelle due barre */}
+        <MadeBy />
       </nav>
 
       {/* una scheda nuova rimonta il contenuto: l'animazione di entrata riparte */}

@@ -1,7 +1,7 @@
 // Gestionale: tornei (stagioni) e circoli.
 
 import type { FastifyBaseLogger, FastifyInstance } from 'fastify';
-import { validateRoundRobin } from '@tentennis/shared';
+import { clubSurfaces, SURFACES, validateRoundRobin } from '@tentennis/shared';
 import { z } from 'zod';
 import { requireAdmin } from '../auth';
 import { audit, db } from '../db';
@@ -35,6 +35,8 @@ const clubBody = z.object({
   city: z.string().trim().max(80).optional().nullable(),
   mapsUrl: z.string().trim().url().regex(/^https?:\/\//i, 'Il link deve iniziare con https://').optional().nullable().or(z.literal('')),
   active: z.boolean().default(true),
+  /** superfici dei campi (D-075) */
+  surfaces: z.array(z.enum(SURFACES)).default([]),
 });
 
 /** Posizione per il meteo, in sottofondo: il gestionale non aspetta Google Maps */
@@ -154,6 +156,7 @@ export async function adminSeasonRoutes(app: FastifyInstance) {
       city: c.city,
       mapsUrl: c.mapsUrl,
       active: c.active,
+      surfaces: clubSurfaces(c.surfaces),
       matches: c._count.matches,
       located: c.latitude !== null && c.longitude !== null,
     }));

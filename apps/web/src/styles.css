@@ -483,6 +483,23 @@ a {
   border-top: 1px solid var(--line);
 }
 
+/* Firma (MadeBy): sotto le icone, separata da una riga, sopra l'area sicura dell'iPhone */
+.made-by {
+  margin: 0 16px;
+  padding: 6px 0 calc(8px + env(safe-area-inset-bottom));
+  border-top: 1px solid var(--line);
+  text-align: center;
+  font-size: 10.5px;
+  font-weight: 600;
+  color: var(--ink3);
+}
+
+.made-by a {
+  color: var(--ink2);
+  font-weight: 800;
+  text-decoration: none;
+}
+
 .install-popup {
   position: fixed;
   z-index: 45;
@@ -501,7 +518,7 @@ a {
 
 /* sopra la barra delle sezioni */
 .install-popup.above-tabs {
-  bottom: calc(84px + env(safe-area-inset-bottom));
+  bottom: calc(98px + env(safe-area-inset-bottom));
 }
 
 /* in alto, dove non copre il modulo (login) */
@@ -533,7 +550,8 @@ a {
 
 .tabbar {
   display: flex;
-  padding: 6px 4px calc(10px + env(safe-area-inset-bottom));
+  /* sotto c'è la firma (MadeBy), che tiene lo spazio dell'area sicura dell'iPhone */
+  padding: 6px 4px 2px;
   /* le voci non ci stanno tutte: si scorrono, fermandosi allineate */
   overflow-x: auto;
   scroll-snap-type: x mandatory;
@@ -1192,7 +1210,8 @@ textarea.input {
 
 /* il passaggio al sito solo su desktop: il gestionale non è pensato per il telefono */
 @media (max-width: 899px) {
-  .admin-nav .switch-area {
+  .admin-nav .switch-area,
+  .admin-nav .made-by {
     display: none !important;
   }
 
@@ -1479,6 +1498,30 @@ textarea.input {
     margin: 0;
     background: #0b1a24;
     border-top: 0;
+    /* barra laterale sopra, firma in fondo */
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* sotto la firma lo stesso spazio della barra del gestionale (12 + 18 px): nessun salto passando dall'uno all'altro */
+  .made-by {
+    margin: 0;
+    border-top: 0;
+    text-align: left;
+    padding: 0 12px 30px 26px;
+    white-space: nowrap;
+    color: rgba(255, 255, 255, 0.4);
+  }
+
+  /* nel gestionale la barra ha già il suo margine interno (e 4 px tra un elemento e l'altro):
+     così firma e tasti in fondo stanno alla stessa altezza che nel sito */
+  .admin-nav .made-by {
+    display: block;
+    padding: 0 0 12px 12px;
+  }
+
+  .made-by a {
+    color: rgba(255, 255, 255, 0.65);
   }
 
   .tabbar.switched,
@@ -1487,11 +1530,13 @@ textarea.input {
   }
 
   .tabbar {
-    height: 100%;
+    flex: 1;
+    min-height: 0;
     display: flex;
     flex-direction: column;
     gap: 4px;
-    padding: 18px 14px;
+    /* sotto c'è la firma, a 4 px come tra le voci */
+    padding: 18px 14px 4px;
     background: #0b1a24;
     border-top: 0;
     /* barra laterale: niente scorrimento né sfumature */
@@ -2030,7 +2075,7 @@ textarea.input {
   position: fixed;
   z-index: 55;
   left: 50%;
-  bottom: calc(84px + env(safe-area-inset-bottom));
+  bottom: calc(98px + env(safe-area-inset-bottom));
   width: calc(100% - 24px);
   max-width: 520px;
   max-height: 60dvh;

@@ -1,6 +1,6 @@
 // Client dell'API e tipi delle risposte.
 
-import type { MatchScoreInput, MatchStatus, PredictionHow, PredictionStandingRow, ResultStatus, Side, StandingRow } from '@tentennis/shared';
+import type { MatchScoreInput, MatchStatus, PredictionHow, PredictionStandingRow, ResultStatus, Side, StandingRow, Surface } from '@tentennis/shared';
 
 export class ApiError extends Error {
   constructor(
@@ -48,6 +48,8 @@ export interface Club {
   city: string | null;
   description: string | null;
   mapsUrl: string | null;
+  /** superfici dei campi (D-075) */
+  surfaces: Surface[];
 }
 
 export interface Round {
@@ -86,6 +88,8 @@ export interface Match {
   clubId: string | null;
   /** campo fuori lista, scritto a mano */
   venue: string | null;
+  /** superficie su cui si gioca, se indicata (D-075) */
+  surface: Surface | null;
   postponed: boolean;
   status: MatchStatus;
   coverPhotoUrl: string | null;

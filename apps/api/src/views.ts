@@ -5,6 +5,7 @@ import {
   computePredictionStandings,
   computeStandings,
   COUNTS_IN_STANDINGS,
+  clubSurfaces,
   evaluateMatch,
   matchStatus,
   predictionsOpen,
@@ -42,6 +43,7 @@ export function matchView(m: MatchRow, submittedByPlayerId: string | null = null
     scheduledAt: m.scheduledAt?.toISOString() ?? null,
     clubId: m.clubId,
     venue: m.venue,
+    surface: m.surface,
     postponed: m.postponedAt !== null,
     status: matchStatus({
       resultStatus: r?.status ?? null,
@@ -190,5 +192,5 @@ export function playerView(p: Player) {
 }
 
 export function clubView(c: Club) {
-  return { id: c.id, name: c.name, city: c.city, description: c.description, mapsUrl: c.mapsUrl };
+  return { id: c.id, name: c.name, city: c.city, description: c.description, mapsUrl: c.mapsUrl, surfaces: clubSurfaces(c.surfaces) };
 }

@@ -2,6 +2,7 @@
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
+import { SURFACE_LABEL, SURFACES, type Surface } from '@tentennis/shared';
 import { api } from '../api';
 import { IconAction } from '../components/AdminTable';
 import { ButtonLoader, ErrorState, Loading, TextField, useClosing, useToast } from '../components/ui';
@@ -15,6 +16,8 @@ interface ClubRow {
   matches: number;
   /** posizione per il meteo ricavata dal link o dalla città (D-065) */
   located: boolean;
+  /** superfici dei campi (D-075) */
+  surfaces: Surface[];
 }
 
 export function AdminClubs() {
@@ -41,6 +44,7 @@ export function AdminClubs() {
             <tr>
               <th>Circolo</th>
               <th>Città</th>
+              <th>Superfici</th>
               <th>Meteo</th>
               <th>Partite</th>
               <th>Stato</th>
@@ -53,6 +57,9 @@ export function AdminClubs() {
                 <td style={{ fontWeight: 700 }}>{c.name}</td>
                 <td className="muted" style={{ fontSize: 13 }}>
                   {c.city ?? '-'}
+                </td>
+                <td style={{ fontSize: 12.5, color: c.surfaces.length ? 'var(--ink2)' : 'var(--warnFg)', fontWeight: c.surfaces.length ? 400 : 600 }}>
+                  {c.surfaces.length ? c.surfaces.map((s) => SURFACE_LABEL[s]).join(', ') : 'Da indicare'}
                 </td>
                 <td style={{ fontSize: 12.5, fontWeight: 600, color: c.located ? 'var(--accent)' : 'var(--warnFg)' }}>
                   {c.located ? 'Disponibile' : 'Posizione non trovata'}
@@ -88,6 +95,7 @@ function ClubDialog({ club, onClose }: { club: ClubRow | null; onClose: () => vo
   const [city, setCity] = useState(club?.city ?? '');
   const [mapsUrl, setMapsUrl] = useState(club?.mapsUrl ?? '');
   const [active, setActive] = useState(club?.active ?? true);
+  const [surfaces, setSurfaces] = useState<Surface[]>(club?.surfaces ?? []);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => e.key === 'Escape' && close();
@@ -97,7 +105,7 @@ function ClubDialog({ club, onClose }: { club: ClubRow | null; onClose: () => vo
 
   const save = useMutation({
     mutationFn: () => {
-      const body = { name, city: city || null, mapsUrl: mapsUrl || null, active };
+      const body = { name, city: city || null, mapsUrl: mapsUrl || null, active, surfaces };
       return club ? api(`/api/admin/clubs/${club.id}`, { method: 'PATCH', body }) : api('/api/admin/clubs', { method: 'POST', body });
     },
     onSuccess: () => {
@@ -136,6 +144,25 @@ function ClubDialog({ club, onClose }: { club: ClubRow | null; onClose: () => vo
         <span className="faint" style={{ fontSize: 12.5, marginTop: -6 }}>
           Dal link (o, se non basta, dalla città) si ricava la posizione per il meteo delle partite.
         </span>
+        <div className="field">
+          <span>Superfici dei campi</span>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+            {SURFACES.map((s) => (
+              <button
+                key={s}
+                type="button"
+                className="chip"
+                aria-pressed={surfaces.includes(s)}
+                onClick={() => setSurfaces(surfaces.includes(s) ? surfaces.filter((x) => x !== s) : SURFACES.filter((x) => x === s || surfaces.includes(x)))}
+              >
+                {SURFACE_LABEL[s]}
+              </button>
+            ))}
+          </div>
+          <span className="faint" style={{ fontSize: 12.5 }}>
+            Programmando una partita in questo circolo i giocatori scelgono tra queste; se è una sola, viene messa da sola.
+          </span>
+        </div>
         <label style={{ display: 'flex', alignItems: 'center', gap: 10, fontWeight: 700, fontSize: 14.5 }}>
           <input type="checkbox" checked={active} onChange={(e) => setActive(e.target.checked)} style={{ width: 18, height: 18 }} />
           Attivo

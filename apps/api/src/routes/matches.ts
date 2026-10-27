@@ -2,12 +2,16 @@
 
 import type { FastifyInstance, FastifyReply } from 'fastify';
 import {
+  clubSurfaces,
   evaluateMatch,
   formatDayWithWeekday,
   formatScore,
   fromRomeLocal,
   predictionsOpen,
+  SURFACE_LABEL,
+  SURFACES,
   type MatchScoreInput,
+  type Surface,
 } from '@tentennis/shared';
 import { z } from 'zod';
 import { requireUser, type CurrentUser } from '../auth';
@@ -37,6 +41,10 @@ const isPlayerOf = (user: CurrentUser, m: FullMatch) =>
 
 const matchTitle = (m: FullMatch) => `${m.playerA.shortName} vs ${m.playerB.shortName}`;
 
+/** " Campo in terra rossa." per email e calendario, se la superficie è indicata */
+const surfaceText = (surface: string | null) =>
+  surface && surface in SURFACE_LABEL ? ` Campo in ${SURFACE_LABEL[surface as Surface].toLowerCase()}.` : '';
+
 export function calendarEvent(m: FullMatch): CalendarEvent | null {
   if (!m.scheduledAt) return null;
   return {
@@ -46,7 +54,7 @@ export function calendarEvent(m: FullMatch): CalendarEvent | null {
     durationMinutes: 120,
     title: `Tennis: ${matchTitle(m)}`,
     location: m.club ? [m.club.name, m.club.city].filter(Boolean).join(', ') : (m.venue ?? ''),
-    description: `Giornata ${m.round.number}.\n${env.appUrl}/partite/${m.id}`,
+    description: `Giornata ${m.round.number}.${surfaceText(m.surface)}\n${env.appUrl}/partite/${m.id}`,
   };
 }
 
@@ -147,22 +155,29 @@ export async function matchRoutes(app: FastifyInstance) {
         // un circolo della lista oppure un campo scritto a mano (D-040)
         clubId: z.string().min(1).nullish(),
         venue: z.string().trim().min(2).max(120).nullish(),
+        // superficie tra quelle del circolo (D-075); con un campo fuori lista, una qualunque o nessuna
+        surface: z.enum(SURFACES).nullish(),
       })
       .refine((b) => !!b.clubId !== !!b.venue, 'Scegli un circolo oppure scrivi dove giocate')
       .parse(req.body);
     const m = await loadForAction(req.params.id, req.user!, reply);
     if (!m) return;
     if (m.result) return reply.code(409).send({ error: 'La partita è già stata giocata' });
-    if (body.clubId && !(await db.seasonClub.findFirst({ where: { seasonId: m.seasonId, clubId: body.clubId } }))) {
-      return reply.code(400).send({ error: 'Circolo non disponibile per questo torneo' });
+    const link = body.clubId ? await db.seasonClub.findFirst({ where: { seasonId: m.seasonId, clubId: body.clubId }, include: { club: true } }) : null;
+    if (body.clubId && !link) return reply.code(400).send({ error: 'Circolo non disponibile per questo torneo' });
+    // circolo con una sola superficie: è quella; con più superfici si sceglie tra le sue
+    const offered = link ? clubSurfaces(link.club.surfaces) : [];
+    const surface = body.surface ?? (offered.length === 1 ? offered[0]! : null);
+    if (link && surface && offered.length > 0 && !offered.includes(surface)) {
+      return reply.code(400).send({ error: `Al ${link.club.name} non ci sono campi in ${SURFACE_LABEL[surface].toLowerCase()}` });
     }
 
     const scheduledAt = fromRomeLocal(body.date, body.time);
     const updated = await db.match.update({
       where: { id: m.id },
-      data: { scheduledAt, clubId: body.clubId ?? null, venue: body.venue ?? null, postponedAt: null, scheduleSeq: { increment: 1 } },
+      data: { scheduledAt, clubId: body.clubId ?? null, venue: body.venue ?? null, surface, postponedAt: null, scheduleSeq: { increment: 1 } },
     });
-    await audit(req.user!.id, 'Match', m.id, 'schedule', { scheduledAt: m.scheduledAt, clubId: m.clubId, venue: m.venue }, body);
+    await audit(req.user!.id, 'Match', m.id, 'schedule', { scheduledAt: m.scheduledAt, clubId: m.clubId, venue: m.venue, surface: m.surface }, { ...body, surface });
 
     const fresh = (await fullMatch(m.id))!;
     const event = calendarEvent(fresh)!;
@@ -172,7 +187,7 @@ export async function matchRoutes(app: FastifyInstance) {
       await sendMail({
         to: p.user.email,
         subject: `${matchTitle(fresh)}: ${when}`,
-        text: `La partita ${matchTitle(fresh)} è in programma ${when}${event.location ? ` a ${event.location}` : ''}.\n\nAggiungila al calendario con il file allegato oppure su Google Calendar:\n${googleCalendarUrl(event)}\n\nDettagli nell'app:\n${env.appUrl}/partite/${fresh.id}`,
+        text: `La partita ${matchTitle(fresh)} è in programma ${when}${event.location ? ` a ${event.location}` : ''}.${surfaceText(fresh.surface)}\n\nAggiungila al calendario con il file allegato oppure su Google Calendar:\n${googleCalendarUrl(event)}\n\nDettagli nell'app:\n${env.appUrl}/partite/${fresh.id}`,
         attachments: [{ filename: `partita-${fresh.code}.ics`, content: toIcs(event), contentType: 'text/calendar; charset=utf-8; method=PUBLISH' }],
       });
     }
