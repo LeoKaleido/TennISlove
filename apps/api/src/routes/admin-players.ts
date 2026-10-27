@@ -30,6 +30,11 @@ const playerBody = z.object({
   lastName: z.string().trim().min(1).max(60),
   shortName: z.string().trim().min(1).max(30),
   email: z.string().trim().toLowerCase().email(),
+  /** iscritto dal: per il badge Veterano; se manca resta quella già salvata (o oggi, per un giocatore nuovo) */
+  memberSince: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/)
+    .optional(),
 });
 
 export async function adminPlayerRoutes(app: FastifyInstance) {
@@ -67,6 +72,7 @@ export async function adminPlayerRoutes(app: FastifyInstance) {
             firstName: u.player.firstName,
             lastName: u.player.lastName,
             shortName: u.player.shortName,
+            memberSince: u.player.memberSince,
             seasons: u.player.seasons.map((s) => s.season.label),
             hasMatches: u.player._count.matchesAsA + u.player._count.matchesAsB > 0,
           },
@@ -84,6 +90,7 @@ export async function adminPlayerRoutes(app: FastifyInstance) {
             firstName: p.firstName,
             lastName: p.lastName,
             shortName: p.shortName,
+            memberSince: p.memberSince,
             seasons: [] as string[],
             hasMatches: p._count.matchesAsA + p._count.matchesAsB > 0,
           },
@@ -103,7 +110,7 @@ export async function adminPlayerRoutes(app: FastifyInstance) {
         : existing
       : await db.user.create({ data: { email: body.email, isAdmin: body.isAdmin } });
     const player = await db.player.create({
-      data: { firstName: body.firstName, lastName: body.lastName, shortName: body.shortName, userId: user.id },
+      data: { firstName: body.firstName, lastName: body.lastName, shortName: body.shortName, memberSince: body.memberSince, userId: user.id },
     });
     await audit(req.user!.id, 'Player', player.id, 'create', null, body);
     if (body.invite) await invite(user, player.firstName);
@@ -130,7 +137,7 @@ export async function adminPlayerRoutes(app: FastifyInstance) {
     }
     await db.player.update({
       where: { id: player.id },
-      data: { firstName: body.firstName, lastName: body.lastName, shortName: body.shortName, userId },
+      data: { firstName: body.firstName, lastName: body.lastName, shortName: body.shortName, memberSince: body.memberSince, userId },
     });
     await audit(req.user!.id, 'Player', player.id, 'update', { ...player, user: undefined, email: player.user?.email }, body);
     return { ok: true };

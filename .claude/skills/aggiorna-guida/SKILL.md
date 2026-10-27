@@ -39,7 +39,7 @@ Gli screenshot si fanno **solo sui tornei dimostrativi**: giocatori inventati (A
    ```sh
    node scripts/guida/screenshots.mjs <scratchpad>/guida-token
    ```
-   Telefono 390×844 ad alta definizione, tema chiaro. Aggiorna anche `guide-images.json` (le misure riservano lo spazio delle immagini: i salti alle sezioni restano precisi).
+   Telefono 390×844 ad alta definizione (l'app ha solo il tema scuro). Aggiorna anche `guide-images.json` (le misure riservano lo spazio delle immagini: i salti alle sezioni restano precisi).
 
 5. **Guarda ogni screenshot** con Read prima di andare avanti. Problemi già incontrati:
    - cuore di caricamento al posto della pagina: lo script aspetta `#boot` e `[aria-busy]`; se compare ancora, aggiungi un'attesa;

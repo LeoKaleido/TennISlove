@@ -8,7 +8,7 @@ Tutto in sviluppo, con il container acceso e l'app su http://localhost:5173. Ser
 # 1. tornei dimostrativi (quello in corso diventa il torneo dell'app): il token di sessione di Andrea va in un file
 docker compose exec -T -w /repo/apps/api app node_modules/.bin/tsx prisma/demo-guida.ts create > /tmp/guida-token
 
-# 2. screenshot: Chrome senza finestra, a misura di telefono, tema chiaro
+# 2. screenshot: Chrome senza finestra, a misura di telefono (l'app ha solo il tema scuro)
 node scripts/guida/screenshots.mjs /tmp/guida-token
 
 # 3. via i tornei dimostrativi

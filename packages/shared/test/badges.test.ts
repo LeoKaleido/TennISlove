@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { computeBadges, type BadgeId, type BadgeInput, type BadgeMatch } from '../src/badges';
+import { BADGE_NAME_MAX, BADGES, computeBadges, membershipYears, type BadgeId, type BadgeInput, type BadgeMatch } from '../src/badges';
 
 const PLAYERS = ['me', 'p1', 'p2', 'p3'];
 let n = 0;
@@ -28,7 +28,11 @@ const input = (matches: BadgeMatch[], extra: Partial<BadgeInput> = {}): BadgeInp
   final: null,
   ...extra,
 });
-const earned = (i: BadgeInput) => computeBadges(i).filter((b) => b.earned).map((b) => b.id);
+// Presenze si ottiene sempre partecipando: nei controlli sugli altri badge non conta
+const earned = (i: BadgeInput) =>
+  computeBadges(i)
+    .filter((b) => b.earned && b.id !== 'PRESENCE')
+    .map((b) => b.id);
 const badge = (i: BadgeInput, id: BadgeId) => computeBadges(i).find((b) => b.id === id)!;
 
 describe('computeBadges', () => {
@@ -91,5 +95,32 @@ describe('computeBadges', () => {
   it('senza stagione chiusa niente badge di fine stagione', () => {
     expect(earned(input([], { predictions: { correct: 2, upsets: 0 } }))).toEqual([]);
     expect(badge(input([], { predictions: { correct: 2, upsets: 0 } }), 'SEER').progress).toBe(2);
+  });
+
+  it('presenze: un livello per il torneo a cui si partecipa', () => {
+    expect(badge(input([]), 'PRESENCE').times).toBe(1);
+    expect(badge(input([], { playerIds: ['p1', 'p2'] }), 'PRESENCE').earned).toBe(false);
+  });
+});
+
+describe('membershipYears', () => {
+  it('anni compiuti e prossimo anniversario', () => {
+    expect(membershipYears('2026-10-24', '2026-10-27')).toEqual({ years: 0, nextOn: '2027-10-24' });
+    expect(membershipYears('2024-10-24', '2026-10-23')).toEqual({ years: 1, nextOn: '2026-10-24' });
+    expect(membershipYears('2024-10-24', '2026-10-24')).toEqual({ years: 2, nextOn: '2027-10-24' });
+  });
+
+  it('iscritto il 29 febbraio: anniversario il 28 negli anni non bisestili', () => {
+    expect(membershipYears('2024-02-29', '2025-02-28')).toEqual({ years: 1, nextOn: '2026-02-28' });
+    expect(membershipYears('2024-02-29', '2028-02-28')).toEqual({ years: 3, nextOn: '2028-02-29' });
+  });
+});
+
+describe('nomi dei badge', () => {
+  it('non superano la lunghezza massima, né in tutto né per parola', () => {
+    for (const { name } of Object.values(BADGES)) {
+      expect(name.length, name).toBeLessThanOrEqual(BADGE_NAME_MAX.total);
+      for (const word of name.split(' ')) expect(word.length, name).toBeLessThanOrEqual(BADGE_NAME_MAX.word);
+    }
   });
 });

@@ -46,7 +46,7 @@ const SECTIONS: Section[] = [
       <>
         <p>Entri con l’email e la password che trovi nell’email di invito. Se non la ricordi, tocca “Password dimenticata? Ricevi un codice”: ti arriva un codice di 6 cifre per entrare.</p>
         <p>
-          Puoi installare TennIsLove come un’app sul telefono: dalle <a href="#impostazioni">impostazioni</a> tocca “Installa l’app”. Su iPhone si fa da Safari: Condividi, poi “Aggiungi alla schermata Home”.
+          Puoi installare TennIsLove come un’app sul telefono: dalle <a href="#impostazioni">impostazioni</a> tocca “Installa l’app”. Su Android si apre subito l’installazione; su iPhone si apre il menu Condividi: lì scegli “Aggiungi alla schermata Home”.
         </p>
       </>
     ),
@@ -57,7 +57,7 @@ const SECTIONS: Section[] = [
     images: ['home'],
     body: (
       <>
-        <p>In alto c’è la giornata in corso e la tua partita, con il pulsante per la cosa da fare adesso: programmarla, inserire il risultato o confermare quello inserito dall’avversario.</p>
+        <p>In alto c’è il nome del torneo, la giornata in corso e la tua partita, con il pulsante per la cosa da fare adesso: programmarla, inserire il risultato o confermare quello inserito dall’avversario.</p>
         <p>Sotto trovi le altre partite della settimana, i <a href="#pronostici">pronostici</a> da fare, gli ultimi risultati e i primi della classifica.</p>
         <p>In basso c’è la barra delle sezioni: se non vedi tutte le voci, scorrila di lato.</p>
       </>
@@ -180,11 +180,12 @@ const SECTIONS: Section[] = [
   {
     id: 'badge',
     title: 'I badge',
-    images: ['badge'],
+    images: ['badge', 'badge-dettaglio'],
     body: (
       <>
-        <p>Riconoscimenti che ottieni giocando: la prima vittoria, un set vinto 6-0 (Cappotto), una rimonta, 3 vittorie di fila (Tris), battere il primo in classifica (Ammazzagrandi), i pronostici giusti e altri. Li trovi nel profilo: quelli presi a colori, gli altri in grigio.</p>
-        <p>Tocca un badge per vedere come si ottiene, in quali tornei l’hai preso e quanto ti manca. Se lo prendi più volte sale di livello (×2, ×3). I più difficili hanno il bordo di bronzo, d’argento o d’oro.</p>
+        <p>Riconoscimenti che ottieni giocando: la prima vittoria, un set vinto 6-0 (Cappotto), una rimonta, 3 vittorie di fila (Tris), battere il primo in classifica (Ammazza grandi), i pronostici giusti e altri. Li trovi nel profilo: quelli presi a colori, gli altri in grigio.</p>
+        <p>Due badge viola premiano la fedeltà: Presenze sale di un livello per ogni torneo a cui partecipi, Veterano per ogni anno da quando sei iscritto.</p>
+        <p>Tocca un badge: dal basso sale un riquadro con come si ottiene, in quali tornei l’hai preso e cosa ti manca per il prossimo livello. Si chiude con la ✕ o toccando fuori. Se prendi un badge più volte sale di livello (×2, ×3). I più difficili hanno il bordo di bronzo, d’argento o d’oro.</p>
       </>
     ),
   },
@@ -213,7 +214,7 @@ const SECTIONS: Section[] = [
   {
     id: 'foto',
     title: 'Foto e gallery',
-    body: <p>Dopo una partita i due giocatori possono caricare una o più foto: la prima diventa la copertina della partita. Nella Gallery trovi tutte le foto del torneo. Nel profilo puoi mettere la tua foto toccando il tuo avatar.</p>,
+    body: <p>Dopo una partita i due giocatori possono caricare una o più foto: la prima diventa la copertina della partita. Nella Gallery trovi tutte le foto del torneo che stai guardando. Nel profilo puoi mettere la tua foto toccando il tuo avatar.</p>,
   },
   {
     id: 'impostazioni',
@@ -221,7 +222,7 @@ const SECTIONS: Section[] = [
     images: ['impostazioni'],
     body: (
       <p>
-        Dall’ingranaggio in alto nel tuo profilo: installare l’app, cambiare la password, <a href="#torneo">scegliere il torneo</a>, aprire questa guida, scegliere il tema chiaro o scuro e uscire. Su computer torneo, guida, tema ed esci sono anche nella barra a sinistra.
+        Dall’ingranaggio in alto nel tuo profilo: installare l’app, cambiare la password, <a href="#torneo">scegliere il torneo</a>, aprire questa guida e uscire. Su computer torneo, guida ed esci sono anche nella barra a sinistra.
       </p>
     ),
   },
@@ -232,9 +233,10 @@ const SECTIONS: Section[] = [
     body: (
       <>
         <p>
-          Quando ci sono più tornei (per esempio quello in corso e quelli degli anni passati) scegli quale guardare dalla riga “Torneo” nelle <a href="#impostazioni">impostazioni</a> o, su computer, sotto il logo nella barra a sinistra. La scelta vale per tutta l’app: Home, calendario, classifica, pronostici, profilo e testa a testa.
+          Quando ci sono più tornei (per esempio quello in corso e quelli degli anni passati) scegli quale guardare dalla riga “Torneo” nelle <a href="#impostazioni">impostazioni</a> o, su computer, sotto il logo nella barra a sinistra. La scelta vale per tutta l’app: Home, calendario, classifica, pronostici, profilo, gallery e testa a testa.
         </p>
         <p>Guardando un torneo concluso, in cima alle pagine c’è un avviso con il link per tornare a quello in corso. Programmare, inserire risultati e caricare foto si fa sempre sul torneo in corso. Con un solo torneo la riga mostra solo il suo nome.</p>
+        <p>Tra un torneo e l’altro, quando nessuno è in corso, l’app mostra l’ultimo concluso finché non parte il prossimo.</p>
       </>
     ),
   },

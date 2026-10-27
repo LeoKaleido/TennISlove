@@ -4,10 +4,7 @@ import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router';
 import { App } from './App';
 import { ToastProvider } from './components/ui';
-import { applyStoredTheme } from './theme';
 import './styles.css';
-
-applyStoredTheme();
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { retry: 1, refetchOnWindowFocus: true } },

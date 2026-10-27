@@ -87,7 +87,7 @@ async function remove() {
 
 /** Torneo con calendario completo; le partite si restituiscono con la loro giornata */
 async function season(label: string, status: 'ACTIVE' | 'ARCHIVED', start: string, ids: string[], clubs: Club[], seed: number) {
-  const s = await db.season.create({ data: { name: NAME, label, qualifiers: 4, status } });
+  const s = await db.season.create({ data: { name: NAME, label, subtitle: 'Amici del tennis, il giovedì sera', qualifiers: 4, status } });
   await db.seasonPlayer.createMany({ data: ids.map((playerId, i) => ({ seasonId: s.id, playerId, seedOrder: i })) });
   await db.seasonClub.createMany({ data: clubs.map((c) => ({ seasonId: s.id, clubId: c.id })) });
   const matches = [];
@@ -117,6 +117,8 @@ async function create() {
     players.push(await db.player.create({ data: { firstName: first, lastName: last, shortName: first, userId: user.id } }));
   }
   const andrea = players[0]!;
+  // Andrea è iscritto da due anni e qualche mese: nella guida il badge Veterano ha un livello e mezzo anno da fare
+  await db.player.update({ where: { id: andrea.id }, data: { memberSince: addDays(romeDay(new Date()), -(2 * 365 + 120)) } });
   const ids = players.map((p) => p.id);
   const userOf = (playerId: string) => players.find((p) => p.id === playerId)!.userId!;
   const withAndrea = (m: { playerAId: string; playerBId: string }) => m.playerAId === andrea.id || m.playerBId === andrea.id;

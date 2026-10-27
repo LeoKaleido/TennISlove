@@ -4,12 +4,13 @@ import { BADGES, computeBadges, COUNTS_IN_STANDINGS, type BadgeId, type BadgeSta
 import type { SeasonOverview } from './api';
 import { playedOn } from './data';
 
-/** Colori della medaglia per gruppo: risultati, costanza, partecipazione, stagione */
+/** Colori della medaglia per gruppo: risultati, costanza, partecipazione, stagione, carriera */
 const GROUP = {
   results: { from: '#E37A45', to: '#A9461F', ink: '#FFFFFF' },
   form: { from: '#33AE80', to: '#166146', ink: '#FFFFFF' },
   social: { from: '#4796D8', to: '#22598E', ink: '#FFFFFF' },
   season: { from: '#F0D25E', to: '#B98F1A', ink: '#0B1A24' },
+  career: { from: '#9B7BE0', to: '#5A3A9E', ink: '#FFFFFF' },
 };
 
 /** Bordo metallico dei badge più prestigiosi */
@@ -82,6 +83,13 @@ const GLYPHS: Record<BadgeId, { group: keyof typeof GROUP; svg: string }> = {
     group: 'season',
     svg: `<path d="M26 46V25h12v21M18 46V33h8M38 46V37h8v9M15 46h34" ${STROKE}/><path d="M31 30.5l2-1.5v8" ${stroke(2.4)}/>`,
   },
+  // pallina da tennis: un torneo giocato
+  PRESENCE: {
+    group: 'career',
+    svg: `<circle cx="32" cy="32" r="14" ${STROKE}/><path d="M20 24c5.5 3.5 5.5 12.5 0 16M44 24c-5.5 3.5-5.5 12.5 0 16" ${stroke(2.6)}/>`,
+  },
+  // gradi da veterano: tre galloni
+  VETERAN: { group: 'career', svg: `<path d="M20 25l12-7 12 7M20 34l12-7 12 7M20 43l12-7 12 7" ${STROKE}/>` },
 };
 
 /** SVG completo della medaglia: serve uguale nella pagina e nell'immagine della card */

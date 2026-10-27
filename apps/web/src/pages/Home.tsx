@@ -62,7 +62,7 @@ export function HomePage() {
           TennIsLove
         </span>
         {myPlayer && (
-          <Link to="/profilo" aria-label="Il tuo profilo">
+          <Link to="/profilo" aria-label="Il tuo profilo" style={{ textDecoration: 'none' }}>
             <Avatar player={myPlayer} size={38} />
           </Link>
         )}
@@ -259,7 +259,8 @@ function MyMatchCard({
       </div>
       <div style={{ fontSize: 13.5, lineHeight: 1.4, fontWeight: 600 }}>{matchInfo(match, data.rounds, clubName)}</div>
       <WeatherLine matchId={match.id} enabled={!!match.scheduledAt && !!match.clubId && !match.result} compact />
-      <Link to={action.to} className="btn btn-dark">
+      {/* sul riquadro chiaro della tua partita il pulsante resta scuro */}
+      <Link to={action.to} className="btn btn-dark" style={{ background: '#0B1A24', color: '#C6EEDB' }}>
         {action.label}
       </Link>
       <Link to={`/partite/${match.id}`} className="link-btn" style={{ textAlign: 'center', marginTop: -4, color: '#1F6F54' }}>

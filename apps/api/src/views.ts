@@ -183,6 +183,7 @@ export function playerView(p: Player) {
     firstName: p.firstName,
     lastName: p.lastName,
     shortName: p.shortName,
+    memberSince: p.memberSince,
     // la versione nell'URL evita che il browser mostri la foto precedente dalla cache
     photoUrl: p.photoKey ? `/api/players/${p.id}/photo?v=${encodeURIComponent(p.photoKey)}` : null,
   };

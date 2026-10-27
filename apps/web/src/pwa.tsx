@@ -13,9 +13,28 @@ export const isIOS = () => /iphone|ipad|ipod/i.test(navigator.userAgent) || (nav
 /** Chrome su iPhone/iPad: stesso motore di Safari, ma il pulsante Condividi è in alto a destra */
 export const isChromeIOS = () => /crios/i.test(navigator.userAgent);
 
-/** Come installare su iPhone/iPad, dove nessun sito può aprire l'installazione con un pulsante */
+/** iPhone/iPad con il menu Condividi a disposizione delle pagine: il pulsante Installa lo apre */
+const canShareToInstall = () => isIOS() && typeof navigator.share === 'function';
+
+/**
+ * Come installare su iPhone/iPad, dove nessun sito può avviare l'installazione: il pulsante apre il menu Condividi
+ * (con dentro «Aggiungi alla schermata Home»); senza, si dice dove trovarlo
+ */
 export const iosInstallHint = () =>
-  isChromeIOS() ? 'Tocca Condividi in alto a destra, poi «Aggiungi alla schermata Home».' : 'Tocca Condividi, poi «Aggiungi alla schermata Home».';
+  canShareToInstall()
+    ? 'Nel menu che si apre scegli «Aggiungi alla schermata Home» (se non lo vedi, scorri il menu verso il basso).'
+    : isChromeIOS()
+      ? 'Tocca Condividi in alto a destra, poi «Aggiungi alla schermata Home».'
+      : 'Tocca Condividi, poi «Aggiungi alla schermata Home».';
+
+/** Apre il menu Condividi dell'iPhone: va chiamato dal tocco sul pulsante */
+async function shareToInstall() {
+  try {
+    await navigator.share({ title: 'TennIsLove', url: `${location.origin}/` });
+  } catch {
+    // menu chiuso senza scegliere: niente da fare
+  }
+}
 
 /** Telefono o tablet (anche iPad, che si presenta come Mac) */
 export const isMobileDevice = () => isIOS() || /android/i.test(navigator.userAgent);
@@ -118,7 +137,10 @@ async function promptInstall() {
   listeners.forEach((l) => l());
 }
 
-/** Installazione: su Android si apre il prompt di sistema, su iPhone si mostrano i passi da fare */
+/**
+ * Installazione: su Android si apre il prompt di sistema; su iPhone `share` apre il menu Condividi
+ * e i passi (`iosInstallHint`) dicono cosa scegliere
+ */
 export function useInstall() {
   const [, rerender] = useState(0);
   useEffect(() => {
@@ -129,5 +151,6 @@ export function useInstall() {
   return {
     available: !isStandalone() && (!!deferredPrompt || isIOS()),
     prompt: deferredPrompt ? promptInstall : null,
+    share: !deferredPrompt && canShareToInstall() ? shareToInstall : null,
   };
 }

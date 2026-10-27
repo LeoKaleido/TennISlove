@@ -15,7 +15,7 @@ interface Person {
   disabledAt: string | null;
   invitedAt: string | null;
   lastLoginAt: string | null;
-  player: { id: string; firstName: string; lastName: string; shortName: string; seasons: string[]; hasMatches: boolean } | null;
+  player: { id: string; firstName: string; lastName: string; shortName: string; memberSince: string; seasons: string[]; hasMatches: boolean } | null;
 }
 
 interface PlayerForm {
@@ -23,9 +23,10 @@ interface PlayerForm {
   lastName: string;
   shortName: string;
   email: string;
+  memberSince: string;
 }
 
-const EMPTY: PlayerForm = { firstName: '', lastName: '', shortName: '', email: '' };
+const EMPTY: PlayerForm = { firstName: '', lastName: '', shortName: '', email: '', memberSince: '' };
 
 const day = (iso: string) => formatDayWithWeekday(romeDay(iso));
 
@@ -212,8 +213,8 @@ function PlayerDialog({ person, onClose }: { person: Person | null; onClose: () 
   const toast = useToast();
   const [form, setForm] = useState<PlayerForm>(
     person?.player
-      ? { firstName: person.player.firstName, lastName: person.player.lastName, shortName: person.player.shortName, email: person.email ?? '' }
-      : EMPTY,
+      ? { firstName: person.player.firstName, lastName: person.player.lastName, shortName: person.player.shortName, email: person.email ?? '', memberSince: person.player.memberSince }
+      : { ...EMPTY, memberSince: romeDay(new Date()) },
   );
   const [invite, setInvite] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -246,7 +247,8 @@ function PlayerDialog({ person, onClose }: { person: Person | null; onClose: () 
     if (key === 'shortName') setShortTouched(true);
     setForm(next);
   };
-  const valid = form.firstName.trim() && form.lastName.trim() && form.shortName.trim() && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim());
+  const valid =
+    form.firstName.trim() && form.lastName.trim() && form.shortName.trim() && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim()) && /^\d{4}-\d{2}-\d{2}$/.test(form.memberSince);
   const emailChanged = !isNew && person?.email && person.email !== form.email.trim().toLowerCase();
 
   return (
@@ -272,7 +274,11 @@ function PlayerDialog({ person, onClose }: { person: Person | null; onClose: () 
           <TextField label="Cognome" style={{ height: 48 }} value={form.lastName} onChange={set('lastName')} />
           <TextField label="Nome breve" style={{ height: 48 }} value={form.shortName} onChange={set('shortName')} placeholder="Es. Alessandro P" />
           <TextField label="Email" style={{ height: 48 }} type="email" value={form.email} onChange={set('email')} placeholder="nome@email.it" />
+          <TextField label="Iscritto dal" style={{ height: 48 }} type="date" value={form.memberSince} max={romeDay(new Date())} onChange={set('memberSince')} />
         </div>
+        <span className="faint" style={{ fontSize: 12.5, marginTop: -6 }}>
+          Ogni anno di iscrizione vale un livello del badge Veterano: per chi giocava già prima dell'app, indica quando ha iniziato.
+        </span>
         {isNew && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
             <label style={{ display: 'flex', alignItems: 'center', gap: 10, fontWeight: 700, fontSize: 14.5 }}>

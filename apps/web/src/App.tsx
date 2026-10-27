@@ -93,6 +93,7 @@ function useMatchModal() {
 
   return {
     background: desktop && inMatch ? (background.current ?? HOME) : null,
+    location,
     depth,
   };
 }
@@ -123,14 +124,15 @@ function MatchModal({ background, depth, children }: { background: Location; dep
 
 export function App() {
   useResumeRoute();
-  const { background, depth } = useMatchModal();
+  const { background, location, depth } = useMatchModal();
   // nessuna pagina, login compreso, compare prima dei font: altrimenti il testo cambia forma sotto gli occhi
   const fonts = useFontsReady();
   if (!fonts) return <Splash />;
   return (
     <>
       <UpdateBanner />
-      <Routes location={background ?? undefined}>
+      {/* sempre con una location: con e senza, React Router dà alberi diversi e la pagina sotto la finestra si rimonterebbe */}
+      <Routes location={background ?? location}>
         <Route element={<Plain />}>
           <Route
             path="/login"

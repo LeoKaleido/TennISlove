@@ -29,13 +29,14 @@ export function ShareCardButton({ data, player }: { data: SeasonOverview; player
 function CardModal({ data, player, onClose }: { data: SeasonOverview; player: Player; onClose: () => void }) {
   const [closing, close] = useClosing(onClose);
   const toast = useToast();
-  const { list, loading } = useBadgesAcrossSeasons(player.id);
+  const book = useBadgesAcrossSeasons(player.id);
+  const { loading } = book;
   const [blob, setBlob] = useState<Blob | null>(null);
   const [url, setUrl] = useState<string | null>(null);
   const [sharing, setSharing] = useState(false);
 
   // badge ottenuti in qualunque torneo, i più prestigiosi per primi
-  const earned = BADGE_ORDER.map((id) => ({ id, level: badgeLevel(list, id) }))
+  const earned = BADGE_ORDER.map((id) => ({ id, level: badgeLevel(book, id) }))
     .filter((b) => b.level > 0)
     .sort((a, b) => rank(a.id) - rank(b.id));
   const key = earned.map((b) => `${b.id}${b.level}`).join();

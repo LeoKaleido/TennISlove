@@ -1,10 +1,10 @@
-// Impostazioni dell'account: installa l'app, password, tema, esci.
-// Nel profilo si aprono dall'ingranaggio; su desktop tema ed esci stanno anche nella barra laterale.
+// Impostazioni dell'account: installa l'app, password, torneo, guida, esci.
+// Nel profilo si aprono dall'ingranaggio; su desktop esci sta anche nella barra laterale.
 
 import { useMutation } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router';
-import { useLogout, useTheme } from '../account';
+import { useLogout } from '../account';
 import { api } from '../api';
 import { useMe } from '../data';
 import { iosInstallHint, useInstall } from '../pwa';
@@ -12,7 +12,6 @@ import { SeasonPicker } from './SeasonPicker';
 import { ButtonLoader, Collapse, HelpLink, TextField, useClosing, useToast } from './ui';
 
 export function SettingsList() {
-  const [theme, toggleTheme] = useTheme();
   const logout = useLogout();
   const install = useInstall();
   const toast = useToast();
@@ -36,10 +35,17 @@ export function SettingsList() {
 
   return (
     <div className="card settings-list">
-      {/* Android apre il prompt di sistema; su iPhone l'installazione si fa solo da Safari */}
+      {/* Android apre il prompt di sistema; su iPhone il menu Condividi, con sotto cosa scegliere */}
       {install.available && (
         <>
-          <button className="list-row" onClick={() => (install.prompt ? install.prompt() : setInstallHelp(!installHelp))}>
+          <button
+            className="list-row"
+            onClick={() => {
+              if (install.prompt) return install.prompt();
+              setInstallHelp(install.share ? true : !installHelp);
+              install.share?.();
+            }}
+          >
             <span className="settings-label">Installa l'app</span>
           </button>
           <Collapse open={installHelp}>
@@ -82,11 +88,7 @@ export function SettingsList() {
         <span className="settings-label">Guida all'app</span>
         <span className="muted">›</span>
       </Link>
-      {/* su desktop tema ed esci stanno nella barra laterale */}
-      <button className="list-row hide-desktop" onClick={toggleTheme}>
-        <span className="settings-label">Tema</span>
-        <span className="muted">{theme === 'dark' ? 'Scuro' : 'Chiaro'}</span>
-      </button>
+      {/* su desktop esci sta nella barra laterale */}
       <button className="list-row hide-desktop" onClick={() => logout.mutate()} disabled={logout.isPending}>
         <span className="settings-label" style={{ color: 'var(--errFg)' }}>
           Esci

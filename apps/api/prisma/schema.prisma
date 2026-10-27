@@ -88,6 +88,8 @@ model Player {
   shortName String
   photoKey  String?
   userId    String? @unique
+  /// iscritto dal (YYYY-MM-DD, fuso di Roma): anni di iscrizione per il badge Veterano
+  memberSince String @default(dbgenerated("to_char((now() AT TIME ZONE 'Europe/Rome'::text), 'YYYY-MM-DD'::text)"))
 
   user    User?          @relation(fields: [userId], references: [id])
   seasons SeasonPlayer[]

@@ -1,38 +1,7 @@
 /* Token e componenti base, dal mockup di Claude Design (brain/design/mockup) */
 
 :root {
-  --bg: #f3f6f5;
-  --surface: #ffffff;
-  --surface2: #e9efec;
-  --ink: #0b1a24;
-  --ink2: #4f5f68;
-  --ink3: #86959c;
-  --line: #e0e7e4;
-  --line2: #c7d2cd;
-  --night: #0b1a24;
-  --mint: #c6eedb;
-  --accent: #1f6f54;
-  --onAccent: #ffffff;
-  --mintInk: #0b1a24;
-  --warnBg: #fbefd2;
-  --warnFg: #7a4f00;
-  --recBg: #fce2ce;
-  --recFg: #8e3d10;
-  --errBg: #fbe0dc;
-  --errFg: #a8231b;
-  --desk: #dce3e0;
-  --hero: #0b1a24;
-  --ph1: #dce6e1;
-  --ph2: #d0ddd7;
-  --phInk: #4f5f68;
-  /* grafici: un giocatore da solo, oppure due a confronto (blu e arancio: distinti anche per chi confonde rosso e verde) */
-  --chart-one: #1d8a5f;
-  --chart-a: #2f6fd0;
-  --chart-b: #d0601f;
-  color-scheme: light;
-}
-
-[data-theme='dark'] {
+  /* un solo tema, scuro (il tema chiaro è stato tolto) */
   --bg: #071118;
   --surface: #0e1e29;
   --surface2: #16303d;
@@ -41,8 +10,11 @@
   --ink3: #6e838c;
   --line: #1a3140;
   --line2: #2b4757;
+  --night: #0b1a24;
+  --mint: #c6eedb;
   --accent: #7fddb5;
   --onAccent: #0b1a24;
+  --mintInk: #0b1a24;
   --warnBg: #3a2d0e;
   --warnFg: #f2c86b;
   --recBg: #3d2414;
@@ -54,6 +26,7 @@
   --ph1: #142a35;
   --ph2: #10232d;
   --phInk: #a6b7be;
+  /* grafici: un giocatore da solo, oppure due a confronto (blu e arancio: distinti anche per chi confonde rosso e verde) */
   --chart-one: #2ea676;
   --chart-a: #4a8ae6;
   --chart-b: #d86a2c;
@@ -405,8 +378,8 @@ a {
 }
 
 .btn-dark {
-  background: #0b1a24;
-  color: #c6eedb;
+  background: #c6eedb;
+  color: #0b1a24;
 }
 
 .btn-outline {
@@ -441,7 +414,7 @@ a {
   display: grid;
   place-items: center;
   flex: none;
-  /* colore legato allo sfondo del pulsante, non al testo intorno: su un riquadro scuro in tema chiaro la freccia sparirebbe */
+  /* colore legato allo sfondo del pulsante, non al testo intorno: su un riquadro di colore diverso la freccia sparirebbe */
   color: var(--ink);
 }
 
@@ -605,7 +578,7 @@ a {
   color: var(--accent);
 }
 
-/* marchio, guida, tema ed esci della barra laterale: solo su desktop */
+/* marchio, guida ed esci della barra laterale: solo su desktop */
 .tabbar-brand,
 .tabbar-foot {
   display: none;
@@ -1211,7 +1184,7 @@ textarea.input {
   place-items: center;
 }
 
-/* tema ed esci come nella barra laterale dell'app: in riga sul telefono, in fondo su desktop */
+/* passaggio al sito ed esci come nella barra laterale dell'app: in riga sul telefono, in fondo su desktop */
 .admin-nav .tabbar-foot {
   display: flex;
   gap: 4px;
@@ -1476,11 +1449,6 @@ textarea.input {
   line-height: 1.2;
 }
 
-[data-theme='dark'] .btn-dark {
-  background: #c6eedb;
-  color: #0b1a24;
-}
-
 /* ===== Desktop (da 900 px): barra laterale, contenuto largo, pagine su più colonne. Il telefono non cambia. ===== */
 @media (min-width: 900px) {
   /* pagine con le sezioni: barra laterale a sinistra, contenuto a destra */
@@ -1608,7 +1576,7 @@ textarea.input {
     color: #fff;
   }
 
-  /* su desktop lo fa la barra laterale (tema, esci) */
+  /* su desktop lo fa la barra laterale (esci) */
   .hide-desktop {
     display: none !important;
   }
@@ -2040,10 +2008,8 @@ textarea.input {
   font-weight: 700;
   font-size: 12.5px;
   line-height: 1.15;
-  /* nomi lunghi (Ammazzagrandi) restano nella casella: a capo con il trattino */
+  /* i nomi hanno una lunghezza massima (BADGE_NAME_MAX): al più due righe, a capo tra le parole */
   max-width: 100%;
-  hyphens: auto;
-  overflow-wrap: break-word;
 }
 
 .badge-sub {
@@ -2056,9 +2022,73 @@ textarea.input {
   display: flex;
   gap: 14px;
   align-items: flex-start;
-  margin-top: 8px;
-  padding: 14px 6px 4px;
-  border-top: 1px solid var(--line);
+  padding-right: 30px;
+}
+
+/* Dettaglio del badge: sale dal basso, senza sfondo scuro. Sul telefono sopra la barra delle sezioni */
+.badge-sheet {
+  position: fixed;
+  z-index: 55;
+  left: 50%;
+  bottom: calc(84px + env(safe-area-inset-bottom));
+  width: calc(100% - 24px);
+  max-width: 520px;
+  max-height: 60dvh;
+  overflow-y: auto;
+  padding: 16px;
+  border-radius: 22px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: 0 12px 40px rgba(11, 26, 36, 0.22);
+  transform: translateX(-50%);
+  animation: badgeSheetIn 0.24s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.badge-sheet.closing {
+  animation: badgeSheetOut 0.2s ease forwards;
+}
+
+@keyframes badgeSheetIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 24px);
+  }
+}
+
+@keyframes badgeSheetOut {
+  to {
+    opacity: 0;
+    transform: translate(-50%, 24px);
+  }
+}
+
+.badge-sheet-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 0;
+  background: var(--surface2);
+  color: var(--ink2);
+  font-size: 13px;
+  display: grid;
+  place-items: center;
+}
+
+/* su desktop: in basso, al centro della parte a destra della barra laterale */
+@media (min-width: 900px) {
+  .badge-sheet {
+    left: calc(50% + 120px);
+    bottom: 24px;
+  }
+}
+
+/* scheda di un altro giocatore in finestra (desktop): al centro dello schermo */
+.route-modal .badge-sheet {
+  left: 50%;
 }
 
 .badge-progress {

@@ -68,7 +68,6 @@ await send('Page.enable');
 await send('Network.enable');
 await send('Network.setCookie', { name: 'atp_session', value: token, domain: 'localhost', path: '/', httpOnly: true });
 await send('Emulation.setDeviceMetricsOverride', { width: 390, height: 844, deviceScaleFactor: 2, mobile: true });
-await send('Emulation.setEmulatedMedia', { features: [{ name: 'prefers-color-scheme', value: 'light' }] });
 
 const go = async (path) => {
   await send('Page.navigate', { url: BASE + path });
@@ -96,9 +95,10 @@ await send('Page.addScriptToEvaluateOnNewDocument', {
   `,
 });
 
-const shot = async (name, clipExpr) => {
+/** `keepDock`: nei ritagli la barra in basso resta (schermo intero a metà pagina, con un pannello fisso) */
+const shot = async (name, clipExpr, keepDock = false) => {
   // nei ritagli di una sezione la barra in basso (fissa) finirebbe sopra il contenuto
-  await evaluate(`document.querySelectorAll('.dock').forEach((d) => (d.style.visibility = ${clipExpr ? "'hidden'" : "''"}))`);
+  await evaluate(`document.querySelectorAll('.dock').forEach((d) => (d.style.visibility = ${clipExpr && !keepDock ? "'hidden'" : "''"}))`);
   const clip = clipExpr ? await evaluate(clipExpr) : { x: 0, y: 0, width: 390, height: 844 };
   if (!clip) throw new Error(`${name}: elemento non trovato`);
   const { data } = await send('Page.captureScreenshot', { format: 'jpeg', quality: 78, clip: { ...clip, scale: 1 }, captureBeyondViewport: true });
@@ -161,9 +161,14 @@ try {
   await go('/profilo');
   await shot('profilo');
   await shot('andamento', `__rect(__section('Andamento in classifica'), 8)`);
-  await click(`document.querySelector('.badge-tile:not(:has(.locked))')`);
-  await sleep(600);
   await shot('badge', `__rect(__section('Badge'), 8)`);
+  // dettaglio: il pannello che sale dal basso, sullo schermo così come si vede (Veterano: cosa manca al prossimo anno)
+  await evaluate(`window.scrollTo(0, __section('Badge').getBoundingClientRect().top + scrollY - 60)`);
+  await click(`[...document.querySelectorAll('.badge-tile')].find((b) => b.textContent.includes('Veterano'))`);
+  await sleep(900);
+  await shot('badge-dettaglio', `({ x: 0, y: scrollY, width: innerWidth, height: innerHeight })`, true);
+  await click(`document.querySelector('.badge-sheet-close')`);
+  await sleep(400);
 
   await click(`[...document.querySelectorAll('button')].find((b) => b.textContent.includes('Condividi la tua card'))`);
   await waitFor(`document.querySelector('.modal img')?.complete`, 15000);

@@ -35,6 +35,8 @@ export interface Player {
   firstName: string;
   lastName: string;
   shortName: string;
+  /** iscritto dal (YYYY-MM-DD): anni di iscrizione per il badge Veterano */
+  memberSince: string;
   photoUrl: string | null;
 }
 

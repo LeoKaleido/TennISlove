@@ -4,7 +4,7 @@ import { createContext, useCallback, useContext, useEffect, useId, useRef, useSt
 import { Link, NavLink, useLocation, useNavigate } from 'react-router';
 import type { MatchStatus, Zone } from '@tentennis/shared';
 import type { Match, Player } from '../api';
-import { useLogout, useTheme } from '../account';
+import { useLogout } from '../account';
 import { bootVisible } from '../boot';
 import { SeasonPicker } from './SeasonPicker';
 import { iosInstallHint, isMobileDevice, useInstall } from '../pwa';
@@ -243,11 +243,10 @@ export function TabBar() {
 }
 
 /**
- * In fondo alla barra laterale (solo desktop): guida, tema ed esci. Anche nel gestionale, senza la guida.
+ * In fondo alla barra laterale (solo desktop): guida ed esci. Anche nel gestionale, senza la guida.
  * Qui c'è l'unico passaggio tra sito e gestionale (D-036): "Gestionale" per gli admin, "Sito" per gli admin che giocano.
  */
 export function TabBarFoot({ place = 'app' }: { place?: 'app' | 'admin' }) {
-  const [theme, toggleTheme] = useTheme();
   const logout = useLogout();
   const me = useMe().data;
   const switchTo = place === 'app' ? (me?.isAdmin ? { to: '/admin', label: 'Gestionale' } : null) : me?.playerId ? { to: '/', label: 'Sito' } : null;
@@ -271,16 +270,6 @@ export function TabBarFoot({ place = 'app' }: { place?: 'app' | 'admin' }) {
           {switchTo.label}
         </Link>
       )}
-      <button onClick={toggleTheme} aria-label={theme === 'dark' ? 'Passa al tema chiaro' : 'Passa al tema scuro'}>
-        <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden>
-          {theme === 'dark' ? (
-            <path d="M12 3.5v2M12 18.5v2M3.5 12h2M18.5 12h2M6 6l1.4 1.4M16.6 16.6L18 18M6 18l1.4-1.4M16.6 7.4L18 6M12 8.2a3.8 3.8 0 100 7.6 3.8 3.8 0 000-7.6z" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-          ) : (
-            <path d="M19.5 14.5A7.5 7.5 0 019.5 4.5a7.5 7.5 0 1010 10z" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinejoin="round" />
-          )}
-        </svg>
-        {theme === 'dark' ? 'Tema chiaro' : 'Tema scuro'}
-      </button>
       <button onClick={() => logout.mutate()} disabled={logout.isPending}>
         <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden>
           <path d="M14 4.5H7a2 2 0 00-2 2v11a2 2 0 002 2h7M11 12h9M16.5 8.5L20 12l-3.5 3.5" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
@@ -435,7 +424,15 @@ export function InstallBanner({ aboveTabs = false, atTop = false }: { aboveTabs?
       <div className="install-row">
         <Logo size={34} />
         <span style={{ flex: 1, fontWeight: 800, fontSize: 14.5 }}>Installa l'app</span>
-        <button className="btn btn-primary btn-sm" onClick={() => (install.prompt ? install.prompt() : setHelp(!help))}>
+        <button
+          className="btn btn-primary btn-sm"
+          onClick={() => {
+            if (install.prompt) return install.prompt();
+            // iPhone: si apre il menu Condividi e sotto resta scritto cosa scegliere
+            setHelp(install.share ? true : !help);
+            install.share?.();
+          }}
+        >
           Installa
         </button>
         <button className="icon-btn" aria-label="Chiudi" onClick={() => setHidden(true)} style={{ width: 32, height: 32 }}>

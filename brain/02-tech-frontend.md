@@ -11,7 +11,7 @@
 | Routing | React Router 7 |
 | Dati | TanStack Query: una chiamata scarica la stagione intera (D-033), le azioni invalidano la cache |
 | Form | logica condivisa in `apps/web/src/score-form.ts`, validazione col motore di `packages/shared` |
-| Stile | CSS semplice con token (variabili CSS) presi dal mockup, `apps/web/src/styles.css`, tema chiaro e scuro (D-032) |
+| Stile | CSS semplice con token (variabili CSS) presi dal mockup, `apps/web/src/styles.css`, solo tema scuro (D-071; prima chiaro e scuro, D-028) |
 | Foto | ridotte e ricodificate in JPEG sul telefono (`photos.ts`), poi caricate all'API (D-038) |
 | Lingua | solo italiano |
 

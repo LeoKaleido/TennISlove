@@ -17,7 +17,9 @@ export type BadgeId =
   | 'UPSET'
   | 'CHAMPION'
   | 'ORACLE'
-  | 'PODIUM';
+  | 'PODIUM'
+  | 'PRESENCE'
+  | 'VETERAN';
 
 export const BADGES: Record<BadgeId, { name: string; rule: string; target: number }> = {
   FIRST_WIN: { name: 'Prima vittoria', rule: 'Vinci la prima partita', target: 1 },
@@ -26,14 +28,19 @@ export const BADGES: Record<BadgeId, { name: string; rule: string; target: numbe
   WALL: { name: 'Muro', rule: 'Vinci concedendo al massimo 3 game', target: 1 },
   STREAK: { name: 'Tris', rule: '3 vittorie di fila', target: 3 },
   TIEBREAK_KING: { name: 'Re del tie break', rule: '3 partite vinte al super tie break', target: 3 },
-  GIANT_KILLER: { name: 'Ammazzagrandi', rule: 'Batti chi è primo in classifica', target: 1 },
+  GIANT_KILLER: { name: 'Ammazza grandi', rule: 'Batti chi è primo in classifica', target: 1 },
   PHOTOGRAPHER: { name: 'Fotografo', rule: 'Foto in 3 delle tue partite', target: 3 },
   SEER: { name: 'Indovino', rule: '5 pronostici con il vincitore giusto', target: 5 },
   UPSET: { name: 'Colpo grosso', rule: 'Indovina uno sfavorito nei pronostici', target: 1 },
   CHAMPION: { name: 'Campione', rule: 'Vinci il torneo', target: 1 },
   ORACLE: { name: 'Oracolo', rule: 'Primo nei pronostici a fine stagione', target: 1 },
   PODIUM: { name: 'Podio', rule: 'Tra i primi 3 a fine stagione', target: 1 },
+  PRESENCE: { name: 'Presenze', rule: 'Un livello per ogni torneo a cui partecipi', target: 1 },
+  VETERAN: { name: 'Veterano', rule: 'Un livello per ogni anno di iscrizione', target: 1 },
 };
+
+/** Lunghezza massima dei nomi: stanno su due righe sotto la medaglia, senza spezzare le parole */
+export const BADGE_NAME_MAX = { total: 16, word: 10 };
 
 export const BADGE_ORDER = Object.keys(BADGES) as BadgeId[];
 
@@ -54,7 +61,7 @@ export interface BadgeMatch {
 
 export interface BadgeInput {
   playerId: string;
-  /** tutti i giocatori della stagione, nell'ordine dell'elenco iniziale (serve ad Ammazzagrandi) */
+  /** tutti i giocatori della stagione, nell'ordine dell'elenco iniziale (serve ad Ammazza grandi) */
   playerIds: string[];
   matches: BadgeMatch[];
   predictions: { correct: number; upsets: number } | null;
@@ -78,7 +85,26 @@ const byPlayOrder = (a: BadgeMatch, b: BadgeMatch) =>
   (a.playedOn ?? '').localeCompare(b.playedOn ?? '') || (a.submittedAt ?? '').localeCompare(b.submittedAt ?? '');
 
 /** Badge che si ottengono una sola volta per stagione: i livelli si sommano tra i tornei */
-export const ONCE_PER_SEASON: BadgeId[] = ['FIRST_WIN', 'CHAMPION', 'ORACLE', 'PODIUM'];
+export const ONCE_PER_SEASON: BadgeId[] = ['FIRST_WIN', 'CHAMPION', 'ORACLE', 'PODIUM', 'PRESENCE'];
+
+/** Badge di carriera: non dipendono da un torneo (Veterano: anni dall'iscrizione, vedi `membershipYears`) */
+export const CAREER_BADGES: BadgeId[] = ['VETERAN'];
+
+/**
+ * Anni compiuti dall'iscrizione (`since`, YYYY-MM-DD) a oggi, e il giorno in cui si compie il prossimo.
+ * Il 29 febbraio, negli anni non bisestili, l'anniversario è il 28.
+ */
+export function membershipYears(since: string, today: string): { years: number; nextOn: string } {
+  const [y, m, d] = since.split('-').map(Number) as [number, number, number];
+  const on = (year: number) => {
+    const last = new Date(Date.UTC(year, m, 0)).getUTCDate();
+    return `${year}-${String(m).padStart(2, '0')}-${String(Math.min(d, last)).padStart(2, '0')}`;
+  };
+  let years = Number(today.slice(0, 4)) - y;
+  if (today < on(Number(today.slice(0, 4)))) years -= 1;
+  years = Math.max(0, years);
+  return { years, nextOn: on(y + years + 1) };
+}
 
 export function computeBadges(input: BadgeInput): BadgeState[] {
   const me = input.playerId;
@@ -134,7 +160,7 @@ export function computeBadges(input: BadgeInput): BadgeState[] {
   states.get('STREAK')!.progress = streak % BADGES.STREAK.target;
   states.get('TIEBREAK_KING')!.progress = tiebreaks % BADGES.TIEBREAK_KING.target;
 
-  // Ammazzagrandi: la classifica com'era subito prima di ciascuna vittoria
+  // Ammazza grandi: la classifica com'era subito prima di ciascuna vittoria
   const wins = games.filter((g) => g.won);
   if (wins.length > 0) {
     const all = input.matches.filter((m) => m.score).sort(byPlayOrder);
@@ -151,6 +177,8 @@ export function computeBadges(input: BadgeInput): BadgeState[] {
     threshold('SEER', input.predictions.correct);
     for (let i = 0; i < input.predictions.upsets; i++) level('UPSET');
   }
+  // chi è nell'elenco del torneo vi partecipa: un livello per torneo, sommati tra le stagioni
+  if (input.playerIds.includes(me)) level('PRESENCE');
   if (input.final) {
     const f = input.final;
     if (f.championId === me) level('CHAMPION');

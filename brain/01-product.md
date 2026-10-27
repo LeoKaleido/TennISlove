@@ -130,18 +130,22 @@ Riconoscimenti calcolati dai dati che l'app ha già (risultati, date, foto, pron
 | Muro | una vittoria concedendo al massimo 3 game in tutta la partita |
 | Tris | 3 vittorie di fila (una partita senza vincitore interrompe la serie) |
 | Re del tie break | 3 partite vinte al super tie break |
-| Ammazzagrandi | battuto chi in quel momento era primo in classifica (anche a pari merito), con almeno una partita giocata |
+| Ammazza grandi | battuto chi in quel momento era primo in classifica (anche a pari merito), con almeno una partita giocata |
 | Fotografo | foto in 3 delle proprie partite |
 | Indovino | 5 pronostici con il vincitore giusto |
 | Colpo grosso | un colpo grosso nei pronostici (§9) |
 | Campione | vincitore del torneo, indicato dall'admin |
 | Oracolo | primo nella classifica dei pronostici a stagione chiusa |
 | Podio | tra i primi 3 a stagione chiusa |
+| Presenze | un livello per ogni torneo a cui si partecipa (essere nell'elenco del torneo) |
+| Veterano | un livello per ogni anno compiuto dall'iscrizione (`Player.memberSince`, modificabile dal gestionale per chi giocava già prima dell'app) |
 
-- **Ordine delle partite** (Tris, Ammazzagrandi): per giorno giocato: la data programmata, altrimenti quella di inserimento del risultato ma non oltre la fine della settimana della giornata (i risultati importati dall'Excel sono stati inseriti tutti insieme, dopo).
+- **Ordine delle partite** (Tris, Ammazza grandi): per giorno giocato: la data programmata, altrimenti quella di inserimento del risultato ma non oltre la fine della settimana della giornata (i risultati importati dall'Excel sono stati inseriti tutti insieme, dopo).
 - **Livelli**: un badge si ottiene più volte e mostra il numero (×2, ×3), sommando tutti i tornei. Ogni set vinto 6-0 (anche in una partita persa), ogni rimonta, ogni Muro, ogni capolista battuto e ogni colpo grosso vale un livello; Tris un livello ogni 3 vittorie di fila (6 di fila = 2), Re del tie break ogni 3 vittorie al super tie break, Fotografo ogni 3 partite con foto, Indovino ogni 5 pronostici giusti. Prima vittoria e i badge di fine stagione valgono una volta per torneo.
-- **Bordo**: oro per Campione e Oracolo; argento per Podio, Ammazzagrandi, Tris e Re del tie break; bronzo per Cappotto, Rimonta, Muro, Indovino e Colpo grosso.
-- **Nel profilo**: tutti i badge con il livello e i tornei in cui sono stati ottenuti (con le partite); gli altri in grigio. Per ciascuno, quanto manca al prossimo livello nel torneo in corso.
+- **Bordo**: oro per Campione e Oracolo; argento per Podio, Ammazza grandi, Tris e Re del tie break; bronzo per Cappotto, Rimonta, Muro, Indovino e Colpo grosso.
+- **Nomi**: al massimo 16 caratteri e 10 per parola (`BADGE_NAME_MAX`, controllato da un test): stanno sotto la medaglia senza spezzare le parole.
+- **Nel profilo**: tutti i badge con il livello e i tornei in cui sono stati ottenuti (con le partite); gli altri in grigio. Toccandone uno sale dal basso un pannello, senza sfondo scuro, con la regola, i tornei e **cosa manca** al prossimo livello (per Veterano la data dell'iscrizione e quella del prossimo anno).
+- **Carriera**: Presenze e Veterano (medaglia viola) misurano la partecipazione negli anni; Presenze si somma tra i tornei come gli altri, Veterano dipende solo dalla data di iscrizione.
 - **Card del giocatore**: dal proprio profilo, "Condividi la card" crea un'immagine 1080×1350 con foto, nome, posizione, punti, statistiche e badge ottenuti; si condivide (WhatsApp, Instagram…) o si scarica. È una scelta del giocatore: l'app resta privata (D-009).
 
 ## 11. Testa a testa e andamento in classifica (D-064)
