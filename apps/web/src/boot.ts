@@ -25,23 +25,33 @@ export function useFontsReady() {
 /** La schermata di avvio di index.html (#boot) è ancora sullo schermo? */
 export const bootVisible = () => !!document.getElementById('boot');
 
-// Il cuore di public/loader.svg tocca terra ogni 0,675 secondi (due rimbalzi in 1,35)
-const LANDING_S = 1.35 / 2;
-const MIN_BOOT_S = 1;
+/**
+ * Immagine della schermata di avvio, solo all'apertura dell'app (i caricamenti interni usano il cuore, public/loader.svg).
+ * È il loader delle palline, generato da scripts/avvio/genera.mjs. Cambiandola, aggiorna anche `src` di #boot in index.html.
+ */
+export const BOOT_IMAGE = '/avvio.svg';
+
+/**
+ * Durata di un giro dell'animazione di avvio, in secondi: la schermata sfuma solo alla fine di un giro, mai a metà.
+ * null = sfuma appena l'app è pronta (le palline girano in 6 s: aspettare la fine del giro sarebbe troppo).
+ */
+const BOOT_LOOP_S: number | null = null;
+/** Durata minima della schermata di avvio, da quando l'animazione parte */
+const MIN_BOOT_S = 1.5;
 
 /**
  * Prima pagina pronta: la schermata di avvio sfuma e poi sparisce.
- * Resta almeno 1 secondo, altrimenti si vedrebbe il cuore fermo dell'avvio nativo e poi un movimento di un attimo,
- * e sfuma solo quando il cuore tocca terra, mai a metà salto. Le chiamate successive non fanno niente.
+ * Resta almeno 1,5 secondi (MIN_BOOT_S): le palline fanno in tempo a colpire, e non si vede un movimento di un attimo,
+ * e sfuma alla fine di un giro dell'animazione (BOOT_LOOP_S), mai a metà. Le chiamate successive non fanno niente.
  */
 export function hideBoot() {
   const el = document.getElementById('boot');
   if (!el || el.dataset.leaving) return;
   el.dataset.leaving = '1';
-  // l'animazione del loader parte quando l'immagine è scaricata
-  const loaded = performance.getEntriesByName(new URL('/loader.svg', location.href).href)[0] as PerformanceResourceTiming | undefined;
+  // l'animazione dell'immagine parte quando l'immagine è scaricata
+  const loaded = performance.getEntriesByName(new URL(BOOT_IMAGE, location.href).href)[0] as PerformanceResourceTiming | undefined;
   const now = (performance.now() - (loaded?.responseEnd ?? 0)) / 1000;
-  const at = Math.ceil(Math.max(now, MIN_BOOT_S) / LANDING_S) * LANDING_S;
+  const at = BOOT_LOOP_S ? Math.ceil(Math.max(now, MIN_BOOT_S) / BOOT_LOOP_S) * BOOT_LOOP_S : Math.max(now, MIN_BOOT_S);
   setTimeout(() => {
     el.classList.add('boot-leaving');
     el.addEventListener('animationend', (e) => e.target === el && el.remove());

@@ -5,7 +5,7 @@ import { Link, NavLink, useLocation, useNavigate } from 'react-router';
 import type { MatchStatus, Zone } from '@tentennis/shared';
 import type { Match, Player } from '../api';
 import { useLogout } from '../account';
-import { bootVisible } from '../boot';
+import { BOOT_IMAGE, bootVisible } from '../boot';
 import { SeasonPicker } from './SeasonPicker';
 import { iosInstallHint, isMobileDevice, useInstall } from '../pwa';
 import { avatarColors, initials, STATUS_STYLE, useMe, ZONE_STYLE } from '../data';
@@ -322,7 +322,7 @@ export function Splash() {
   if (bootVisible()) return null;
   return (
     <div className="boot">
-      <img className="in" src="/loader.svg" alt="" />
+      <img className="in" src={BOOT_IMAGE} alt="" />
     </div>
   );
 }

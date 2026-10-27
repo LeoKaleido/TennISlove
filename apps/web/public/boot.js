@@ -1,4 +1,4 @@
-// Schermata di avvio: il cuore sfuma dentro solo quando l'immagine è caricata, non prima.
+// Schermata di avvio: l'immagine sfuma dentro solo quando è caricata, non prima.
 // File separato perché la Content-Security-Policy non permette script dentro l'HTML.
 (function () {
   var img = document.querySelector('#boot img');

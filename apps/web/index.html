@@ -35,9 +35,11 @@
     <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet" />
     <style>
       /* Schermata di avvio, condivisa con il componente Splash (src/components/ui.tsx).
-         Le schermate native di iPhone (public/splash) sono solo il colore di sfondo: il cuore compare qui con una dissolvenza. */
+         Le schermate native di iPhone (public/splash) sono solo il colore di sfondo: l'immagine compare qui con una dissolvenza.
+         La grandezza del cerchio si regola in scripts/avvio/genera.mjs (VIEW). */
       .boot { position: fixed; inset: 0; z-index: 100; display: grid; place-items: center; background: #0b1a24; }
-      .boot img { width: 140px; opacity: 0; transition: opacity 0.7s cubic-bezier(0.25, 0.1, 0.25, 1); }
+      /* a tutto schermo: le palline arrivano da fuori dallo schermo (l'inquadratura è nell'SVG, preserveAspectRatio slice) */
+      .boot img { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; transition: opacity 0.7s cubic-bezier(0.25, 0.1, 0.25, 1); }
       .boot img.in { opacity: 1; }
       .boot-leaving { pointer-events: none; animation: boot-out 0.28s ease forwards; }
       @keyframes boot-out { to { opacity: 0; } }
@@ -46,9 +48,10 @@
   <body>
     <div id="root"></div>
     <!-- schermata di avvio: fuori da #root, React non la ridisegna; boot.ts la fa sfumare quando l'app è pronta.
+         L'immagine è solo per l'avvio (public/avvio.svg, BOOT_IMAGE in src/boot.ts): cambiandola, aggiorna tutti e due.
          Il cuore è un'immagine e non un SVG nella pagina: un'animazione SVG nella pagina parte solo a caricamento finito,
          un'immagine ha un orologio suo e si muove appena è caricata. -->
-    <div id="boot" class="boot"><img src="/loader.svg" alt="" /></div>
+    <div id="boot" class="boot"><img src="/avvio.svg" alt="" /></div>
     <script src="/boot.js"></script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
