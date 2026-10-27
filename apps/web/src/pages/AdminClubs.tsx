@@ -3,6 +3,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { api } from '../api';
+import { IconAction } from '../components/AdminTable';
 import { ButtonLoader, ErrorState, Loading, TextField, useClosing, useToast } from '../components/ui';
 
 interface ClubRow {
@@ -34,26 +35,46 @@ export function AdminClubs() {
           + Nuovo circolo
         </button>
       </div>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: 10 }}>
-        {clubs.data.map((c) => (
-          <div key={c.id} className="card" style={{ borderRadius: 18, padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 6, opacity: c.active ? 1 : 0.55 }}>
-            <span style={{ fontWeight: 800, fontSize: 16 }}>{c.name}</span>
-            <span className="muted" style={{ fontSize: 13 }}>
-              {c.city ?? 'Città non indicata'}
-              {!c.active && ', non attivo'}
-            </span>
-            {!c.located && (
-              <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--warnFg)' }}>Meteo non disponibile: posizione non trovata da link o città</span>
-            )}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 6 }}>
-              <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--accent)' }}>{c.matches === 1 ? '1 partita' : `${c.matches} partite`}</span>
-              <button className="link-btn" style={{ color: 'var(--ink2)' }} onClick={() => setEditing(c)}>
-                Modifica
-              </button>
-            </div>
-          </div>
-        ))}
+      <div className="card admin-table-wrap">
+        <table className="admin-table">
+          <thead>
+            <tr>
+              <th>Circolo</th>
+              <th>Città</th>
+              <th>Meteo</th>
+              <th>Partite</th>
+              <th>Stato</th>
+              <th className="actions">Azioni</th>
+            </tr>
+          </thead>
+          <tbody>
+            {clubs.data.map((c) => (
+              <tr key={c.id} style={{ opacity: c.active ? 1 : 0.55 }}>
+                <td style={{ fontWeight: 700 }}>{c.name}</td>
+                <td className="muted" style={{ fontSize: 13 }}>
+                  {c.city ?? '-'}
+                </td>
+                <td style={{ fontSize: 12.5, fontWeight: 600, color: c.located ? 'var(--accent)' : 'var(--warnFg)' }}>
+                  {c.located ? 'Disponibile' : 'Posizione non trovata'}
+                </td>
+                <td style={{ fontSize: 13 }}>{c.matches}</td>
+                <td style={{ fontSize: 12.5, fontWeight: 600, color: c.active ? 'var(--ink2)' : 'var(--ink3)' }}>{c.active ? 'Attivo' : 'Non attivo'}</td>
+                <td className="actions">
+                  <span className="icon-actions">
+                    <IconAction icon="edit" tip="Modifica" onClick={() => setEditing(c)} />
+                    {c.mapsUrl && <IconAction icon="map" tip="Apri su Google Maps" href={c.mapsUrl} />}
+                  </span>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
+      {clubs.data.some((c) => !c.located) && (
+        <span className="faint" style={{ fontSize: 12.5, marginTop: -8 }}>
+          Meteo non disponibile: la posizione non si ricava né dal link né dalla città. Controlla il link di Google Maps o indica la città.
+        </span>
+      )}
       {editing && <ClubDialog club={editing === 'new' ? null : editing} onClose={() => setEditing(null)} />}
     </>
   );
@@ -81,6 +102,8 @@ function ClubDialog({ club, onClose }: { club: ClubRow | null; onClose: () => vo
     },
     onSuccess: () => {
       queryClient.invalidateQueries();
+      // la posizione per il meteo si ricava in sottofondo: si ricontrolla dopo qualche secondo
+      setTimeout(() => queryClient.invalidateQueries({ queryKey: ['admin-clubs'] }), 5000);
       toast(club ? 'Circolo aggiornato' : 'Circolo aggiunto');
       close();
     },

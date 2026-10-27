@@ -4,7 +4,7 @@ import multipart from '@fastify/multipart';
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import { z } from 'zod';
 import { requireUser } from '../auth';
-import { audit, db } from '../db';
+import { audit, currentSeason, db } from '../db';
 import { detectImage, isAllowedImage, MAX_UPLOAD_BYTES, openFile, removeFile, saveFile, storageKey } from '../storage';
 
 /** Tetto per partita: evita che il disco si riempia */
@@ -61,9 +61,7 @@ export async function photoRoutes(app: FastifyInstance) {
 
   /** Gallery della stagione in corso (o ?season=) */
   app.get<{ Querystring: { season?: string } }>('/api/gallery', async (req) => {
-    const season = req.query.season
-      ? await db.season.findUnique({ where: { id: req.query.season } })
-      : await db.season.findFirst({ where: { status: 'ACTIVE' }, orderBy: { createdAt: 'desc' } });
+    const season = req.query.season ? await db.season.findUnique({ where: { id: req.query.season } }) : await currentSeason();
     if (!season || (season.status === 'DRAFT' && !req.user!.isAdmin)) return { photos: [] };
     const photos = await db.matchPhoto.findMany({
       where: { match: { seasonId: season.id } },

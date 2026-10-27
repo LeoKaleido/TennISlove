@@ -240,19 +240,21 @@ export function TabBar() {
   );
 }
 
-/** In fondo alla barra laterale (solo desktop): tema ed esci */
-function TabBarFoot() {
+/** In fondo alla barra laterale (solo desktop): guida, tema ed esci. Anche nel gestionale, senza la guida */
+export function TabBarFoot({ guide = true }: { guide?: boolean }) {
   const [theme, toggleTheme] = useTheme();
   const logout = useLogout();
   return (
     <div className="tabbar-foot">
-      <NavLink to="/guida">
-        <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden>
-          <circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" strokeWidth="2" />
-          <path d="M9.6 9.6a2.5 2.5 0 114 2c-.9.6-1.6 1.1-1.6 2.2M12 17h.01" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-        </svg>
-        Guida
-      </NavLink>
+      {guide && (
+        <NavLink to="/guida">
+          <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden>
+            <circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" strokeWidth="2" />
+            <path d="M9.6 9.6a2.5 2.5 0 114 2c-.9.6-1.6 1.1-1.6 2.2M12 17h.01" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+          </svg>
+          Guida
+        </NavLink>
+      )}
       <button onClick={toggleTheme} aria-label={theme === 'dark' ? 'Passa al tema chiaro' : 'Passa al tema scuro'}>
         <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden>
           {theme === 'dark' ? (

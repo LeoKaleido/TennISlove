@@ -1,7 +1,7 @@
 // Scelta del torneo (D-068): vale per tutta l'app. Nelle impostazioni e, su desktop, in cima alla barra laterale.
 
 import { Link } from 'react-router';
-import { selectSeason, useSeason, useSeasons } from '../data';
+import { selectSeason, useSeason, useSeasons, useSelectedSeasonId } from '../data';
 
 const STATUS: Record<string, string> = { ACTIVE: 'in corso', ARCHIVED: 'concluso' };
 
@@ -36,16 +36,21 @@ export function SeasonPicker({ className, short = false }: { className?: string;
 /** In cima alle pagine quando si guarda un torneo che non è quello in corso */
 export function SeasonBanner() {
   const season = useSeason();
+  const chosen = useSelectedSeasonId();
   const s = season.data?.season;
   if (!s || s.status === 'ACTIVE') return null;
+  // senza una scelta è l'ultimo concluso: tra un torneo e l'altro non c'è un torneo in corso a cui tornare
   return (
     <div className="season-banner" role="status">
       <span>
-        Stai guardando il torneo <strong>{s.label}</strong>, concluso.
+        {chosen ? 'Stai guardando il torneo' : 'Il torneo'} <strong>{s.label}</strong>
+        {chosen ? ', concluso.' : ' è concluso: il prossimo non è ancora iniziato.'}
       </span>
-      <Link to="#" className="link-btn" onClick={(e) => (e.preventDefault(), selectSeason(null))}>
-        Torna a quello in corso
-      </Link>
+      {chosen && (
+        <Link to="#" className="link-btn" onClick={(e) => (e.preventDefault(), selectSeason(null))}>
+          Torna a quello in corso
+        </Link>
+      )}
     </div>
   );
 }

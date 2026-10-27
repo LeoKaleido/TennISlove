@@ -1,14 +1,16 @@
 // Gestionale: moderazione delle foto caricate dai giocatori.
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import type { ReactNode } from 'react';
 import { formatDayWithWeekday, romeDay } from '@tentennis/shared';
 import { api, type SeasonOverview } from '../api';
+import { AdminHeader } from '../components/AdminHeader';
 import { ErrorState, Loading, useToast } from '../components/ui';
 import { playerIndex } from '../data';
 import { useGallery } from './Gallery';
 
-export function AdminPhotos({ data }: { data: SeasonOverview }) {
-  const gallery = useGallery();
+export function AdminPhotos({ data, picker }: { data: SeasonOverview; picker: ReactNode }) {
+  const gallery = useGallery(data.season.id);
   const queryClient = useQueryClient();
   const toast = useToast();
   const remove = useMutation({
@@ -27,14 +29,7 @@ export function AdminPhotos({ data }: { data: SeasonOverview }) {
 
   return (
     <>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-        <h1 className="display" style={{ fontSize: 40, lineHeight: 0.92 }}>
-          Foto
-        </h1>
-        <span className="muted" style={{ fontSize: 13.5 }}>
-          {gallery.data.photos.length} foto
-        </span>
-      </div>
+      <AdminHeader title="Foto" sub={gallery.data.photos.length === 1 ? '1 foto' : `${gallery.data.photos.length} foto`} aside={picker} />
       {gallery.data.photos.length === 0 ? (
         <div className="muted" style={{ padding: 18, borderRadius: 18, border: '1.5px dashed var(--line2)', fontSize: 13.5 }}>
           Nessuna foto caricata.

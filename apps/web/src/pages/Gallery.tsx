@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { Link } from 'react-router';
 import { api } from '../api';
 import { ErrorState, HelpLink, Loading, Logo } from '../components/ui';
-import { playerIndex, useMe, useSeason } from '../data';
+import { playerIndex, useMe, useSeason, useSelectedSeasonId } from '../data';
 
 export interface GalleryPhoto {
   id: string;
@@ -16,12 +16,17 @@ export interface GalleryPhoto {
   playerBId: string;
 }
 
-export const useGallery = () => useQuery({ queryKey: ['gallery'], queryFn: () => api<{ photos: GalleryPhoto[] }>('/api/gallery') });
+/** Foto di un torneo; undefined = quello in corso */
+export const useGallery = (seasonId: string | undefined) =>
+  useQuery({
+    queryKey: ['gallery', seasonId ?? 'current'],
+    queryFn: () => api<{ photos: GalleryPhoto[] }>(seasonId ? `/api/gallery?season=${seasonId}` : '/api/gallery'),
+  });
 
 export function GalleryPage() {
   const me = useMe();
   const season = useSeason();
-  const gallery = useGallery();
+  const gallery = useGallery(useSelectedSeasonId());
   const [mineOnly, setMineOnly] = useState(false);
 
   if (season.isLoading || gallery.isLoading) return <Loading />;

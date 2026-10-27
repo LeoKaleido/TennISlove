@@ -1,7 +1,7 @@
 import type { FastifyInstance } from 'fastify';
 import { DEMO_SEASON_NAME } from '@tentennis/shared';
 import { requireUser } from '../auth';
-import { db } from '../db';
+import { currentSeason, db } from '../db';
 import { seasonOverview } from '../views';
 
 export async function seasonRoutes(app: FastifyInstance) {
@@ -19,11 +19,9 @@ export async function seasonRoutes(app: FastifyInstance) {
     return seasons.map((s) => ({ id: s.id, name: s.name, label: s.label, status: s.status }));
   });
 
-  /** Stagione in corso, oppure ?id= per una stagione in archivio */
+  /** Stagione in corso (o l'ultima conclusa se non ce n'è una), oppure ?id= per una stagione in archivio */
   app.get<{ Querystring: { id?: string } }>('/api/season', async (req, reply) => {
-    const season = req.query.id
-      ? await db.season.findUnique({ where: { id: req.query.id } })
-      : await db.season.findFirst({ where: { status: 'ACTIVE' }, orderBy: { createdAt: 'desc' } });
+    const season = req.query.id ? await db.season.findUnique({ where: { id: req.query.id } }) : await currentSeason();
     // un torneo in preparazione lo vede solo l'admin, dal gestionale
     if (!season || (season.status === 'DRAFT' && !req.user!.isAdmin)) return reply.code(404).send({ error: 'Nessun torneo in corso' });
     return seasonOverview(season, req.user!.playerId);

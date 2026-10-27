@@ -6,7 +6,7 @@ import { formatDay, formatRange, roundRobin, scheduleWeeks, type Pause } from '@
 import { api } from '../api';
 import { ButtonLoader, ErrorState, Loading, TextField, useToast } from '../components/ui';
 
-interface SeasonRow {
+export interface SeasonRow {
   id: string;
   name: string;
   label: string;

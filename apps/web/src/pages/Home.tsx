@@ -72,6 +72,13 @@ export function HomePage() {
         <div className="home-hero" style={{ margin: '0 10px', background: 'var(--hero)', color: '#fff', borderRadius: 28, padding: '20px 16px 16px', display: 'flex', flexDirection: 'column', gap: 16, position: 'relative', overflow: 'hidden' }}>
           <div style={{ position: 'absolute', right: -30, top: -30, width: 150, height: 200, border: '2px solid rgba(198,238,219,.12)', borderRadius: 4 }} />
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6, padding: '0 4px', position: 'relative' }}>
+            {/* il torneo con il sottotitolo scelto nel gestionale */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 2, paddingBottom: 12, marginBottom: 6, borderBottom: '1px solid rgba(198,238,219,.14)' }}>
+              <span style={{ fontSize: 14, fontWeight: 800 }}>
+                {data.season.name} {data.season.label}
+              </span>
+              {data.season.subtitle && <span style={{ fontSize: 12.5, color: 'rgba(255,255,255,.7)' }}>{data.season.subtitle}</span>}
+            </div>
             <div className="kicker" style={{ color: '#C6EEDB' }}>
               {round.startsOn <= day && day <= round.endsOn ? 'Giornata in corso' : 'Prossima giornata'}
             </div>

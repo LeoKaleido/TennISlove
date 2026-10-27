@@ -74,10 +74,11 @@ export function useSeason(id?: string) {
   return useSeasonData(id ?? selected);
 }
 
-/** Sempre il torneo in corso: per le azioni sulle partite (risultato, conferma, foto) e il gestionale */
+/** Sempre il torneo in corso: per le azioni sulle partite (risultato, conferma, foto) */
 export const useCurrentSeason = () => useSeasonData(undefined);
 
-function useSeasonData(id: string | undefined) {
+/** Un torneo preciso, senza guardare la scelta dell'app (il gestionale ha la sua); undefined = in corso */
+export function useSeasonData(id: string | undefined) {
   return useQuery({
     queryKey: ['season', id ?? 'current'],
     queryFn: () => api<SeasonOverview>(id ? `/api/season?id=${id}` : '/api/season'),

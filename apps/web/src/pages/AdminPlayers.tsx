@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { formatDayWithWeekday, romeDay } from '@tentennis/shared';
 import { api } from '../api';
+import { IconAction } from '../components/AdminTable';
 import { Avatar, ButtonLoader, ErrorState, Loading, TextField, useClosing, useToast } from '../components/ui';
 
 interface Person {
@@ -30,32 +31,13 @@ const day = (iso: string) => formatDayWithWeekday(romeDay(iso));
 
 export function AdminPlayers() {
   const people = useQuery({ queryKey: ['admin-people'], queryFn: () => api<{ people: Person[] }>('/api/admin/people') });
-  const queryClient = useQueryClient();
-  const toast = useToast();
   const [editing, setEditing] = useState<Person | 'new' | null>(null);
   const [newAdmin, setNewAdmin] = useState(false);
-
-  const invite = useMutation({
-    mutationFn: (p: Person) => api(`/api/admin/users/${p.userId}/invite`, { method: 'POST' }),
-    onSuccess: (_, p) => {
-      queryClient.invalidateQueries({ queryKey: ['admin-people'] });
-      toast(`Invito inviato a ${p.email}`);
-    },
-    onError: (e) => toast(e.message),
-  });
 
   if (people.isLoading) return <Loading />;
   if (!people.data) return <ErrorState error={people.error} />;
   const players = people.data.people.filter((p) => p.player).sort((a, b) => a.player!.lastName.localeCompare(b.player!.lastName));
   const adminsOnly = people.data.people.filter((p) => !p.player);
-
-  const status = (p: Person) => {
-    if (p.disabledAt) return { text: 'Accesso revocato', color: 'var(--errFg)' };
-    if (!p.email) return { text: 'Senza email', color: 'var(--errFg)' };
-    if (p.lastLoginAt) return { text: `Entrato ${day(p.lastLoginAt)}`, color: 'var(--accent)' };
-    if (p.invitedAt) return { text: `Invitato ${day(p.invitedAt)}`, color: 'var(--warnFg)' };
-    return { text: 'Mai invitato', color: 'var(--ink3)' };
-  };
 
   return (
     <>
@@ -64,52 +46,100 @@ export function AdminPlayers() {
           <h1 className="display" style={{ fontSize: 40, lineHeight: 0.92 }}>
             Giocatori
           </h1>
+          <span className="muted" style={{ fontSize: 13.5 }}>
+            {players.length} giocatori
+          </span>
         </div>
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-          <button className="btn btn-outline" style={{ height: 44, fontSize: 14 }} onClick={() => setNewAdmin(true)}>
+        <div className="admin-head-actions">
+          <button className="btn btn-outline" onClick={() => setNewAdmin(true)}>
             + Nuovo amministratore
           </button>
-          <button className="btn btn-primary" style={{ height: 44, fontSize: 14 }} onClick={() => setEditing('new')}>
+          <button className="btn btn-primary" onClick={() => setEditing('new')}>
             + Nuovo giocatore
           </button>
         </div>
       </div>
 
-      <div className="card">
-        {players.map((p) => {
-          const pl = p.player!;
-          const st = status(p);
-          return (
-            <div key={pl.id} className="list-row" style={{ flexWrap: 'wrap', padding: '10px 14px' }}>
-              <Avatar player={{ ...pl, photoUrl: null }} size={36} />
-              <div style={{ flex: '1 1 220px', minWidth: 0, display: 'flex', flexDirection: 'column', gap: 2 }}>
-                <span style={{ fontWeight: 700, fontSize: 14.5 }}>
-                  {pl.firstName} {pl.lastName}{' '}
-                  <span className="faint" style={{ fontWeight: 500, fontSize: 12 }}>
-                    ({pl.shortName})
-                  </span>
-                </span>
-                <span className="mono muted ellipsis" style={{ fontSize: 12 }}>
-                  {p.email ?? 'nessuna email'}
-                </span>
-              </div>
-              {p.isAdmin && (
-                <span className="pill" style={{ background: 'var(--night)', color: '#C6EEDB' }}>
-                  Admin
-                </span>
-              )}
-              <span style={{ fontSize: 12, fontWeight: 600, width: 140, color: st.color }}>{st.text}</span>
-              <button className="btn btn-outline btn-sm" onClick={() => setEditing(p)}>
-                Modifica
-              </button>
-              {p.userId && (
-                <button className="btn btn-outline btn-sm" disabled={invite.isPending} onClick={() => invite.mutate(p)}>
-                  {p.disabledAt ? 'Riattiva e invita' : p.invitedAt || p.lastLoginAt ? 'Reinvia invito' : 'Invita'}
-                </button>
-              )}
-            </div>
-          );
-        })}
+      <div className="card admin-table-wrap">
+        <table className="admin-table">
+          <thead>
+            <tr>
+              <th>Giocatore</th>
+              <th>Email</th>
+              <th>Tornei</th>
+              <th>Accesso</th>
+              <th className="actions">Azioni</th>
+            </tr>
+          </thead>
+          <tbody>
+            {players.map((p) => {
+              const pl = p.player!;
+              const st = accessStatus(p);
+              return (
+                <tr key={pl.id}>
+                  <td>
+                    <span className="people-name">
+                      <Avatar player={{ ...pl, photoUrl: null }} size={32} />
+                      <span style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+                        <strong>
+                          {pl.firstName} {pl.lastName}
+                        </strong>
+                        <span className="faint" style={{ fontSize: 12 }}>
+                          {pl.shortName}
+                        </span>
+                      </span>
+                      {p.isAdmin && (
+                        <span className="pill" style={{ background: '#C6EEDB', color: '#0B1A24' }}>
+                          Admin
+                        </span>
+                      )}
+                    </span>
+                  </td>
+                  <td className="mono muted" style={{ fontSize: 12.5 }}>
+                    {p.email ?? 'nessuna email'}
+                  </td>
+                  <td className="muted" style={{ fontSize: 12.5 }}>
+                    {pl.seasons.length ? pl.seasons.join(', ') : '-'}
+                  </td>
+                  <td style={{ fontSize: 12.5, fontWeight: 600, color: st.color }}>{st.text}</td>
+                  <td className="actions">
+                    <span className="icon-actions">
+                      <IconAction icon="edit" tip="Modifica" onClick={() => setEditing(p)} />
+                      {p.userId && <InviteAction person={p} />}
+                      {p.userId && !p.disabledAt && (
+                        <IconAction
+                          icon={p.isAdmin ? 'admin-off' : 'admin'}
+                          tip={p.isAdmin ? 'Togli il ruolo admin' : 'Rendi amministratore'}
+                          confirm
+                          url={`/api/admin/users/${p.userId}/admin`}
+                          method="PUT"
+                          body={{ isAdmin: !p.isAdmin }}
+                          done={p.isAdmin ? `${pl.shortName} non è più amministratore` : `${pl.shortName} ora è amministratore`}
+                        />
+                      )}
+                      {pl.hasMatches
+                        ? p.userId &&
+                          !p.disabledAt && (
+                            <IconAction
+                              icon="revoke"
+                              tip="Revoca accesso: non entra più, partite e risultati restano"
+                              danger
+                              confirm
+                              url={`/api/admin/users/${p.userId}/revoke`}
+                              method="POST"
+                              done={`Accesso di ${pl.shortName} revocato`}
+                            />
+                          )
+                        : (
+                          <IconAction icon="delete" tip="Cancella giocatore (non ha partite)" danger confirm url={`/api/admin/players/${pl.id}`} method="DELETE" done={`${pl.shortName} cancellato`} />
+                        )}
+                    </span>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
       </div>
 
       {adminsOnly.length > 0 && (
@@ -117,19 +147,35 @@ export function AdminPlayers() {
           <h2 className="title" style={{ fontSize: 20 }}>
             Solo amministratori
           </h2>
-          <div className="card">
-            {adminsOnly.map((p) => (
-              <div key={p.userId} className="list-row" style={{ flexWrap: 'wrap', padding: '10px 14px' }}>
-                <span className="mono ellipsis" style={{ flex: '1 1 220px', minWidth: 0, fontSize: 13 }}>
-                  {p.email}
-                </span>
-                <span style={{ fontSize: 12, fontWeight: 600, width: 140, color: status(p).color }}>{status(p).text}</span>
-                <button className="btn btn-outline btn-sm" disabled={invite.isPending} onClick={() => invite.mutate(p)}>
-                  {p.invitedAt || p.lastLoginAt ? 'Reinvia invito' : 'Invita'}
-                </button>
-                <ConfirmButton label="Cancella" confirm="Conferma" url={`/api/admin/users/${p.userId}`} method="DELETE" done={`${p.email} cancellato`} />
-              </div>
-            ))}
+          <div className="card admin-table-wrap">
+            <table className="admin-table">
+              <thead>
+                <tr>
+                  <th>Email</th>
+                  <th>Accesso</th>
+                  <th className="actions">Azioni</th>
+                </tr>
+              </thead>
+              <tbody>
+                {adminsOnly.map((p) => {
+                  const st = accessStatus(p);
+                  return (
+                    <tr key={p.userId}>
+                      <td className="mono" style={{ fontSize: 13 }}>
+                        {p.email}
+                      </td>
+                      <td style={{ fontSize: 12.5, fontWeight: 600, color: st.color }}>{st.text}</td>
+                      <td className="actions">
+                        <span className="icon-actions">
+                          <InviteAction person={p} />
+                          <IconAction icon="delete" tip="Cancella amministratore" danger confirm url={`/api/admin/users/${p.userId}`} method="DELETE" done={`${p.email} cancellato`} />
+                        </span>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
           </div>
         </section>
       )}
@@ -137,6 +183,26 @@ export function AdminPlayers() {
       {editing && <PlayerDialog person={editing === 'new' ? null : editing} onClose={() => setEditing(null)} />}
       {newAdmin && <AdminDialog onClose={() => setNewAdmin(false)} />}
     </>
+  );
+}
+
+function accessStatus(p: Person) {
+  if (p.disabledAt) return { text: 'Accesso revocato', color: 'var(--errFg)' };
+  if (!p.email) return { text: 'Senza email', color: 'var(--errFg)' };
+  if (p.lastLoginAt) return { text: `Entrato ${day(p.lastLoginAt)}`, color: 'var(--accent)' };
+  if (p.invitedAt) return { text: `Invitato ${day(p.invitedAt)}`, color: 'var(--warnFg)' };
+  return { text: 'Mai invitato', color: 'var(--ink3)' };
+}
+
+function InviteAction({ person }: { person: Person }) {
+  return (
+    <IconAction
+      icon="invite"
+      tip={person.disabledAt ? 'Riattiva e invita' : person.invitedAt || person.lastLoginAt ? 'Reinvia invito' : 'Invita'}
+      url={`/api/admin/users/${person.userId}/invite`}
+      method="POST"
+      done={`Invito inviato a ${person.email}`}
+    />
   );
 }
 
