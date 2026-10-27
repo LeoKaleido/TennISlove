@@ -174,7 +174,7 @@ Script di avvio: `docker/dev-start.sh` e `docker/prod-start.sh`. L'app gira semp
 9. **Inviti**: dal gestionale, sezione Giocatori, invia l'invito a ciascun giocatore: riceve indirizzo dell'app e una password (D-060). Gli admin senza giocatore (es. `giuseppe@kalei.do`) entrano con il codice via email.
 
 ### Uso quotidiano e problemi in produzione
-I comandi passano da `docker compose -f docker-compose.prod.yml`, dalla cartella del progetto. Per usarli da qualunque cartella serve il nome del container: `docker ps --format '{{.Names}}'` (con il compose del repository è `tentennis-prod-app-1`).
+I comandi passano da `docker compose -f docker-compose.prod.yml`, dalla cartella del progetto. Per usarli da qualunque cartella serve il nome del container: `docker ps --format '{{.Names}}'` (con il compose del repository è `tennislove-app-1`).
 - **Log di tutto**: `docker compose -f docker-compose.prod.yml logs -f`
 - **Email**: all'avvio il log scrive le impostazioni in uso (`Email: SMTP host:porta, SSL, utente, mittente`, mai la password); poi una riga per ogni invio:
   - `Email inviata a … (server: 250 …)`: partita e accettata dal server di posta. Se non arriva: spam, SPF/DKIM/DMARC su Plesk, log della posta di Plesk;
@@ -201,7 +201,23 @@ I comandi passano da `docker compose -f docker-compose.prod.yml`, dalla cartella
 - **Facoltative**: `SESSION_DAYS` (90), `LOGIN_CODE_MINUTES` (15), `LOG_LEVEL` (info).
 
 ### Aggiornare
-1. **Backup** se l'aggiornamento contiene migrazioni: `scripts/backup.sh`.
+**In automatico (D-074)**: ogni push su `main` aggiorna il server da solo.
+1. GitHub chiama il webhook di Plesk, che fa il pull nella cartella `/var/www/vhosts/tennislove.it/httpdocs`.
+2. Plesk lancia l'azione di deploy, impostata nella pagina Git del dominio:
+   `cd /var/www/vhosts/tennislove.it/httpdocs && docker compose -p tennislove -f docker-compose.prod.yml up -d --build`
+3. Il container si ricostruisce e si riavvia (pochi secondi di fermo, database compreso) e applica le migrazioni.
+
+Perché funzioni:
+- l'azione gira con l'utente di sistema del dominio, **`tennislove.it`** (proprietario della cartella), che deve essere nel gruppo `docker` (`usermod -aG docker tennislove.it`, da root) e avere una shell vera (`/bin/bash`, non chrooted) in "Accesso al server web";
+- il `.env` di produzione sta in quella cartella (non è nel repo: il pull non lo tocca);
+- il progetto Docker si chiama `tennislove`: `-p tennislove` e `name:` nel compose devono restare uguali al progetto che gira, altrimenti Docker crea volumi nuovi con un database vuoto.
+
+Attenzione: chi è nel gruppo `docker` ha di fatto i poteri di root sul server, e il deploy esegue ciò che arriva dal repo: chi può fare push su `main` controlla il server. Repo privato, pochi collaboratori, accesso SSH di `tennislove.it` con chiave o password forte.
+
+Controllo dopo un push: nella pagina Git di Plesk l'ultimo commit e il registro del deploy senza errori; `docker ps` mostra `tennislove-app-1` creato da pochi minuti; `curl http://127.0.0.1:8080/api/health` risponde `{"ok":true}`.
+
+**A mano** (se il deploy automatico non parte):
+1. **Backup** se l'aggiornamento contiene migrazioni: `scripts/backup.sh` (il deploy automatico non lo fa: prima di un push con migrazioni, fallo a mano).
 2. `git pull`
 3. `docker compose -f docker-compose.prod.yml up -d --build`
 4. `docker compose -f docker-compose.prod.yml logs -f`: il container si riavvia (database compreso, pochi secondi di fermo), applica le migrazioni, poi compare "Server listening".

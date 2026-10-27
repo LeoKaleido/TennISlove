@@ -1,6 +1,8 @@
 # Produzione sul VPS, un unico container (D-054): docker compose -f docker-compose.prod.yml up -d --build
 # Procedura completa: brain/05-runbook.md
-name: tentennis-prod
+# Lo stesso nome del progetto che gira sul server: i volumi (database e foto) si chiamano tennislove_pgdata e tennislove_uploads.
+# Non cambiarlo: con un nome diverso Docker creerebbe volumi nuovi e partirebbe con un database vuoto.
+name: tennislove
 
 services:
   app:
