@@ -568,9 +568,10 @@ a {
   color: var(--accent);
 }
 
-/* marchio, tema ed esci della barra laterale: solo su desktop */
+/* marchio, pronostici, tema ed esci della barra laterale: solo su desktop */
 .tabbar-brand,
-.tabbar-foot {
+.tabbar-foot,
+.tabbar a.desktop-only {
   display: none;
 }
 
@@ -1217,7 +1218,9 @@ textarea.input {
     font-size: 19px;
   }
 
-  .tabbar a {
+  .tabbar a,
+  .tabbar a.desktop-only {
+    display: flex;
     flex-direction: row;
     gap: 12px;
     padding: 10px 12px;
@@ -1942,4 +1945,124 @@ textarea.input {
 .settings-label {
   font-weight: 700;
   font-size: 15px;
+}
+
+.pred-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.pred-saved {
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--accent);
+  animation: fadeIn 0.2s ease;
+}
+
+.pred-how .chip:disabled {
+  opacity: 0.45;
+}
+
+/* Riassunto dei pronostici in Home */
+.pred-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: 18px;
+  color: inherit;
+  text-decoration: none;
+}
+
+.pred-summary-main {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.pred-summary-main > span:last-child {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 13px;
+}
+
+.pred-summary-main strong {
+  font-size: 14.5px;
+}
+
+.pred-summary-big {
+  font-weight: 900;
+  font-stretch: 70%;
+  font-size: 40px;
+  line-height: 1;
+  color: var(--accent);
+}
+
+.pred-verdict {
+  font-size: 12.5px;
+  font-weight: 800;
+  white-space: nowrap;
+  color: var(--ink3);
+}
+
+.pred-verdict.ok {
+  color: var(--accent);
+}
+
+.pred-verdict.ko {
+  color: var(--errFg);
+}
+
+/* Meteo della partita (D-065) */
+.weather {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  column-gap: 8px;
+  row-gap: 2px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: var(--bg);
+  color: var(--ink);
+}
+
+.weather-main {
+  font-weight: 800;
+  font-size: 14px;
+}
+
+.weather-sub {
+  font-size: 13px;
+  color: var(--ink2);
+}
+
+/* probabile pioggia: lo si nota subito */
+.weather.wet {
+  background: var(--warnBg);
+  color: var(--warnFg);
+}
+
+.weather.wet .weather-sub {
+  color: inherit;
+}
+
+/* nella card "La tua partita" in Home: senza fondo, con i colori del riquadro */
+.weather.compact {
+  padding: 0;
+  background: none;
+  color: inherit;
+}
+
+.weather.compact .weather-main {
+  font-size: 13.5px;
+}
+
+.weather.compact .weather-sub {
+  color: inherit;
+  opacity: 0.75;
 }

@@ -116,7 +116,7 @@ Gioco a parte tra i giocatori: si pronostica l'esito delle partite degli altri. 
 - **Annullati** (non contano per nessuno): tempo scaduto senza vincitore, partita mai giocata.
 - **Risultati**: i provvisori danno punti subito, come in classifica (D-017); i contestati restano fuori finché l'admin non decide.
 - **Calcolo**: i punti si ricalcolano sempre dai risultati, mai salvati (come D-006). Si salva solo il pronostico: partita, giocatore, vincitore, modo, data; uno per giocatore e partita.
-- **Dove**: in Home un riquadro con le partite da pronosticare della settimana, con voto diretto; nella scheda partita la sezione pronostici; in Classifica una scheda "Pronostici" (punti, indovinati su giocati, colpi grossi). A fine stagione il primo è **l'Oracolo**.
+- **Dove**: una pagina **Pronostici** (`/pronostici`) con le partite da pronosticare per giornata (le righe non si spostano votando; conferma "Salvato"), i propri pronostici chiusi con l'esito e i punti, e il link alla classifica. In Home solo un riassunto (quanti da fare, posizione) che porta alla pagina; su desktop la pagina è anche nella barra laterale. Nella scheda partita la sezione pronostici; in Classifica una scheda "Pronostici" (punti, indovinati su giocati, colpi grossi). A fine stagione il primo è **l'Oracolo**.
 
 ## 10. Badge e card del giocatore (D-062)
 
@@ -149,3 +149,10 @@ Riconoscimenti calcolati dai dati che l'app ha già (risultati, date, foto, pron
 - **Andamento**: nel profilo, la posizione in classifica a fine di ogni giornata già iniziata, in un grafico a linea (1° in alto, linea della fase finale segnata). Conta le partite giocate entro la fine della settimana, qualunque sia la loro giornata: un recupero pesa nella settimana in cui si gioca. Toccando il grafico si vedono posizione e punti di quella giornata.
 - **Testa a testa** (`/confronto/:a/:b`): si apre dagli "Scontri diretti" del profilo e con "Confronta con te" sul profilo di un altro giocatore. Mostra lo scontro diretto, i numeri affiancati (punti, vinte, giocate, game, differenza game, punti a partita, vittorie al super tie break, badge, punti dei pronostici), l'andamento di tutti e due sullo stesso grafico e i risultati contro gli avversari affrontati da entrambi.
 - **Colori**: blu e arancio per i due giocatori, verificati anche per chi confonde rosso e verde; un verde per il grafico di un solo giocatore.
+
+## 12. Meteo della partita (D-065)
+
+- **Dove**: nella scheda di una partita programmata in un circolo della lista e, compatto, nella "tua partita" in Home. Non c'è per partite già giocate, oltre i 16 giorni di previsioni o in un campo scritto a mano (senza posizione).
+- **Cosa**: tempo (il peggiore nelle 2 ore della partita), temperatura all'inizio, probabilità di pioggia massima, vento. Con pioggia probabile (≥ 50%) la riga si colora.
+- **Fonte**: Open-Meteo, gratuito e senza chiave. Le previsioni le chiede il server (l'indirizzo dei giocatori non esce verso terzi) e le tiene 30 minuti.
+- **Posizione dei circoli**: ricavata dal link Google Maps (anche dai link brevi, seguendo i rimandi); se il link non la contiene, dalla città con la ricerca luoghi di Open-Meteo, scegliendo tra gli omonimi quello che corrisponde (es. "Santa Maria degli Angeli, Assisi"). Si ricava all'avvio per i circoli senza posizione e di nuovo quando dal gestionale cambiano link o città; il gestionale segnala i circoli senza posizione.

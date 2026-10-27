@@ -164,6 +164,18 @@ const TABS = [
     ),
   },
   {
+    // solo nella barra laterale su desktop: sul telefono ci si arriva dalla Home
+    to: '/pronostici',
+    label: 'Pronostici',
+    desktopOnly: true,
+    icon: (
+      <>
+        <circle cx="12" cy="10.5" r="6.5" fill="none" stroke="currentColor" strokeWidth="2.2" />
+        <path d="M7 20.5h10l-1.6-3.2H8.6z" fill="currentColor" />
+      </>
+    ),
+  },
+  {
     to: '/gallery',
     label: 'Gallery',
     icon: (
@@ -193,7 +205,7 @@ export function TabBar() {
         <span className="title brand">TennIsLove</span>
       </div>
       {TABS.map((t) => (
-        <NavLink key={t.to} to={t.to} end={t.end}>
+        <NavLink key={t.to} to={t.to} end={t.end} className={'desktopOnly' in t ? 'desktop-only' : undefined}>
           <svg width="24" height="24" viewBox="0 0 24 24">
             {t.icon}
           </svg>

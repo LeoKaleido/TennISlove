@@ -2,7 +2,7 @@ import { Link } from 'react-router';
 import { formatDayWithWeekday, romeDay } from '@tentennis/shared';
 import type { Match, SeasonOverview } from '../api';
 import { MatchRow } from '../components/MatchRow';
-import { PredictionPanel } from '../components/Predictions';
+import { WeatherLine } from '../components/Weather';
 import { Avatar, ErrorState, Loading, Logo, ScoreTable } from '../components/ui';
 import { currentRound, isMine, matchInfo, opponentOf, playerIndex, roundRange, STATUS_STYLE, today, useMe, useSeason } from '../data';
 
@@ -49,10 +49,10 @@ export function HomePage() {
     .sort((a, b) => (b.result!.submittedAt > a.result!.submittedAt ? 1 : -1))
     .slice(0, 4);
   const clubName = (id: string | null) => data.clubs.find((c) => c.id === id)?.name;
-  // pronostici aperti fino alla giornata in corso, compresi i recuperi; prima quelli ancora da votare
-  const toPredict = data.matches
-    .filter((m) => m.predictions.canPredict && round && m.round <= round.number)
-    .sort((x, y) => Number(!!x.predictions.mine) - Number(!!y.predictions.mine) || x.round - y.round);
+  // pronostici: in Home solo il riassunto, si votano nella pagina dedicata
+  const canPredict = data.matches.filter((m) => m.predictions.canPredict);
+  const toPredict = canPredict.filter((m) => !m.predictions.mine).length;
+  const predRow = data.predictionStandings.find((r) => r.playerId === myId);
 
   return (
     <div className="screen home" style={{ gap: 24 }}>
@@ -118,7 +118,7 @@ export function HomePage() {
         </section>
       )}
 
-      {toPredict.length > 0 && (
+      {myId && predRow && (canPredict.length > 0 || predRow.played > 0) && (
         <section className="home-predict" style={{ display: 'flex', flexDirection: 'column', gap: 10, padding: '0 14px' }}>
           <div className="section-head">
             <h2 className="title">Pronostici</h2>
@@ -126,17 +126,18 @@ export function HomePage() {
               Classifica
             </Link>
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            {toPredict.map((m) => {
-              const a = players.get(m.playerAId)!;
-              const b = players.get(m.playerBId)!;
-              return (
-                <div key={m.id} className="card" style={{ padding: 14, borderRadius: 18 }}>
-                  <PredictionPanel match={m} predictions={m.predictions} players={players} title={`${a.shortName} vs ${b.shortName}`} />
-                </div>
-              );
-            })}
-          </div>
+          <Link to="/pronostici" className="card pred-summary">
+            <span className="pred-summary-main">
+              <span className="pred-summary-big">{toPredict}</span>
+              <span>
+                <strong>{toPredict === 0 ? 'Tutti fatti' : toPredict === 1 ? 'partita da pronosticare' : 'partite da pronosticare'}</strong>
+                <span className="muted">
+                  {predRow.played > 0 ? `Sei ${predRow.position}° con ${predRow.points} punti` : 'Indovina chi vince le partite degli altri'}
+                </span>
+              </span>
+            </span>
+            <span className="btn btn-primary btn-sm">{toPredict > 0 ? 'Pronostica' : 'Vedi'}</span>
+          </Link>
         </section>
       )}
 
@@ -246,6 +247,7 @@ function MyMatchCard({
         </Link>
       </div>
       <div style={{ fontSize: 13.5, lineHeight: 1.4, fontWeight: 600 }}>{matchInfo(match, data.rounds, clubName)}</div>
+      <WeatherLine matchId={match.id} enabled={!!match.scheduledAt && !!match.clubId && !match.result} compact />
       <Link to={action.to} className="btn btn-dark">
         {action.label}
       </Link>

@@ -114,6 +114,9 @@ model Club {
   city        String?
   description String?
   mapsUrl     String?
+  /// posizione per il meteo (D-065), ricavata dal link Maps o, in mancanza, dalla città
+  latitude    Float?
+  longitude   Float?
   active      Boolean @default(true)
 
   matches Match[]

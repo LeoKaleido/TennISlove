@@ -12,6 +12,8 @@ interface ClubRow {
   mapsUrl: string | null;
   active: boolean;
   matches: number;
+  /** posizione per il meteo ricavata dal link o dalla città (D-065) */
+  located: boolean;
 }
 
 export function AdminClubs() {
@@ -40,6 +42,9 @@ export function AdminClubs() {
               {c.city ?? 'Città non indicata'}
               {!c.active && ', non attivo'}
             </span>
+            {!c.located && (
+              <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--warnFg)' }}>Meteo non disponibile: posizione non trovata da link o città</span>
+            )}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 6 }}>
               <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--accent)' }}>{c.matches === 1 ? '1 partita' : `${c.matches} partite`}</span>
               <button className="link-btn" style={{ color: 'var(--ink2)' }} onClick={() => setEditing(c)}>
@@ -105,6 +110,9 @@ function ClubDialog({ club, onClose }: { club: ClubRow | null; onClose: () => vo
           <TextField label="Città" style={{ height: 48 }} value={city} onChange={(e) => setCity(e.target.value)} />
         </div>
         <TextField label="Link Google Maps" style={{ height: 48 }} type="url" value={mapsUrl} onChange={(e) => setMapsUrl(e.target.value)} placeholder="https://maps.google.com/…" />
+        <span className="faint" style={{ fontSize: 12.5, marginTop: -6 }}>
+          Dal link (o, se non basta, dalla città) si ricava la posizione per il meteo delle partite.
+        </span>
         <label style={{ display: 'flex', alignItems: 'center', gap: 10, fontWeight: 700, fontSize: 14.5 }}>
           <input type="checkbox" checked={active} onChange={(e) => setActive(e.target.checked)} style={{ width: 18, height: 18 }} />
           Attivo

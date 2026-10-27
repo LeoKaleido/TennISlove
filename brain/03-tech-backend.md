@@ -28,6 +28,7 @@ La fonte è `apps/api/prisma/schema.prisma`, commentato. Punti chiave:
 - **`LoginCode`**: codici di accesso, salvati solo come hash, con il numero di tentativi.
 - **`Prediction`**: pronostici dei giocatori (D-061), uno per giocatore e partita. Si salva solo la scelta; punti e classifica dei pronostici si calcolano in `packages/shared/src/predictions.ts`. `GET season` filtra i pronostici per chi guarda (conteggio, percentuali dopo il voto, nomi a chiusura).
 - **`User.disabledAt`**: accesso revocato dal gestionale (D-063): niente login né sessioni, ma il giocatore resta in calendario e classifica.
+- **`Club.latitude/longitude`**: posizione per il meteo (D-065), ricavata in `weather.ts` dal link Maps o dalla città.
 - **`AuditLog`**: ogni modifica a risultati, programmazione, giocatori e foto.
 
 ## API
@@ -41,6 +42,7 @@ Tutto sotto `/api`. Tranne `/api/auth/*` e `/api/health`, serve il login. Le rot
 | Partite | `GET matches/:id`, `GET matches/:id/calendar.ics`, `PUT matches/:id/schedule`, `POST matches/:id/postpone` |
 | Risultati | `PUT matches/:id/result`, `POST matches/:id/result/confirm`, `POST matches/:id/result/dispute` |
 | Pronostici | `PUT matches/:id/prediction` (vincitore e modo, fino all'inizio della partita) |
+| Meteo | `GET matches/:id/weather` (Open-Meteo, in cache 30 minuti) |
 | Foto | `POST matches/:id/photos`, `PUT matches/:id/cover`, `GET`/`DELETE photos/:id`, `GET gallery`, `POST me/photo`, `GET players/:id/photo` |
 | Gestionale | `admin/people`, `admin/players` (+ `DELETE`), `admin/admins`, `admin/users/:id` (`DELETE`, + `invite`, `admin`, `revoke`), `admin/seasons` (+ `activate`, `archive`), `admin/clubs`, `admin/matches/:id/result` (+ `force-confirm`) |
 

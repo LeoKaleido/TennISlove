@@ -1,7 +1,7 @@
 // Pronostici tra giocatori (D-061): scelta del vincitore e del modo, percentuali e chi ha scelto cosa.
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { PREDICTION_POINTS, type PredictionHow, type Side } from '@tentennis/shared';
 import { api, type Match, type MatchPredictions, type Player } from '../api';
 import { Avatar, useToast } from './ui';
@@ -9,6 +9,7 @@ import { Avatar, useToast } from './ui';
 type Pick = { pick: Side; how: PredictionHow | null };
 
 const HOW_LABEL: Record<PredictionHow, string> = { TWO_SETS: 'In 2 set', SUPER_TIEBREAK: 'Al super tie break' };
+const HOW_SHORT: Record<PredictionHow, string> = { TWO_SETS: '2 set', SUPER_TIEBREAK: 'Super tie break' };
 
 const votes = (n: number) => (n === 1 ? '1 pronostico' : `${n} pronostici`);
 
@@ -17,21 +18,40 @@ export function PredictionPanel({
   predictions: p,
   players,
   title,
+  sub,
+  compact = false,
 }: {
   match: Match;
   predictions: MatchPredictions;
   players: Map<string, Player>;
-  /** in Home: chi gioca, al posto di "Pronostici" */
+  /** nella pagina Pronostici: chi gioca, al posto di "Pronostici" */
   title?: string;
+  /** riga sotto il titolo, es. quando e dove si gioca */
+  sub?: string;
+  /** nella pagina Pronostici: la spiegazione sta una volta sola in cima, qui solo le scelte */
+  compact?: boolean;
 }) {
   const queryClient = useQueryClient();
   const toast = useToast();
   // la scelta appena fatta si vede subito, senza aspettare il ricaricamento della stagione
   const [optimistic, setOptimistic] = useState<Pick | null>(null);
+  // conferma visibile per qualche secondo dopo ogni scelta
+  const [saved, setSaved] = useState(false);
+  useEffect(() => {
+    if (!saved) return;
+    const t = setTimeout(() => setSaved(false), 2500);
+    return () => clearTimeout(t);
+  }, [saved]);
   const save = useMutation({
     mutationFn: (body: Pick) => api(`/api/matches/${match.id}/prediction`, { method: 'PUT', body }),
-    onMutate: (body) => setOptimistic(body),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['season'] }),
+    onMutate: (body) => {
+      setOptimistic(body);
+      setSaved(false);
+    },
+    onSuccess: () => {
+      setSaved(true);
+      queryClient.invalidateQueries({ queryKey: ['season'] });
+    },
     onError: (e) => {
       setOptimistic(null);
       toast(e.message);
@@ -42,14 +62,22 @@ export function PredictionPanel({
   const b = players.get(match.playerBId)!;
 
   let status: string;
-  if (p.open) status = p.canPredict && !mine ? `${votes(p.count)}, scegli per vedere come votano gli altri` : votes(p.count);
+  if (p.open) status = p.canPredict && !mine ? `${votes(p.count)}, scegli chi vince per vedere come votano gli altri` : votes(p.count);
   else status = p.count === 0 ? 'Nessun pronostico' : `Chiusi, ${votes(p.count)}`;
 
   return (
     <div className="pred">
       <div className="pred-head">
-        <span className="pred-title">{title ?? 'Pronostici'}</span>
-        <span className="faint">{status}</span>
+        <span className="pred-title-row">
+          <span className="pred-title">{title ?? 'Pronostici'}</span>
+          {saved && (
+            <span className="pred-saved" role="status">
+              ✓ Salvato
+            </span>
+          )}
+        </span>
+        {sub && <span className="muted">{sub}</span>}
+        {(!compact || p.split) && <span className="faint">{compact ? votes(p.count) : status}</span>}
       </div>
 
       {p.canPredict && (
@@ -67,22 +95,22 @@ export function PredictionPanel({
               </button>
             ))}
           </div>
-          {mine && (
-            <div className="pred-how">
-              <span className="faint">Come vince? +{PREDICTION_POINTS.how}</span>
-              {(Object.keys(HOW_LABEL) as PredictionHow[]).map((how) => (
-                <button
-                  key={how}
-                  className="chip"
-                  aria-pressed={mine.how === how}
-                  // toccando di nuovo la scelta si toglie
-                  onClick={() => save.mutate({ pick: mine.pick, how: mine.how === how ? null : how })}
-                >
-                  {HOW_LABEL[how]}
-                </button>
-              ))}
-            </div>
-          )}
+          {/* sempre visibile, attivo dopo aver scelto il vincitore: si capisce che c'è */}
+          <div className="pred-how">
+            {!compact && <span className="faint">Come vince? Facoltativo, +{PREDICTION_POINTS.how}</span>}
+            {(Object.keys(HOW_LABEL) as PredictionHow[]).map((how) => (
+              <button
+                key={how}
+                className="chip"
+                aria-pressed={mine?.how === how}
+                disabled={!mine}
+                // toccando di nuovo la scelta si toglie
+                onClick={() => mine && save.mutate({ pick: mine.pick, how: mine.how === how ? null : how })}
+              >
+                {compact ? HOW_SHORT[how] : HOW_LABEL[how]}
+              </button>
+            ))}
+          </div>
         </>
       )}
 

@@ -10,6 +10,7 @@ import { adminSeasonRoutes } from './routes/admin-seasons';
 import { matchRoutes } from './routes/matches';
 import { photoRoutes } from './routes/photos';
 import { seasonRoutes } from './routes/season';
+import { locateMissingClubs } from './weather';
 
 // trustProxy: in produzione davanti c'è Nginx, così nei log compare l'IP vero del client
 const app = Fastify({ logger: { level: process.env.LOG_LEVEL ?? 'info' }, trustProxy: env.trustProxy });
@@ -36,3 +37,5 @@ app.get('/api/health', async () => ({ ok: true }));
 
 startJobs();
 await app.listen({ host: '0.0.0.0', port: env.port });
+// posizione dei circoli per il meteo (D-065), senza far aspettare l'avvio
+locateMissingClubs((msg) => app.log.info(msg)).catch((e) => app.log.warn({ err: e }, 'Posizione dei circoli non ricavata'));

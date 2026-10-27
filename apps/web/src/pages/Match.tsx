@@ -7,6 +7,7 @@ import { Avatar, BackButton, ErrorState, Loading, Logo, ScoreTable, StatusPill, 
 import { PredictionPanel } from '../components/Predictions';
 import { isMine, playerIndex, roundRange, today, useMe, useSeason } from '../data';
 import { ScheduleSheet } from './ScheduleSheet';
+import { WeatherLine } from '../components/Weather';
 
 export function MatchPage() {
   const { id } = useParams<{ id: string }>();
@@ -124,6 +125,8 @@ export function MatchPage() {
           <Info label="Circolo" value={club ? club.name : (m.venue ?? 'Da decidere')} href={club?.mapsUrl ?? undefined} />
         </div>
 
+        <WeatherLine matchId={m.id} enabled={!!m.scheduledAt && !!club && !r} />
+
         {note && <div className={`note note-${note.tone}`}>{note.text}</div>}
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -163,6 +166,9 @@ export function MatchPage() {
         <section style={{ padding: '22px 14px 0' }}>
           <div className="card" style={{ padding: 16 }}>
             <PredictionPanel match={m} predictions={predictions} players={players} />
+            <Link to="/pronostici" className="link-btn" style={{ display: 'block', marginTop: 12 }}>
+              Tutti i pronostici
+            </Link>
           </div>
         </section>
       )}

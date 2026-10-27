@@ -16,6 +16,7 @@ import { env } from '../env';
 import { googleCalendarUrl, toIcs, type CalendarEvent } from '../ics';
 import { sendMail } from '../mail';
 import { matchInclude, scoreInput, toView } from '../views';
+import { matchWeather } from '../weather';
 
 const fullMatch = (id: string) =>
   db.match.findUnique({
@@ -111,6 +112,20 @@ export async function matchRoutes(app: FastifyInstance) {
       photos: photos.map((p) => ({ id: p.id, url: `/api/photos/${p.id}`, uploadedById: p.uploadedById })),
       googleCalendarUrl: event ? googleCalendarUrl(event) : null,
     };
+  });
+
+  /** Meteo della partita (D-065): solo programmata in un circolo con posizione, entro le previsioni disponibili */
+  app.get<{ Params: { id: string } }>('/api/matches/:id/weather', async (req, reply) => {
+    const m = await db.match.findUnique({ where: { id: req.params.id }, include: { club: true, result: true } });
+    if (!m) return reply.code(404).send({ error: 'Partita non trovata' });
+    if (!m.scheduledAt || !m.club || m.result) return { weather: null };
+    try {
+      return { weather: await matchWeather(m.club, m.scheduledAt) };
+    } catch (e) {
+      // il meteo è un di più: se Open-Meteo non risponde la scheda resta com'è
+      req.log.warn({ err: e }, 'Meteo non disponibile');
+      return { weather: null };
+    }
   });
 
   app.get<{ Params: { id: string } }>('/api/matches/:id/calendar.ics', async (req, reply) => {

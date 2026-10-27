@@ -1,11 +1,12 @@
 // Gestionale: tornei (stagioni) e circoli.
 
-import type { FastifyInstance } from 'fastify';
+import type { FastifyBaseLogger, FastifyInstance } from 'fastify';
 import { validateRoundRobin } from '@tentennis/shared';
 import { z } from 'zod';
 import { requireAdmin } from '../auth';
 import { audit, db } from '../db';
 import { seasonOverview } from '../views';
+import { locateMissingClubs } from '../weather';
 
 const day = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
 
@@ -35,6 +36,11 @@ const clubBody = z.object({
   mapsUrl: z.string().trim().url().regex(/^https?:\/\//i, 'Il link deve iniziare con https://').optional().nullable().or(z.literal('')),
   active: z.boolean().default(true),
 });
+
+/** Posizione per il meteo, in sottofondo: il gestionale non aspetta Google Maps */
+const relocate = (log: FastifyBaseLogger) => {
+  locateMissingClubs((msg) => log.info(msg)).catch((e) => log.warn({ err: e }, 'Posizione dei circoli non ricavata'));
+};
 
 const code = (round: number, index: number) => `G${String(round).padStart(2, '0')}-${String(index).padStart(2, '0')}`;
 
@@ -142,12 +148,21 @@ export async function adminSeasonRoutes(app: FastifyInstance) {
 
   app.get('/api/admin/clubs', async () => {
     const clubs = await db.club.findMany({ orderBy: { name: 'asc' }, include: { _count: { select: { matches: true } } } });
-    return clubs.map((c) => ({ id: c.id, name: c.name, city: c.city, mapsUrl: c.mapsUrl, active: c.active, matches: c._count.matches }));
+    return clubs.map((c) => ({
+      id: c.id,
+      name: c.name,
+      city: c.city,
+      mapsUrl: c.mapsUrl,
+      active: c.active,
+      matches: c._count.matches,
+      located: c.latitude !== null && c.longitude !== null,
+    }));
   });
 
   app.post('/api/admin/clubs', async (req) => {
     const body = clubBody.parse(req.body);
     const club = await db.club.create({ data: { ...body, mapsUrl: body.mapsUrl || null } });
+    relocate(req.log);
     // un nuovo circolo è subito disponibile nel torneo in corso
     const current = await db.season.findFirst({ where: { status: 'ACTIVE' }, orderBy: { createdAt: 'desc' } });
     if (current) await db.seasonClub.create({ data: { seasonId: current.id, clubId: club.id } });
@@ -159,7 +174,13 @@ export async function adminSeasonRoutes(app: FastifyInstance) {
     const body = clubBody.parse(req.body);
     const club = await db.club.findUnique({ where: { id: req.params.id } });
     if (!club) return reply.code(404).send({ error: 'Circolo non trovato' });
-    await db.club.update({ where: { id: club.id }, data: { ...body, mapsUrl: body.mapsUrl || null } });
+    const moved = (body.mapsUrl || null) !== club.mapsUrl || (body.city ?? null) !== club.city;
+    // link o città cambiati: la posizione per il meteo si ricava di nuovo
+    await db.club.update({
+      where: { id: club.id },
+      data: { ...body, mapsUrl: body.mapsUrl || null, ...(moved ? { latitude: null, longitude: null } : {}) },
+    });
+    if (moved) relocate(req.log);
     await audit(req.user!.id, 'Club', club.id, 'update', club, body);
     return { ok: true };
   });
