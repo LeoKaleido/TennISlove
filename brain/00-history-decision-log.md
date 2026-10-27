@@ -108,6 +108,7 @@ Registro cronologico di eventi, decisioni e domande aperte. Le voci nuove si agg
 | D-065 | 27/10/2026 | **Meteo della partita** con Open-Meteo, chiesto dal server; posizione dei circoli (`Club.latitude/longitude`) dal link Maps o dalla città. Dettagli in `01-product.md` §12 | Idea scelta dall'utente; gratuito, senza chiave, senza dati dei giocatori verso terzi | Accettata |
 | D-066 | 27/10/2026 | **Simulatore "cosa ti serve"** nella scheda delle proprie partite da giocare: posizione dopo otto risultati tipici. Dettagli in `01-product.md` §13 | Dalla lista di idee: usa il motore di punteggio dell'app, nessun sito costruito con altri strumenti può farlo | Accettata |
 | D-067 | 27/10/2026 | **Guida all'app** con screenshot e punto interrogativo accanto a ogni funzione; screenshot da un torneo dimostrativo (`apps/api/prisma/demo-guida.ts`, `scripts/guida/`). Pronostici tra le sezioni anche sul telefono, con la barra in basso scorrevole. Dettagli in `01-product.md` §14 | Richiesta dell'utente; i giocatori veri non compaiono negli screenshot | Accettata |
+| D-068 | 27/10/2026 | **Scelta del torneo globale** nelle Impostazioni e nella barra laterale, al posto dei pulsanti in Classifica. Dettagli in `01-product.md` §15 | Richiesta dell'utente: il torneo è un'impostazione di tutta l'app, non della sola classifica | Accettata |
 
 ## Domande aperte
 

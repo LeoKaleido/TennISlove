@@ -103,9 +103,12 @@ const shot = async (name, clipExpr) => {
   if (!clip) throw new Error(`${name}: elemento non trovato`);
   const { data } = await send('Page.captureScreenshot', { format: 'jpeg', quality: 78, clip: { ...clip, scale: 1 }, captureBeyondViewport: true });
   writeFileSync(join(outDir, `${name}.jpg`), Buffer.from(data, 'base64'));
+  // misure in pixel CSS: la guida riserva lo spazio prima che l'immagine arrivi, e i salti alle sezioni restano precisi
+  sizes[name] = [Math.round(clip.width), Math.round(clip.height)];
   console.log(`${name}.jpg`);
 };
 const click = (expr) => evaluate(`(${expr}).click()`);
+const sizes = {};
 
 // ---- dati del torneo dimostrativo
 
@@ -117,7 +120,8 @@ const info = await evaluate(`(async () => {
   const next = mine.find((m) => !m.result);
   const toConfirm = mine.find((m) => m.result && m.result.status === 'PENDING');
   const opp = (m) => (m.playerAId === me.playerId ? m.playerBId : m.playerAId);
-  return { me: me.playerId, next: next.id, toConfirm: toConfirm.id, rival: opp(toConfirm) };
+  const past = (await fetch('/api/seasons').then((r) => r.json())).find((x) => x.status === 'ARCHIVED');
+  return { me: me.playerId, next: next.id, toConfirm: toConfirm.id, rival: opp(toConfirm), past: past?.id };
 })()`);
 
 try {
@@ -175,6 +179,18 @@ try {
   await go(`/confronto/${info.me}/${info.rival}`);
   await shot('testa-a-testa');
   await shot('avversari-comuni', `__rect(__section('Avversari in comune') ?? __section('Numeri a confronto'), 8)`);
+
+  // torneo concluso scelto dalle impostazioni: avviso in cima e classifica con il campione (per ultimo, poi si torna al torneo in corso)
+  if (info.past) {
+    await evaluate(`localStorage.setItem('tennislove:season', ${JSON.stringify(info.past)})`);
+    await go('/classifica');
+    await shot('torneo-concluso');
+    await evaluate(`localStorage.removeItem('tennislove:season')`);
+  }
+  const lines = Object.keys(sizes)
+    .sort()
+    .map((k) => `  ${JSON.stringify(k)}: [${sizes[k].join(', ')}]`);
+  writeFileSync('apps/web/src/guide-images.json', `{\n${lines.join(',\n')}\n}\n`);
 } finally {
   ws.close();
   chrome.kill();

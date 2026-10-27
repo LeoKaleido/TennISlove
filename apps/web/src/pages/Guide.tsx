@@ -1,10 +1,14 @@
 // Guida all'app (D-067): ogni funzione spiegata ai giocatori, con screenshot del torneo dimostrativo.
 // Le sezioni hanno un id: il punto interrogativo accanto a ogni funzione (HelpLink) porta a /guida#id.
 
-import { useEffect, type ReactNode } from 'react';
-import { Link, useLocation } from 'react-router';
+import { useCallback, useEffect, useRef, useState, type MouseEvent, type ReactNode } from 'react';
+import { useLocation } from 'react-router';
 import { PREDICTION_POINTS } from '@tentennis/shared';
 import { BackButton } from '../components/ui';
+import IMAGE_SIZES from '../guide-images.json';
+
+/** larghezza e altezza di ogni screenshot, scritte da scripts/guida/screenshots.mjs */
+const SIZE: Record<string, number[]> = IMAGE_SIZES;
 
 export type GuideId =
   | 'accesso'
@@ -24,7 +28,8 @@ export type GuideId =
   | 'andamento'
   | 'testa-a-testa'
   | 'foto'
-  | 'impostazioni';
+  | 'impostazioni'
+  | 'torneo';
 
 interface Section {
   id: GuideId;
@@ -201,7 +206,7 @@ const SECTIONS: Section[] = [
     images: ['testa-a-testa', 'avversari-comuni'],
     body: (
       <p>
-        Confronta due giocatori: dal profilo di un altro tocca “Confronta con te”, oppure un nome negli scontri diretti del profilo. Vedi lo scontro diretto, i numeri affiancati, l’andamento di tutti e due e i risultati contro gli avversari che avete affrontato entrambi.
+        Confronta due giocatori. Apri il profilo di un altro giocatore (dalla classifica: tocca il suo nome, poi “Apri profilo”): sotto i suoi numeri, nella parte scura in alto, c’è “Confronta con te”. Oppure, nel tuo profilo, tocca un nome nella lista “Scontri diretti”. Vedi lo scontro diretto, i numeri affiancati, l’andamento di tutti e due e i risultati contro gli avversari che avete affrontato entrambi.
       </p>
     ),
   },
@@ -214,54 +219,151 @@ const SECTIONS: Section[] = [
     id: 'impostazioni',
     title: 'Le impostazioni',
     images: ['impostazioni'],
-    body: <p>Dall’ingranaggio in alto nel tuo profilo: installare l’app, cambiare la password, scegliere il tema chiaro o scuro, uscire e aprire questa guida. Su computer tema ed esci sono anche nella barra a sinistra.</p>,
+    body: (
+      <p>
+        Dall’ingranaggio in alto nel tuo profilo: installare l’app, cambiare la password, <a href="#torneo">scegliere il torneo</a>, aprire questa guida, scegliere il tema chiaro o scuro e uscire. Su computer torneo, guida, tema ed esci sono anche nella barra a sinistra.
+      </p>
+    ),
+  },
+  {
+    id: 'torneo',
+    title: 'Scegliere il torneo',
+    images: ['torneo-concluso'],
+    body: (
+      <>
+        <p>
+          Quando ci sono più tornei (per esempio quello in corso e quelli degli anni passati) scegli quale guardare dalla riga “Torneo” nelle <a href="#impostazioni">impostazioni</a> o, su computer, sotto il logo nella barra a sinistra. La scelta vale per tutta l’app: Home, calendario, classifica, pronostici, profilo e testa a testa.
+        </p>
+        <p>Guardando un torneo concluso, in cima alle pagine c’è un avviso con il link per tornare a quello in corso. Programmare, inserire risultati e caricare foto si fa sempre sul torneo in corso. Con un solo torneo la riga mostra solo il suo nome.</p>
+      </>
+    ),
   },
 ];
 
+/** Sotto questa distanza dal bordo alto una sezione conta come "quella che stai leggendo" */
+const READING_LINE = 120;
+
+/**
+ * Sezione attiva dell'indice. In fondo alla pagina vale sempre l'ultima, anche se è troppo corta
+ * per arrivare in cima. Dopo un tocco sull'indice resta quella scelta finché non si scorre a mano:
+ * altrimenti una sezione corta verso la fine verrebbe scavalcata dalla successiva.
+ */
+function useActiveSection(ids: string[]) {
+  const [active, setActive] = useState(ids[0]!);
+  const chosen = useRef(false);
+
+  const update = useCallback(() => {
+    if (chosen.current) return;
+    const atBottom = window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 4;
+    if (atBottom) return setActive(ids[ids.length - 1]!);
+    let current = ids[0]!;
+    for (const id of ids) {
+      const el = document.getElementById(id);
+      if (el && el.getBoundingClientRect().top <= READING_LINE) current = id;
+    }
+    setActive(current);
+  }, [ids]);
+
+  useEffect(() => {
+    update();
+    // lo scorrimento a mano riporta l'evidenziazione a seguire la pagina
+    const release = () => {
+      chosen.current = false;
+    };
+    window.addEventListener('scroll', update, { passive: true });
+    window.addEventListener('resize', update);
+    window.addEventListener('wheel', release, { passive: true });
+    window.addEventListener('touchmove', release, { passive: true });
+    window.addEventListener('keydown', release);
+    return () => {
+      window.removeEventListener('scroll', update);
+      window.removeEventListener('resize', update);
+      window.removeEventListener('wheel', release);
+      window.removeEventListener('touchmove', release);
+      window.removeEventListener('keydown', release);
+    };
+  }, [update]);
+
+  const choose = useCallback((id: string) => {
+    chosen.current = true;
+    setActive(id);
+  }, []);
+  return [active, choose] as const;
+}
+
+const IDS = SECTIONS.map((s) => s.id);
+
 export function GuidePage() {
   const location = useLocation();
+  const [active, choose] = useActiveSection(IDS);
+  const toc = useRef<HTMLElement>(null);
+
+  const goTo = useCallback(
+    (id: string, smooth = true) => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      choose(id);
+      el.scrollIntoView({ block: 'start', behavior: smooth ? 'smooth' : 'auto' });
+      history.replaceState(null, '', `#${id}`);
+    },
+    [choose],
+  );
+
   // aperta da un punto interrogativo: va alla sezione giusta
   useEffect(() => {
     const id = location.hash.slice(1);
     if (!id) return;
-    const t = setTimeout(() => document.getElementById(id)?.scrollIntoView({ block: 'start' }), 50);
+    const t = setTimeout(() => goTo(id, false), 50);
     return () => clearTimeout(t);
-  }, [location.hash]);
+  }, [location.hash, goTo]);
+
+  // sul telefono l'indice scorre di lato: la voce attiva resta in vista
+  useEffect(() => {
+    toc.current?.querySelector('a.active')?.scrollIntoView({ inline: 'nearest', block: 'nearest' });
+  }, [active]);
+
+  // link interni (indice e testo): scorrimento morbido e voce scelta evidenziata
+  const onLink = (e: MouseEvent) => {
+    const a = (e.target as HTMLElement).closest('a');
+    const href = a?.getAttribute('href');
+    if (!href?.startsWith('#')) return;
+    e.preventDefault();
+    goTo(href.slice(1));
+  };
 
   return (
-    <div className="screen guide" style={{ gap: 18 }}>
+    <div className="screen guide" style={{ gap: 18 }} onClick={onLink}>
       <div className="page-head" style={{ gap: 8 }}>
         <BackButton />
         <h1 className="display">Guida</h1>
         <div className="sub">Tutto quello che si può fare con TennIsLove. Il punto interrogativo accanto a ogni funzione porta qui, alla sua spiegazione.</div>
       </div>
 
-      <nav className="card guide-index" aria-label="Indice">
-        {SECTIONS.map((s) => (
-          <a key={s.id} href={`#${s.id}`}>
-            {s.title}
-          </a>
-        ))}
-      </nav>
+      <div className="guide-layout">
+        <nav ref={toc} className="guide-toc" aria-label="Indice">
+          {SECTIONS.map((s) => (
+            <a key={s.id} href={`#${s.id}`} className={active === s.id ? 'active' : undefined} aria-current={active === s.id ? 'location' : undefined}>
+              {s.title}
+            </a>
+          ))}
+        </nav>
 
-      {SECTIONS.map((s) => (
-        <section key={s.id} id={s.id} className="guide-section">
-          <h2 className="title">{s.title}</h2>
-          <div className="guide-body">{s.body}</div>
-          {s.images && (
-            <div className="guide-shots">
-              {s.images.map((img) => (
-                <img key={img} src={`/guida/${img}.jpg`} alt="" loading="lazy" />
-              ))}
-            </div>
-          )}
-        </section>
-      ))}
+        <div className="guide-content">
+          {SECTIONS.map((s) => (
+            <section key={s.id} id={s.id} className="guide-section">
+              <h2 className="title">{s.title}</h2>
+              <div className="guide-body">{s.body}</div>
+              {s.images && (
+                <div className="guide-shots">
+                  {s.images.map((img) => (
+                    <img key={img} src={`/guida/${img}.jpg`} alt="" loading="lazy" width={SIZE[img]?.[0]} height={SIZE[img]?.[1]} />
+                  ))}
+                </div>
+              )}
+            </section>
+          ))}
 
-      <div style={{ padding: '0 16px 8px' }}>
-        <Link to="/" className="btn btn-outline" style={{ width: '100%' }}>
-          Torna alla Home
-        </Link>
+        </div>
       </div>
     </div>
   );

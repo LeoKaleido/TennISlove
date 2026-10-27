@@ -1047,6 +1047,8 @@ textarea.input {
   display: flex;
   flex-direction: column;
   min-height: 0;
+  /* l'unica cosa nella finestra che si restringe: è lei a scorrere (la regola generale .modal > * vieta di restringersi) */
+  flex-shrink: 1 !important;
   overflow-y: auto;
   overscroll-behavior: contain;
   scrollbar-width: thin;
@@ -1206,12 +1208,14 @@ textarea.input {
     max-width: none;
     display: grid;
     grid-template-columns: 240px minmax(0, 1fr);
+    /* prima riga per l'avviso del torneo concluso (vuota se non c'è), poi la pagina */
+    grid-template-rows: auto 1fr;
     box-shadow: none;
   }
 
   .app-tabs > :not(.dock) {
     grid-column: 2;
-    grid-row: 1;
+    grid-row: 2;
     width: 100%;
     max-width: 1080px;
     margin: 0 auto;
@@ -1220,7 +1224,7 @@ textarea.input {
 
   .app-tabs .dock {
     grid-column: 1;
-    grid-row: 1;
+    grid-row: 1 / span 2;
     position: sticky;
     top: 0;
     height: 100dvh;
@@ -1241,6 +1245,19 @@ textarea.input {
     overflow: visible;
     mask-image: none;
     -webkit-mask-image: none;
+  }
+
+  .app-tabs > .season-banner {
+    grid-row: 1;
+    width: calc(100% - 64px);
+    max-width: 1016px;
+    margin: 20px auto 0;
+    padding: 10px 14px;
+  }
+
+  .tabbar-season {
+    display: block !important;
+    margin: -8px 6px 14px;
   }
 
   .tabbar-brand {
@@ -1706,7 +1723,7 @@ textarea.input {
 
 .badge-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(92px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
   gap: 4px;
 }
 
@@ -1733,6 +1750,10 @@ textarea.input {
   font-weight: 700;
   font-size: 12.5px;
   line-height: 1.15;
+  /* nomi lunghi (Ammazzagrandi) restano nella casella: a capo con il trattino */
+  max-width: 100%;
+  hyphens: auto;
+  overflow-wrap: break-word;
 }
 
 .badge-sub {
@@ -2235,19 +2256,54 @@ textarea.input {
   gap: 8px;
 }
 
-.guide-index {
-  margin: 0 16px;
-  padding: 12px 16px;
+.guide-layout {
   display: flex;
-  flex-wrap: wrap;
-  gap: 6px 14px;
-  font-size: 13.5px;
-  font-weight: 700;
+  flex-direction: column;
+  gap: 18px;
 }
 
-.guide-index a {
-  color: var(--accent);
+/* indice: sul telefono una fila che resta in alto e scorre di lato */
+.guide-toc {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  display: flex;
+  gap: 6px;
+  padding: 10px 16px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  background: var(--bg);
+  border-bottom: 1px solid var(--line);
+}
+
+.guide-toc::-webkit-scrollbar {
+  display: none;
+}
+
+.guide-toc a {
+  flex: none;
+  padding: 6px 12px;
+  border-radius: 99px;
+  border: 1.5px solid var(--line2);
+  color: var(--ink2);
+  font-size: 13px;
+  font-weight: 700;
   text-decoration: none;
+  white-space: nowrap;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.guide-toc a.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--onAccent);
+}
+
+.guide-content {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  min-width: 0;
 }
 
 .guide-section {
@@ -2255,7 +2311,8 @@ textarea.input {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  scroll-margin-top: 16px;
+  /* sotto la fila dell'indice, che resta in alto */
+  scroll-margin-top: 64px;
 }
 
 .guide-section .title {
@@ -2295,4 +2352,111 @@ textarea.input {
   border: 1px solid var(--line);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
   background: var(--surface2);
+}
+
+/* Guida su desktop: indice a sinistra, fermo mentre il testo scorre */
+@media (min-width: 900px) {
+  .guide-layout {
+    display: grid;
+    grid-template-columns: 220px minmax(0, 1fr);
+    gap: 32px;
+    align-items: start;
+    padding: 0 16px;
+  }
+
+  .guide-toc {
+    top: 24px;
+    flex-direction: column;
+    gap: 2px;
+    padding: 0;
+    overflow: visible;
+    background: none;
+    border: 0;
+    border-left: 2px solid var(--line);
+  }
+
+  .guide-toc a {
+    margin-left: -2px;
+    padding: 7px 12px;
+    border: 0;
+    border-left: 2px solid transparent;
+    border-radius: 0;
+    white-space: normal;
+    font-size: 13.5px;
+  }
+
+  .guide-toc a:hover {
+    color: var(--ink);
+  }
+
+  .guide-toc a.active {
+    background: none;
+    color: var(--accent);
+    border-left-color: var(--accent);
+  }
+
+  .guide-section {
+    padding: 0;
+    scroll-margin-top: 24px;
+  }
+
+}
+
+/* Scelta del torneo (D-068) */
+.season-picker {
+  max-width: 60%;
+  height: 36px;
+  padding: 0 10px;
+  border-radius: 10px;
+  border: 1.5px solid var(--line2);
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  font-size: 13.5px;
+  font-weight: 700;
+}
+
+.season-picker:disabled {
+  opacity: 1;
+  color: var(--ink2);
+  border-color: transparent;
+  background: none;
+  text-align: right;
+  appearance: none;
+}
+
+/* nella barra laterale su desktop: chiaro su scuro */
+.tabbar-season {
+  display: none;
+  max-width: none;
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.12);
+  color: #c6eedb;
+}
+
+.tabbar-season:disabled {
+  background: none;
+  border-color: transparent;
+  color: rgba(198, 238, 219, 0.75);
+  text-align: left;
+  padding: 0;
+}
+
+.season-banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px 12px;
+  margin: 10px 14px 0;
+  padding: 10px 14px;
+  border-radius: 14px;
+  background: var(--warnBg);
+  color: var(--warnFg);
+  font-size: 13.5px;
+}
+
+.season-banner .link-btn {
+  color: inherit;
+  text-decoration: underline;
 }

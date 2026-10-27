@@ -6,6 +6,7 @@ import type { MatchStatus, Zone } from '@tentennis/shared';
 import type { Match, Player } from '../api';
 import { useLogout, useTheme } from '../account';
 import { bootVisible } from '../boot';
+import { SeasonPicker } from './SeasonPicker';
 import { iosInstallHint, isMobileDevice, useInstall } from '../pwa';
 import { avatarColors, initials, STATUS_STYLE, ZONE_STYLE } from '../data';
 
@@ -58,11 +59,13 @@ export function StatusPill({ status }: { status: MatchStatus }) {
   );
 }
 
-export function ZonePill({ zone, qualifiers }: { zone: Zone; qualifiers: number }) {
+/** Zona di classifica; `final` a torneo concluso: le posizioni non sono più provvisorie */
+export function ZonePill({ zone, qualifiers, final = false }: { zone: Zone; qualifiers: number; final?: boolean }) {
   const s = ZONE_STYLE[zone];
+  const label = s.label.replace('8', String(qualifiers));
   return (
     <span className="pill" style={{ background: s.bg, color: s.fg, border: s.border, fontSize: 10.5, padding: '2px 8px' }}>
-      {s.label.replace('8', String(qualifiers))}
+      {final ? label.replace(' provv.', '') : label}
     </span>
   );
 }
@@ -223,6 +226,7 @@ export function TabBar() {
         <Logo size={34} inverted />
         <span className="title brand">TennIsLove</span>
       </div>
+      <SeasonPicker className="tabbar-season" />
       {TABS.map((t) => (
         <NavLink key={t.to} to={t.to} end={t.end}>
           <svg width="24" height="24" viewBox="0 0 24 24">

@@ -14,8 +14,9 @@ export function MatchPage() {
   const { id } = useParams<{ id: string }>();
   const [params, setParams] = useSearchParams();
   const me = useMe();
-  const season = useSeason();
   const detail = useQuery({ queryKey: ['match', id], queryFn: () => api<MatchDetail>(`/api/matches/${id}`) });
+  // il torneo della partita, non quello scelto: un link da un'email funziona anche guardando un torneo concluso
+  const season = useSeason(detail.data?.seasonId);
   const queryClient = useQueryClient();
   const toast = useToast();
   const [openPhoto, setOpenPhoto] = useState<string | null>(null);

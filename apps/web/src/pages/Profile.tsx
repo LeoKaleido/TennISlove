@@ -127,7 +127,7 @@ export function ProfilePage() {
             {row && data.season.qualifiers > 0 && (
               <span>
                 <span className="pill" style={{ background: '#C6EEDB', color: '#0B1A24', fontSize: 11 }}>
-                  {ZONE_STYLE[row.zone].label.replace('8', String(data.season.qualifiers))}
+                  {ZONE_STYLE[row.zone].label.replace('8', String(data.season.qualifiers)).replace(data.season.status === 'ARCHIVED' ? ' provv.' : '\u0000', '')}
                 </span>
               </span>
             )}

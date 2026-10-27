@@ -4,14 +4,14 @@ import { Link, useParams } from 'react-router';
 import { formatDayWithWeekday, romeDay } from '@tentennis/shared';
 import { api, type MatchDetail } from '../api';
 import { BackButton, ErrorState, HelpLink, Loading, ScoreTable } from '../components/ui';
-import { playerIndex, useMe, useSeason } from '../data';
+import { playerIndex, useMe, useCurrentSeason } from '../data';
 import { clearDraft, loadDraft, saveDraft } from '../drafts';
 
 /** Vista dell'avversario: conferma o contesta il risultato (D-010) */
 export function ConfirmPage() {
   const { id } = useParams<{ id: string }>();
   const me = useMe();
-  const season = useSeason();
+  const season = useCurrentSeason();
   const detail = useQuery({ queryKey: ['match', id], queryFn: () => api<MatchDetail>(`/api/matches/${id}`) });
   const queryClient = useQueryClient();
   const draftKey = `dispute:${id}`;

@@ -106,6 +106,7 @@ export async function matchRoutes(app: FastifyInstance) {
     const photos = await db.matchPhoto.findMany({ where: { matchId: m.id }, orderBy: { createdAt: 'asc' } });
     const event = calendarEvent(m);
     return {
+      seasonId: m.seasonId,
       match: toView(m),
       club: m.club && { id: m.club.id, name: m.club.name, city: m.club.city, mapsUrl: m.club.mapsUrl },
       round: { number: m.round.number, startsOn: m.round.startsOn, endsOn: m.round.endsOn },

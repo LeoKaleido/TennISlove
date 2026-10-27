@@ -1,15 +1,16 @@
-// Torneo dimostrativo per gli screenshot della guida (D-067): giocatori inventati, risultati verosimili.
-// Uso, dentro il container di sviluppo (vedi scripts/guida/README.md):
-//   tsx prisma/demo-guida.ts create   crea il torneo e stampa il token di sessione di Andrea
-//   tsx prisma/demo-guida.ts remove   cancella torneo, giocatori e account dimostrativi
-// Il torneo dimostrativo diventa quello "in corso" finché non lo si cancella: solo in sviluppo.
+// Tornei dimostrativi per gli screenshot della guida (D-067): giocatori inventati, risultati verosimili.
+// Uso, dentro il container di sviluppo (vedi scripts/guida/README.md o la skill aggiorna-guida):
+//   tsx prisma/demo-guida.ts create   crea i tornei e stampa il token di sessione di Andrea
+//   tsx prisma/demo-guida.ts remove   cancella tornei, giocatori e account dimostrativi
+// Due tornei: uno concluso un anno fa (campione, podio, scelta del torneo) e uno in corso, con oggi nella quarta giornata.
+// Finché esiste, quello in corso è il torneo dell'app e tra i tornei da scegliere ci sono solo i dimostrativi: solo in sviluppo.
 
 import { createHash, randomBytes } from 'node:crypto';
-import { PrismaClient, type Player } from '@prisma/client';
-import { addDays, fromRomeLocal, roundRobin } from '@tentennis/shared';
+import { PrismaClient, type Club, type Player } from '@prisma/client';
+import { addDays, computeStandings, DEMO_SEASON_NAME, fromRomeLocal, romeDay, roundRobin, type StandingsMatch } from '@tentennis/shared';
 
 const db = new PrismaClient();
-const NAME = 'Torneo dimostrativo';
+const NAME = DEMO_SEASON_NAME;
 const DOMAIN = '@example.test';
 
 const PLAYERS = [
@@ -23,8 +24,7 @@ const PLAYERS = [
   ['Tommaso', 'Bruno'],
 ] as const;
 
-/** Prima giornata: oggi cade nella quarta */
-const START = '2026-10-05';
+/** Torneo in corso: giornate giocate prima di quella di questa settimana */
 const ROUNDS_PLAYED = 3;
 
 type Score = [number, number][];
@@ -39,19 +39,40 @@ const OTHERS: Score[] = [
   [[3, 6], [4, 6]],
   [[6, 4], [3, 6], [7, 10]],
 ];
-/** Andrea: un 6-0 (Cappotto), una rimonta (Rimonta), tre vittorie di fila (Tris) */
+/** Andrea nel torneo in corso: un 6-0 (Cappotto), una rimonta (Rimonta), tre vittorie di fila (Tris) */
 const ANDREA: Score[] = [
   [[6, 0], [6, 3]],
   [[4, 6], [6, 3], [10, 7]],
   [[6, 4], [6, 2]],
 ];
+/** Andrea nel torneo concluso: quasi sempre vincente, per il podio */
+const ANDREA_PAST: Score[] = [
+  [[6, 2], [6, 3]],
+  [[6, 4], [7, 5]],
+  [[3, 6], [4, 6]],
+  [[6, 1], [6, 4]],
+  [[7, 6], [3, 6], [10, 6]],
+  [[6, 3], [6, 2]],
+  [[6, 4], [6, 4]],
+];
 
 const flip = (s: Score): Score => s.map(([a, b]) => [b, a]);
 const hash = (s: string) => [...s].reduce((h, c) => (h * 31 + c.charCodeAt(0)) >>> 0, 7);
+const scoreInput = (s: Score) => ({ timeExpired: false, set1: { a: s[0]![0], b: s[0]![1] }, set2: { a: s[1]![0], b: s[1]![1] }, stb: s[2] ? { a: s[2][0], b: s[2][1] } : null });
+const resultData = (s: Score) => ({
+  set1A: s[0]![0],
+  set1B: s[0]![1],
+  set2A: s[1]![0],
+  set2B: s[1]![1],
+  stbA: s[2]?.[0] ?? null,
+  stbB: s[2]?.[1] ?? null,
+});
+
+/** Lunedì della settimana di un giorno (YYYY-MM-DD) */
+const mondayOf = (day: string) => addDays(day, -((new Date(`${day}T12:00:00Z`).getUTCDay() + 6) % 7));
 
 async function remove() {
-  const season = await db.season.findFirst({ where: { name: NAME } });
-  if (season) await db.season.delete({ where: { id: season.id } });
+  await db.season.deleteMany({ where: { name: NAME } });
   const users = await db.user.findMany({ where: { email: { endsWith: DOMAIN } }, include: { player: true } });
   for (const u of users) {
     if (u.player) {
@@ -61,7 +82,28 @@ async function remove() {
     }
     await db.user.delete({ where: { id: u.id } });
   }
-  console.error(`Torneo dimostrativo cancellato (${users.length} account)`);
+  console.error(`Tornei dimostrativi cancellati (${users.length} account)`);
+}
+
+/** Torneo con calendario completo; le partite si restituiscono con la loro giornata */
+async function season(label: string, status: 'ACTIVE' | 'ARCHIVED', start: string, ids: string[], clubs: Club[], seed: number) {
+  const s = await db.season.create({ data: { name: NAME, label, qualifiers: 4, status } });
+  await db.seasonPlayer.createMany({ data: ids.map((playerId, i) => ({ seasonId: s.id, playerId, seedOrder: i })) });
+  await db.seasonClub.createMany({ data: clubs.map((c) => ({ seasonId: s.id, clubId: c.id })) });
+  const matches = [];
+  for (const [r, round] of roundRobin(ids, seed).entries()) {
+    const startsOn = addDays(start, r * 7);
+    const created = await db.round.create({ data: { seasonId: s.id, number: r + 1, startsOn, endsOn: addDays(startsOn, 6) } });
+    for (const [i, [a, b]] of round.pairs.entries()) {
+      matches.push(
+        await db.match.create({
+          data: { seasonId: s.id, roundId: created.id, code: `G${String(r + 1).padStart(2, '0')}-${String(i + 1).padStart(2, '0')}`, playerAId: a, playerBId: b },
+          include: { round: true },
+        }),
+      );
+    }
+  }
+  return { season: s, matches };
 }
 
 async function create() {
@@ -74,55 +116,58 @@ async function create() {
     const user = await db.user.create({ data: { email: `demo-${first.toLowerCase()}${DOMAIN}` } });
     players.push(await db.player.create({ data: { firstName: first, lastName: last, shortName: first, userId: user.id } }));
   }
-  const [andrea] = players;
+  const andrea = players[0]!;
   const ids = players.map((p) => p.id);
-  const schedule = roundRobin(ids, 3);
-
-  const season = await db.season.create({ data: { name: NAME, label: 'DEMO', qualifiers: 4, status: 'ACTIVE' } });
-  await db.seasonPlayer.createMany({ data: ids.map((playerId, i) => ({ seasonId: season.id, playerId, seedOrder: i })) });
-  await db.seasonClub.createMany({ data: clubs.map((c) => ({ seasonId: season.id, clubId: c.id })) });
-
-  const matches = [];
-  for (const [r, round] of schedule.entries()) {
-    const startsOn = addDays(START, r * 7);
-    const created = await db.round.create({ data: { seasonId: season.id, number: r + 1, startsOn, endsOn: addDays(startsOn, 6) } });
-    for (const [i, [a, b]] of round.pairs.entries()) {
-      matches.push(
-        await db.match.create({
-          data: { seasonId: season.id, roundId: created.id, code: `G${String(r + 1).padStart(2, '0')}-${String(i + 1).padStart(2, '0')}`, playerAId: a, playerBId: b },
-          include: { round: true },
-        }),
-      );
-    }
-  }
-
-  const andreaUser = andrea!.userId!;
   const userOf = (playerId: string) => players.find((p) => p.id === playerId)!.userId!;
+  const withAndrea = (m: { playerAId: string; playerBId: string }) => m.playerAId === andrea.id || m.playerBId === andrea.id;
+
+  // date da oggi: la settimana in corso è la quarta giornata del torneo in corso
+  const today = romeDay(new Date());
+  const start = addDays(mondayOf(today), -7 * ROUNDS_PLAYED);
+  const year = new Date(`${today}T12:00:00Z`).getUTCFullYear();
+  const pastLabel = `${year - 1}/${String(year).slice(2)}`;
+  const label = `${year}/${String(year + 1).slice(2)}`;
+
+  // ---- torneo concluso un anno fa: tutte le giornate giocate, campione dalla classifica
+
+  const past = await season(pastLabel, 'ARCHIVED', mondayOf(addDays(start, -364)), ids, clubs, 7);
+  const played: StandingsMatch[] = [];
+  let k = 0;
+  let a = 0;
+  for (const m of past.matches) {
+    let score = withAndrea(m) ? ANDREA_PAST[a++]! : OTHERS[(k++ * 3) % OTHERS.length]!;
+    if (withAndrea(m) && m.playerBId === andrea.id) score = flip(score);
+    const at = fromRomeLocal(addDays(m.round.startsOn, 1 + (hash(m.code) % 4)), '19:00');
+    await db.match.update({ where: { id: m.id }, data: { scheduledAt: at, clubId: clubs[hash(m.code) % clubs.length]!.id } });
+    await db.matchResult.create({
+      data: { matchId: m.id, ...resultData(score), status: 'CONFIRMED', submittedById: userOf(m.playerAId), submittedAt: at, confirmedAt: at },
+    });
+    played.push({ playerAId: m.playerAId, playerBId: m.playerBId, score: scoreInput(score) });
+  }
+  const champion = computeStandings(ids, played, { qualifiers: 4 })[0]!.playerId;
+  await db.season.update({ where: { id: past.season.id }, data: { championPlayerId: champion } });
+
+  // ---- torneo in corso
+
+  const { matches } = await season(label, 'ACTIVE', start, ids, clubs, 3);
   let other = 0;
   let andreaRound = 0;
   for (const m of matches) {
     const r = m.round.number;
-    const withAndrea = m.playerAId === andrea!.id || m.playerBId === andrea!.id;
-    const club = clubs[(hash(m.code) % clubs.length)]!;
+    const club = clubs[hash(m.code) % clubs.length]!;
     if (r <= ROUNDS_PLAYED) {
       // giocata a metà settimana alle 19, nel circolo "di casa" della coppia
-      const day = addDays(m.round.startsOn, 1 + (hash(m.code) % 4));
-      const at = fromRomeLocal(day, '19:00');
-      let score = withAndrea ? ANDREA[andreaRound++]! : OTHERS[other++ % OTHERS.length]!;
-      if (withAndrea && m.playerBId === andrea!.id) score = flip(score);
+      const at = fromRomeLocal(addDays(m.round.startsOn, 1 + (hash(m.code) % 4)), '19:00');
+      let score = withAndrea(m) ? ANDREA[andreaRound++]! : OTHERS[other++ % OTHERS.length]!;
+      if (withAndrea(m) && m.playerBId === andrea.id) score = flip(score);
       // l'ultima di Andrea l'ha inserita l'avversario: in attesa della sua conferma (pagina Conferma)
-      const pending = withAndrea && r === ROUNDS_PLAYED;
-      const submitter = pending ? userOf(m.playerAId === andrea!.id ? m.playerBId : m.playerAId) : userOf(m.playerAId);
+      const pending = withAndrea(m) && r === ROUNDS_PLAYED;
+      const submitter = pending ? userOf(m.playerAId === andrea.id ? m.playerBId : m.playerAId) : userOf(m.playerAId);
       await db.match.update({ where: { id: m.id }, data: { scheduledAt: at, clubId: club.id } });
       await db.matchResult.create({
         data: {
           matchId: m.id,
-          set1A: score[0]![0],
-          set1B: score[0]![1],
-          set2A: score[1]![0],
-          set2B: score[1]![1],
-          stbA: score[2]?.[0] ?? null,
-          stbB: score[2]?.[1] ?? null,
+          ...resultData(score),
           status: pending ? 'PENDING' : 'CONFIRMED',
           submittedById: submitter,
           submittedAt: new Date(at.getTime() + 3 * 3_600_000),
@@ -131,9 +176,14 @@ async function create() {
         },
       });
     } else if (r === ROUNDS_PLAYED + 1) {
-      // giornata in corso: Andrea gioca domani al CUS (meteo, simulatore), una partita programmata, le altre da programmare
-      if (withAndrea) await db.match.update({ where: { id: m.id }, data: { scheduledAt: fromRomeLocal('2026-10-28', '18:00'), clubId: cus.id } });
-      else if (m.code.endsWith('-02')) await db.match.update({ where: { id: m.id }, data: { scheduledAt: fromRomeLocal('2026-10-30', '20:00'), clubId: club.id } });
+      // giornata in corso: Andrea gioca domani al CUS (meteo, simulatore), una partita programmata, le altre da programmare.
+      // Di domenica "domani" sarebbe la settimana dopo: si gioca stasera
+      const endsOn = m.round.endsOn;
+      const tomorrow = addDays(today, 1);
+      const andreaAt = tomorrow <= endsOn ? fromRomeLocal(tomorrow, '18:00') : fromRomeLocal(today, '21:00');
+      const otherDay = addDays(today, 3) <= endsOn ? addDays(today, 3) : endsOn;
+      if (withAndrea(m)) await db.match.update({ where: { id: m.id }, data: { scheduledAt: andreaAt, clubId: cus.id } });
+      else if (m.code.endsWith('-02')) await db.match.update({ where: { id: m.id }, data: { scheduledAt: fromRomeLocal(otherDay, '20:00'), clubId: club.id } });
     }
   }
 
@@ -146,21 +196,20 @@ async function create() {
     for (const p of players) {
       if (p.id === m.playerAId || p.id === m.playerBId) continue;
       const h = hash(m.code + p.id);
-      if (r === ROUNDS_PLAYED + 1 && p.id === andrea!.id && !m.code.endsWith('-02')) continue; // Andrea ha ancora da votare
+      if (r === ROUNDS_PLAYED + 1 && p.id === andrea.id && !m.code.endsWith('-02')) continue; // Andrea ha ancora da votare
       if (h % 6 === 0) continue; // qualcuno non vota
-      const right = p.id === andrea!.id ? h % 5 !== 0 : h % 3 !== 0;
-      const pickA = right === winnerA;
+      const right = p.id === andrea.id ? h % 5 !== 0 : h % 3 !== 0;
       await db.prediction.create({
-        data: { matchId: m.id, playerId: p.id, pick: pickA ? 'A' : 'B', how: h % 2 ? 'TWO_SETS' : null },
+        data: { matchId: m.id, playerId: p.id, pick: right === winnerA ? 'A' : 'B', how: h % 2 ? 'TWO_SETS' : null },
       });
     }
   }
 
   const token = randomBytes(32).toString('base64url');
   await db.session.create({
-    data: { userId: andreaUser, tokenHash: createHash('sha256').update(token).digest('hex'), expiresAt: new Date(Date.now() + 86_400_000) },
+    data: { userId: andrea.userId!, tokenHash: createHash('sha256').update(token).digest('hex'), expiresAt: new Date(Date.now() + 86_400_000) },
   });
-  console.error(`Torneo dimostrativo creato: ${players.length} giocatori, ${matches.length} partite`);
+  console.error(`Tornei dimostrativi creati: ${pastLabel} (concluso) e ${label} (in corso), ${players.length} giocatori`);
   // solo il token su stdout: lo legge lo script degli screenshot
   console.log(token);
 }

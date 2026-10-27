@@ -8,6 +8,7 @@ import { useLogout, useTheme } from '../account';
 import { api } from '../api';
 import { useMe } from '../data';
 import { iosInstallHint, useInstall } from '../pwa';
+import { SeasonPicker } from './SeasonPicker';
 import { ButtonLoader, Collapse, HelpLink, TextField, useClosing, useToast } from './ui';
 
 export function SettingsList() {
@@ -71,6 +72,12 @@ export function SettingsList() {
           </button>
         </div>
       </Collapse>
+      <label className="list-row">
+        <span className="settings-label with-help">
+          Torneo <HelpLink to="torneo" label="scegliere il torneo" />
+        </span>
+        <SeasonPicker short />
+      </label>
       <Link to="/guida" className="list-row">
         <span className="settings-label">Guida all'app</span>
         <span className="muted">›</span>

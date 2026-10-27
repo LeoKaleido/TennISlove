@@ -5,7 +5,7 @@ import type { SeasonOverview } from '../api';
 import { PredictionRules } from '../components/Predictions';
 import { RankingDivider, RankingList, RankingRow } from '../components/Ranking';
 import { Avatar, ErrorState, HelpLink, Loading, ZonePill } from '../components/ui';
-import { playerIndex, useMe, useSeason, useSeasons } from '../data';
+import { playerIndex, useMe, useSeason } from '../data';
 
 const COLUMNS = [
   { key: 'played', label: 'G', title: 'Giocate' },
@@ -20,10 +20,8 @@ const COLUMNS = [
 
 export function StandingsPage() {
   const me = useMe();
-  const seasons = useSeasons();
-  const [seasonId, setSeasonId] = useState<string | undefined>();
   const [expanded, setExpanded] = useState<string | null>(null);
-  const season = useSeason(seasonId);
+  const season = useSeason();
   // classifica del torneo o dei pronostici (D-061), nell'URL così il link dalla Home apre quella giusta
   const [params, setParams] = useSearchParams();
   const predictionsView = params.get('vista') === 'pronostici';
@@ -60,19 +58,6 @@ export function StandingsPage() {
           Pronostici
         </button>
       </div>
-
-      {(seasons.data?.length ?? 0) > 1 && (
-        <div style={{ padding: '0 16px', display: 'flex', gap: 6, overflowX: 'auto' }}>
-          {seasons.data!.map((s) => {
-            const on = s.id === data.season.id;
-            return (
-              <button key={s.id} className="chip" aria-pressed={on} onClick={() => setSeasonId(s.status === 'ACTIVE' ? undefined : s.id)} style={{ flex: 'none', height: 34, borderRadius: 99 }}>
-                {s.label}
-              </button>
-            );
-          })}
-        </div>
-      )}
 
       {predictionsView ? (
         <PredictionBoard data={data} myId={myId} />
@@ -148,7 +133,7 @@ export function StandingsPage() {
                     player={p}
                     position={r.position}
                     points={r.points}
-                    sub={q > 0 && <ZonePill zone={r.zone} qualifiers={q} />}
+                    sub={q > 0 && <ZonePill zone={r.zone} qualifiers={q} final={archived} />}
                     highlight={r.playerId === myId}
                     open={expanded === r.playerId}
                     onToggle={() => setExpanded(expanded === r.playerId ? null : r.playerId)}

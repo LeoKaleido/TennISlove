@@ -115,3 +115,6 @@ export function validateRoundRobin(playerIds: string[], rounds: [string, string]
   if (seen.size !== expected) return `Servono ${expected} partite, ce ne sono ${seen.size}`;
   return null;
 }
+
+/** Il torneo dimostrativo degli screenshot della guida (D-067): mai tra i tornei selezionabili */
+export const DEMO_SEASON_NAME = 'Torneo dimostrativo';

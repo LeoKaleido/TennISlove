@@ -4,7 +4,7 @@ import { useNavigate, useParams } from 'react-router';
 import { api, type MatchDetail } from '../api';
 import { PointsPreview } from '../components/PointsPreview';
 import { BackButton, ButtonLoader, ErrorState, HelpLink, Loading, useToast } from '../components/ui';
-import { playerIndex, useMe, useSeason } from '../data';
+import { playerIndex, useMe, useCurrentSeason } from '../data';
 import { clearDraft, loadDraft, saveDraft } from '../drafts';
 import { evaluateForm, formFromResult, type Pair, type ScoreForm } from '../score-form';
 
@@ -13,7 +13,7 @@ export function ResultPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const me = useMe();
-  const season = useSeason();
+  const season = useCurrentSeason();
   const detail = useQuery({ queryKey: ['match', id], queryFn: () => api<MatchDetail>(`/api/matches/${id}`) });
 
   if (detail.isLoading || season.isLoading) return <Loading />;

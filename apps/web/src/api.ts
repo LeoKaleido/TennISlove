@@ -122,6 +122,7 @@ export interface SeasonOverview {
 }
 
 export interface MatchDetail {
+  seasonId: string;
   match: Match;
   club: Pick<Club, 'id' | 'name' | 'city' | 'mapsUrl'> | null;
   round: Pick<Round, 'number' | 'startsOn' | 'endsOn'>;

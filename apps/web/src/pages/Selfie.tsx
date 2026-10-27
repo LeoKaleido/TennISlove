@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
 import { api, type MatchDetail } from '../api';
 import { BackButton, ButtonLoader, ErrorState, Loading, useToast } from '../components/ui';
-import { playerIndex, useMe, useSeason } from '../data';
+import { playerIndex, useMe, useCurrentSeason } from '../data';
 import { compressImage, uploadImage } from '../photos';
 
 interface Draft {
@@ -18,7 +18,7 @@ export function SelfiePage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const me = useMe();
-  const season = useSeason();
+  const season = useCurrentSeason();
   const detail = useQuery({ queryKey: ['match', id], queryFn: () => api<MatchDetail>(`/api/matches/${id}`) });
   const queryClient = useQueryClient();
   const toast = useToast();

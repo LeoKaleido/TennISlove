@@ -9,7 +9,7 @@ import { AdminPhotos } from './AdminPhotos';
 import { AdminPlayers } from './AdminPlayers';
 import { AdminSeasons } from './AdminSeasons';
 import { ErrorState, Loading, Logo, StatusPill, useToast } from '../components/ui';
-import { matchInfo, playerIndex, useSeason } from '../data';
+import { matchInfo, playerIndex, useCurrentSeason } from '../data';
 
 type Tab = 'dash' | 'seasons' | 'players' | 'clubs' | 'results' | 'photos';
 
@@ -23,7 +23,7 @@ const TABS: { key: Tab; label: string }[] = [
 ];
 
 export function AdminPage() {
-  const season = useSeason();
+  const season = useCurrentSeason();
   const [tab, setTab] = useState<Tab>('dash');
   const [editing, setEditing] = useState<string | null>(null);
   if (season.isLoading) return <Loading />;

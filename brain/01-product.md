@@ -167,5 +167,13 @@ Riconoscimenti calcolati dai dati che l'app ha già (risultati, date, foto, pron
 
 - **Dove**: pagina `/guida`, dalle Impostazioni (ingranaggio del profilo) e, su desktop, dalla barra laterale. Ogni funzione ha accanto un **punto interrogativo** che porta alla sua sezione (`/guida#pronostici`, `/guida#badge`…).
 - **Cosa**: tutte le funzioni spiegate ai giocatori, con gli screenshot.
-- **Screenshot**: fatti su un **torneo dimostrativo** con giocatori inventati, mai con nomi o risultati veri. Si rifanno con gli script in `scripts/guida/` (vedi il README) quando l'app cambia aspetto.
+- **Screenshot**: fatti su due **tornei dimostrativi** (uno concluso, uno in corso, date calcolate da oggi) con giocatori inventati, mai con nomi o risultati veri. Mentre esistono, il torneo dell'app è quello dimostrativo e si scelgono solo loro; altrimenti non compaiono mai. Si rifanno con gli script in `scripts/guida/` seguendo la skill di progetto `aggiorna-guida`.
 - **Barra delle sezioni sul telefono**: con Pronostici le voci sono sei e scorrono in orizzontale (si fermano allineate, uno sfumato ai bordi indica che c'è altro, la voce aperta resta in vista).
+
+## 15. Scelta del torneo (D-068)
+
+- **Una scelta per tutta l'app**: Home, Calendario, Classifica, Pronostici, Profilo e testa a testa mostrano il torneo scelto; la scelta resta sul dispositivo. Senza scelta (o scegliendo quello in corso) si vede il torneo in corso, anche quando ne parte uno nuovo.
+- **Dove**: nelle Impostazioni (riga "Torneo") e, su desktop, sotto il logo nella barra laterale. Con un solo torneo si vede solo il nome.
+- **Torneo concluso**: in cima alle pagine un avviso "Stai guardando il torneo …, concluso" con il link per tornare a quello in corso.
+- **Restano sul torneo in corso**: inserire, confermare il risultato, caricare foto e il gestionale. La scheda partita mostra il torneo della partita (un link da un'email funziona sempre).
+- Il torneo dimostrativo della guida (D-067) non compare mai tra quelli da scegliere.

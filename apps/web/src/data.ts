@@ -1,6 +1,7 @@
 // Query condivise e piccole funzioni di presentazione.
 
 import { useQuery } from '@tanstack/react-query';
+import { useSyncExternalStore } from 'react';
 import {
   COUNTS_IN_STANDINGS,
   formatDayWithWeekday,
@@ -29,7 +30,54 @@ export function useMe() {
   });
 }
 
+// Torneo scelto (D-068): vale per tutta l'app, ricordato sul dispositivo. Nessuna scelta = quello in corso
+const SEASON_KEY = 'tennislove:season';
+const seasonListeners = new Set<() => void>();
+
+function readSelectedSeason(): string | null {
+  try {
+    return localStorage.getItem(SEASON_KEY);
+  } catch {
+    return null;
+  }
+}
+
+export function selectSeason(id: string | null) {
+  try {
+    if (id) localStorage.setItem(SEASON_KEY, id);
+    else localStorage.removeItem(SEASON_KEY);
+  } catch {
+    // storage non disponibile: la scelta vale solo finché la pagina resta aperta
+  }
+  seasonListeners.forEach((l) => l());
+}
+
+const subscribeSeason = (l: () => void) => {
+  seasonListeners.add(l);
+  return () => {
+    seasonListeners.delete(l);
+  };
+};
+
+/** Il torneo scelto, se esiste ancora e non è quello in corso; altrimenti undefined (= in corso) */
+export function useSelectedSeasonId() {
+  const selected = useSyncExternalStore(subscribeSeason, readSelectedSeason);
+  const seasons = useSeasons();
+  if (!selected) return undefined;
+  if (!seasons.data) return selected;
+  return seasons.data.some((s) => s.id === selected && s.status !== 'ACTIVE') ? selected : undefined;
+}
+
+/** Un torneo: quello indicato, altrimenti quello scelto, altrimenti quello in corso */
 export function useSeason(id?: string) {
+  const selected = useSelectedSeasonId();
+  return useSeasonData(id ?? selected);
+}
+
+/** Sempre il torneo in corso: per le azioni sulle partite (risultato, conferma, foto) e il gestionale */
+export const useCurrentSeason = () => useSeasonData(undefined);
+
+function useSeasonData(id: string | undefined) {
   return useQuery({
     queryKey: ['season', id ?? 'current'],
     queryFn: () => api<SeasonOverview>(id ? `/api/season?id=${id}` : '/api/season'),
