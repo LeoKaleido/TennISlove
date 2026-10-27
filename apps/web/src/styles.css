@@ -423,7 +423,8 @@ a {
   display: grid;
   place-items: center;
   flex: none;
-  color: inherit;
+  /* colore legato allo sfondo del pulsante, non al testo intorno: su un riquadro scuro in tema chiaro la freccia sparirebbe */
+  color: var(--ink);
 }
 
 /* Segmented control */
@@ -1445,4 +1446,13 @@ textarea.input {
     border-radius: 0 !important;
     padding: 48px 44px !important;
   }
+}
+
+/* messaggio d'errore sotto un campo: parte dove finisce l'angolo arrotondato dell'input */
+.field-error {
+  font-size: 13px;
+  color: var(--errFg);
+  font-weight: 600;
+  margin-top: -6px;
+  padding-left: 16px;
 }

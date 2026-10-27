@@ -123,7 +123,7 @@ export function LoginPage() {
           placeholder="nome@email.it"
           error={!!error}
         />
-        {error && <div style={{ fontSize: 13, color: 'var(--errFg)', fontWeight: 600, marginTop: -6 }}>{error}</div>}
+        {error && <div className="field-error">{error}</div>}
         {mode === 'password' ? (
           <>
             <TextField
@@ -138,7 +138,7 @@ export function LoginPage() {
               onKeyDown={(e) => e.key === 'Enter' && submitPassword()}
               error={!!passwordError}
             />
-            {passwordError && <div style={{ fontSize: 13, color: 'var(--errFg)', fontWeight: 600, marginTop: -6 }}>{passwordError}</div>}
+            {passwordError && <div className="field-error">{passwordError}</div>}
             <button className="btn btn-primary" onClick={submitPassword} disabled={!password || passwordLogin.isPending}>
               {passwordLogin.isPending ? <ButtonLoader /> : 'Entra'}
             </button>
@@ -160,7 +160,7 @@ export function LoginPage() {
                   error={!!codeError}
                   style={{ letterSpacing: '0.3em', fontWeight: 700 }}
                 />
-                {codeError && <div style={{ fontSize: 13, color: 'var(--errFg)', fontWeight: 600, marginTop: -6 }}>{codeError}</div>}
+                {codeError && <div className="field-error">{codeError}</div>}
               </div>
             )}
             {sentTo ? (
