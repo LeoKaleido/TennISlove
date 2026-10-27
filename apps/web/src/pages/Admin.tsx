@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState, type ReactNode } from 'react';
+import { useLocation } from 'react-router';
 import { formatDayWithWeekday, formatScore, romeDay } from '@tentennis/shared';
 import { api, type Match, type SeasonOverview } from '../api';
 import { AdminResultEditor } from '../components/AdminResultEditor';
@@ -45,16 +46,70 @@ function useAdminSeason() {
   return { seasons, list, id, choose };
 }
 
-const TABS: { key: Tab; label: string }[] = [
-  { key: 'dash', label: 'Dashboard' },
-  { key: 'seasons', label: 'Tornei' },
-  { key: 'players', label: 'Giocatori' },
-  { key: 'clubs', label: 'Circoli' },
-  { key: 'results', label: 'Risultati' },
-  { key: 'photos', label: 'Foto' },
+const TABS: { key: Tab; label: string; icon: ReactNode }[] = [
+  {
+    key: 'dash',
+    label: 'Dashboard',
+    icon: (
+      <>
+        <rect x="4" y="4" width="7" height="7" rx="2" fill="none" stroke="currentColor" strokeWidth="2.2" />
+        <rect x="13" y="4" width="7" height="7" rx="2" fill="none" stroke="currentColor" strokeWidth="2.2" />
+        <rect x="4" y="13" width="7" height="7" rx="2" fill="none" stroke="currentColor" strokeWidth="2.2" />
+        <rect x="13" y="13" width="7" height="7" rx="2" fill="none" stroke="currentColor" strokeWidth="2.2" />
+      </>
+    ),
+  },
+  {
+    key: 'seasons',
+    label: 'Tornei',
+    icon: <path d="M7 4h10v5a5 5 0 01-10 0zM12 14v4M8 20h8M7 6H4.5a3 3 0 003 4M17 6h2.5a3 3 0 01-3 4" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />,
+  },
+  {
+    key: 'players',
+    label: 'Giocatori',
+    icon: (
+      <>
+        <circle cx="9" cy="8.5" r="3.5" fill="none" stroke="currentColor" strokeWidth="2.2" />
+        <path d="M3 19.5c.8-3.3 3.2-4.8 6-4.8s5.2 1.5 6 4.8M15.5 5.2a3.5 3.5 0 010 6.6M17.5 14.9c1.8.6 3 2 3.5 4.6" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
+      </>
+    ),
+  },
+  {
+    key: 'clubs',
+    label: 'Circoli',
+    icon: (
+      <>
+        <path d="M12 21s-7-6.2-7-11.5a7 7 0 0114 0C19 14.8 12 21 12 21z" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinejoin="round" />
+        <circle cx="12" cy="9.5" r="2.5" fill="none" stroke="currentColor" strokeWidth="2.2" />
+      </>
+    ),
+  },
+  {
+    key: 'results',
+    label: 'Risultati',
+    icon: (
+      <>
+        <rect x="4" y="4" width="16" height="16" rx="3" fill="none" stroke="currentColor" strokeWidth="2.2" />
+        <path d="M8 9.5h8M8 14.5h5" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
+      </>
+    ),
+  },
+  {
+    key: 'photos',
+    label: 'Foto',
+    icon: (
+      <>
+        <rect x="3.5" y="5" width="17" height="14" rx="3" fill="none" stroke="currentColor" strokeWidth="2.2" />
+        <path d="M3.5 16l5-4.5 4 3.5 3-2.5 5 4" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinejoin="round" />
+        <circle cx="15.5" cy="9.5" r="1.5" fill="currentColor" />
+      </>
+    ),
+  },
 ];
 
 export function AdminPage() {
+  // arrivati dal sito con il tasto della barra laterale: la barra sfuma dal blu al viola
+  const switched = (useLocation().state as { switched?: boolean } | null)?.switched === true;
   const admin = useAdminSeason();
   // senza tornei non c'è niente da chiedere: si parte dalla scheda Tornei
   const season = useSeasonData(admin.id);
@@ -83,46 +138,29 @@ export function AdminPage() {
 
   return (
     <div className="admin">
-      <nav className="admin-nav">
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '4px 6px 14px' }}>
+      <nav className={`admin-nav${switched ? ' switched' : ''}`}>
+        <div className="admin-brand">
           <Logo size={34} inverted />
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-            <span className="title brand" style={{ fontSize: 17, fontStretch: '72%', lineHeight: 1 }}>
-              TennIsLove
-            </span>
-          </div>
+          <span className="title brand">TennIsLove</span>
         </div>
+        {/* al posto del torneo dell'app: dice dove si è */}
+        <span className="admin-context">Gestionale</span>
         <div className="admin-tabs">
           {TABS.map((t) => (
-            <button
-              key={t.key}
-              onClick={() => setTab(t.key)}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                gap: 8,
-                height: 40,
-                padding: '0 12px',
-                border: 0,
-                borderRadius: 11,
-                fontWeight: 700,
-                fontSize: 14,
-                background: tab === t.key ? '#C6EEDB' : 'transparent',
-                color: tab === t.key ? '#0B1A24' : '#fff',
-              }}
-            >
-              {t.label}
-              {t.key === 'dash' && disputed.length > 0 && (
-                <span style={{ minWidth: 20, height: 20, padding: '0 6px', borderRadius: 99, background: '#F49A90', color: '#0B1A24', fontSize: 11, display: 'grid', placeItems: 'center' }}>{disputed.length}</span>
-              )}
+            <button key={t.key} aria-current={tab === t.key ? 'page' : undefined} onClick={() => setTab(t.key)}>
+              <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden>
+                {t.icon}
+              </svg>
+              <span style={{ flex: 1 }}>{t.label}</span>
+              {t.key === 'dash' && disputed.length > 0 && <span className="admin-count">{disputed.length}</span>}
             </button>
           ))}
         </div>
-        <TabBarFoot guide={false} />
+        <TabBarFoot place="admin" />
       </nav>
 
-      <main className="admin-main">
+      {/* una scheda nuova rimonta il contenuto: l'animazione di entrata riparte */}
+      <main key={tab} className="admin-main">
         {SEASON_TABS.includes(tab) && seasonTab()}
         {tab === 'players' && <AdminPlayers />}
         {tab === 'seasons' && <AdminSeasons />}

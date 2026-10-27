@@ -86,7 +86,7 @@ export function ProfilePage() {
 
   return (
     <div className="screen">
-      <div style={{ background: 'var(--hero)', color: '#fff', padding: '16px 16px 22px', display: 'flex', flexDirection: 'column', gap: 16, borderRadius: '0 0 28px 28px' }}>
+      <div className="page-hero" style={{ background: 'var(--hero)', color: '#fff', padding: '16px 16px 22px', display: 'flex', flexDirection: 'column', gap: 16, borderRadius: '0 0 28px 28px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', minHeight: 42 }}>
           {!isMe ? <BackButton /> : <span className="kicker" style={{ color: '#C6EEDB' }}>Il tuo profilo</span>}
           {isMe ? (

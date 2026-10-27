@@ -8,7 +8,7 @@ import { useLogout, useTheme } from '../account';
 import { bootVisible } from '../boot';
 import { SeasonPicker } from './SeasonPicker';
 import { iosInstallHint, isMobileDevice, useInstall } from '../pwa';
-import { avatarColors, initials, STATUS_STYLE, ZONE_STYLE } from '../data';
+import { avatarColors, initials, STATUS_STYLE, useMe, ZONE_STYLE } from '../data';
 
 /** Logo TennIsLove: cuore a forma di pallina da tennis. `inverted` per gli sfondi scuri: riquadro un po' più chiaro */
 export function Logo({ size = 38, inverted = false }: { size?: number; inverted?: boolean }) {
@@ -204,7 +204,9 @@ const TABS = [
  */
 export function TabBar() {
   const ref = useRef<HTMLElement>(null);
-  const { pathname } = useLocation();
+  const { pathname, state } = useLocation();
+  // arrivati dal gestionale con il tasto della barra laterale: la barra sfuma dal viola al blu
+  const switched = (state as { switched?: boolean } | null)?.switched === true;
   const [edges, setEdges] = useState({ start: true, end: false });
   const updateEdges = useCallback(() => {
     const el = ref.current;
@@ -221,7 +223,7 @@ export function TabBar() {
     return () => window.removeEventListener('resize', updateEdges);
   }, [updateEdges]);
   return (
-    <nav ref={ref} className={`tabbar${edges.start ? ' at-start' : ''}${edges.end ? ' at-end' : ''}`} onScroll={updateEdges}>
+    <nav ref={ref} className={`tabbar${edges.start ? ' at-start' : ''}${edges.end ? ' at-end' : ''}${switched ? ' switched' : ''}`} onScroll={updateEdges}>
       <div className="tabbar-brand">
         <Logo size={34} inverted />
         <span className="title brand">TennIsLove</span>
@@ -240,13 +242,18 @@ export function TabBar() {
   );
 }
 
-/** In fondo alla barra laterale (solo desktop): guida, tema ed esci. Anche nel gestionale, senza la guida */
-export function TabBarFoot({ guide = true }: { guide?: boolean }) {
+/**
+ * In fondo alla barra laterale (solo desktop): guida, tema ed esci. Anche nel gestionale, senza la guida.
+ * Qui c'è l'unico passaggio tra sito e gestionale (D-036): "Gestionale" per gli admin, "Sito" per gli admin che giocano.
+ */
+export function TabBarFoot({ place = 'app' }: { place?: 'app' | 'admin' }) {
   const [theme, toggleTheme] = useTheme();
   const logout = useLogout();
+  const me = useMe().data;
+  const switchTo = place === 'app' ? (me?.isAdmin ? { to: '/admin', label: 'Gestionale' } : null) : me?.playerId ? { to: '/', label: 'Sito' } : null;
   return (
     <div className="tabbar-foot">
-      {guide && (
+      {place === 'app' && (
         <NavLink to="/guida">
           <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden>
             <circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" strokeWidth="2" />
@@ -254,6 +261,15 @@ export function TabBarFoot({ guide = true }: { guide?: boolean }) {
           </svg>
           Guida
         </NavLink>
+      )}
+      {/* terzo dal basso in tutte e due le barre: passando da una all'altra resta fermo */}
+      {switchTo && (
+        <Link to={switchTo.to} state={{ switched: true }} className="switch-area">
+          <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden>
+            <path d="M4 8h13M13.5 4.5L17 8l-3.5 3.5M20 16H7M10.5 12.5L7 16l3.5 3.5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+          {switchTo.label}
+        </Link>
       )}
       <button onClick={toggleTheme} aria-label={theme === 'dark' ? 'Passa al tema chiaro' : 'Passa al tema scuro'}>
         <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden>

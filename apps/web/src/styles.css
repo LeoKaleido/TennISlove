@@ -1126,8 +1126,13 @@ textarea.input {
   font-size: 24px;
 }
 
-/* Layout del gestionale: barra in alto su mobile, sidebar fissa su desktop */
+/* Layout del gestionale: barra in alto su mobile, sidebar fissa su desktop.
+   Stesse misure della barra laterale dell'app (il passaggio non fa saltare niente), ma in viola: si capisce dove si è */
 .admin {
+  --side: #261634;
+  --side-app: #0b1a24;
+  --side-active-bg: rgba(226, 204, 255, 0.14);
+  --side-active-fg: #e2ccff;
   min-height: 100dvh;
   background: var(--bg);
   display: flex;
@@ -1135,48 +1140,94 @@ textarea.input {
 }
 
 .admin-nav {
-  background: #0b1a24;
+  background: var(--side);
   color: #fff;
   padding: 14px;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 4px;
+}
+
+.admin-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 6px 12px;
+  color: #fff;
+  font-size: 19px;
+}
+
+.admin-context {
+  display: none;
 }
 
 .admin-tabs {
   display: flex;
-  gap: 6px;
+  gap: 4px;
   overflow-x: auto;
+  scrollbar-width: none;
 }
 
-.admin-tabs button {
+.admin-tabs button,
+.admin-nav .tabbar-foot button,
+.admin-nav .tabbar-foot a {
   flex: none;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border: 0;
+  border-radius: 12px;
+  background: none;
+  color: rgba(255, 255, 255, 0.7);
+  font: inherit;
+  font-size: 14.5px;
+  font-weight: 700;
+  text-align: left;
+  text-decoration: none;
+}
+
+.admin-tabs button:hover,
+.admin-nav .tabbar-foot button:hover,
+.admin-nav .tabbar-foot a:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+}
+
+.admin-tabs button[aria-current='page'] {
+  background: var(--side-active-bg);
+  color: var(--side-active-fg);
+}
+
+.admin-count {
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 99px;
+  background: #f49a90;
+  color: #0b1a24;
+  font-size: 11px;
+  display: grid;
+  place-items: center;
 }
 
 /* tema ed esci come nella barra laterale dell'app: in riga sul telefono, in fondo su desktop */
 .admin-nav .tabbar-foot {
   display: flex;
   gap: 4px;
-  margin-top: 4px;
 }
 
-.admin-nav .tabbar-foot button {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 8px 12px;
-  border: 0;
-  border-radius: 11px;
-  background: none;
-  color: rgba(255, 255, 255, 0.7);
-  font-size: 14px;
-  font-weight: 700;
-  text-align: left;
-}
+/* il passaggio al sito solo su desktop: il gestionale non è pensato per il telefono */
+@media (max-width: 899px) {
+  .admin-nav .switch-area {
+    display: none !important;
+  }
 
-.admin-nav .tabbar-foot button:hover {
-  background: rgba(255, 255, 255, 0.06);
-  color: #fff;
+  .admin-tabs svg,
+  .admin-nav .tabbar-foot svg {
+    width: 20px;
+    height: 20px;
+  }
 }
 
 .admin-main {
@@ -1190,6 +1241,46 @@ textarea.input {
   max-width: 1080px;
 }
 
+/* passaggio tra sito e gestionale: la barra cambia colore sfumando, il contenuto compare piano */
+@keyframes sideFromApp {
+  from {
+    background-color: var(--side-app);
+  }
+}
+
+@keyframes sideFromAdmin {
+  from {
+    background-color: #261634;
+  }
+}
+
+@keyframes contentIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+.admin-nav.switched {
+  animation: sideFromApp 0.45s ease;
+}
+
+/* Ogni pagina del sito e ogni scheda del gestionale compare salendo un poco.
+   Sui blocchi della pagina, non sulla pagina intera: pannelli e finestre (fissi) non devono spostarsi */
+.screen > :not(.sheet-wrap, .modal-wrap),
+.admin-main > :not(.modal-wrap) {
+  animation: contentIn 0.35s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .admin-nav.switched,
+  .tabbar.switched,
+  .screen > *,
+  .admin-main > * {
+    animation: none !important;
+  }
+}
+
 @media (min-width: 900px) {
   .admin {
     flex-direction: row;
@@ -1201,10 +1292,31 @@ textarea.input {
     position: sticky;
     top: 0;
     height: 100dvh;
+    padding: 18px 14px;
+  }
+
+  .admin-brand {
+    padding: 4px 6px 18px;
+  }
+
+  /* stesso posto e stessa altezza della scelta del torneo nell'app */
+  .admin-context {
+    display: flex;
+    align-items: center;
+    align-self: flex-start;
+    height: 36px;
+    margin: -8px 6px 14px;
+    padding: 0 12px;
+    border-radius: 10px;
+    background: var(--side-active-bg);
+    color: var(--side-active-fg);
+    font-size: 13.5px;
+    font-weight: 700;
   }
 
   .admin-tabs {
     flex-direction: column;
+    overflow: visible;
   }
 
   .admin-nav .tabbar-foot {
@@ -1212,11 +1324,6 @@ textarea.input {
     margin-top: auto;
     padding-top: 12px;
     border-top: 1px solid rgba(255, 255, 255, 0.08);
-  }
-
-  .admin-nav .tabbar-foot button {
-    padding: 10px 12px;
-    font-size: 14.5px;
   }
 
   .admin-main {
@@ -1406,6 +1513,11 @@ textarea.input {
     border-top: 0;
   }
 
+  .tabbar.switched,
+  .app-tabs .dock:has(.tabbar.switched) {
+    animation: sideFromAdmin 0.45s ease;
+  }
+
   .tabbar {
     height: 100%;
     display: flex;
@@ -1418,6 +1530,11 @@ textarea.input {
     overflow: visible;
     mask-image: none;
     -webkit-mask-image: none;
+  }
+
+  /* riquadro blu in cima (profilo, testa a testa): attaccato al bordo superiore, come sul telefono */
+  .app-tabs:not(:has(> .season-banner)) > .screen > .page-hero:first-child {
+    margin-top: -28px;
   }
 
   .app-tabs > .season-banner {
