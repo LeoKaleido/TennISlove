@@ -3,11 +3,12 @@
 
 import { useMutation } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router';
 import { useLogout, useTheme } from '../account';
 import { api } from '../api';
 import { useMe } from '../data';
 import { iosInstallHint, useInstall } from '../pwa';
-import { ButtonLoader, Collapse, TextField, useClosing, useToast } from './ui';
+import { ButtonLoader, Collapse, HelpLink, TextField, useClosing, useToast } from './ui';
 
 export function SettingsList() {
   const [theme, toggleTheme] = useTheme();
@@ -70,6 +71,10 @@ export function SettingsList() {
           </button>
         </div>
       </Collapse>
+      <Link to="/guida" className="list-row">
+        <span className="settings-label">Guida all'app</span>
+        <span className="muted">›</span>
+      </Link>
       {/* su desktop tema ed esci stanno nella barra laterale */}
       <button className="list-row hide-desktop" onClick={toggleTheme}>
         <span className="settings-label">Tema</span>
@@ -99,8 +104,8 @@ export function SettingsSheet({ onClose }: { onClose: () => void }) {
         <div className="sheet-handle" />
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10 }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 3, minWidth: 0 }}>
-            <span className="display" style={{ fontSize: 32, lineHeight: 0.95 }}>
-              Impostazioni
+            <span className="display with-help" style={{ fontSize: 32, lineHeight: 0.95 }}>
+              Impostazioni <HelpLink to="impostazioni" label="impostazioni" />
             </span>
             <span className="muted ellipsis" style={{ fontSize: 13 }}>
               {me.data?.email}

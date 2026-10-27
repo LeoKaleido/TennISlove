@@ -116,7 +116,7 @@ Gioco a parte tra i giocatori: si pronostica l'esito delle partite degli altri. 
 - **Annullati** (non contano per nessuno): tempo scaduto senza vincitore, partita mai giocata.
 - **Risultati**: i provvisori danno punti subito, come in classifica (D-017); i contestati restano fuori finché l'admin non decide.
 - **Calcolo**: i punti si ricalcolano sempre dai risultati, mai salvati (come D-006). Si salva solo il pronostico: partita, giocatore, vincitore, modo, data; uno per giocatore e partita.
-- **Dove**: una pagina **Pronostici** (`/pronostici`) con le partite da pronosticare per giornata (le righe non si spostano votando; conferma "Salvato"), i propri pronostici chiusi con l'esito e i punti, e il link alla classifica. In Home solo un riassunto (quanti da fare, posizione) che porta alla pagina; su desktop la pagina è anche nella barra laterale. Nella scheda partita la sezione pronostici; in Classifica una scheda "Pronostici" (punti, indovinati su giocati, colpi grossi). A fine stagione il primo è **l'Oracolo**.
+- **Dove**: una pagina **Pronostici** (`/pronostici`) con le partite da pronosticare per giornata (le righe non si spostano votando; conferma "Salvato"), i propri pronostici chiusi con l'esito e i punti, e il link alla classifica. In Home solo un riassunto (quanti da fare, posizione) che porta alla pagina; la pagina è anche tra le sezioni (barra in basso sul telefono, scorrevole in orizzontale; barra laterale su desktop). Nella scheda partita la sezione pronostici; in Classifica una scheda "Pronostici" (punti, indovinati su giocati, colpi grossi). A fine stagione il primo è **l'Oracolo**.
 
 ## 10. Badge e card del giocatore (D-062)
 
@@ -162,3 +162,10 @@ Riconoscimenti calcolati dai dati che l'app ha già (risultati, date, foto, pron
 - **Dove**: nella scheda di una propria partita del girone ancora da giocare, a torneo in corso.
 - **Cosa**: otto risultati tipici visti dal giocatore (vinci 6-0 6-0, 6-3 6-3, 7-6 7-6, al super tie break; perdi al super tie break, 6-7 6-7, 3-6 3-6, 0-6 0-6). Per ognuno: i punti presi, la posizione in cui si finirebbe (con quante posizioni si sale o si scende rispetto a oggi) e quella dell'avversario. Toccando un risultato si vede la parte di classifica intorno ai due giocatori come sarebbe.
 - **Calcolo**: la classifica vera (stessi risultati, provvisori compresi, e stessi spareggi) con in più la partita simulata. Nessun dato salvato.
+
+## 14. Guida all'app (D-067)
+
+- **Dove**: pagina `/guida`, dalle Impostazioni (ingranaggio del profilo) e, su desktop, dalla barra laterale. Ogni funzione ha accanto un **punto interrogativo** che porta alla sua sezione (`/guida#pronostici`, `/guida#badge`…).
+- **Cosa**: tutte le funzioni spiegate ai giocatori, con gli screenshot.
+- **Screenshot**: fatti su un **torneo dimostrativo** con giocatori inventati, mai con nomi o risultati veri. Si rifanno con gli script in `scripts/guida/` (vedi il README) quando l'app cambia aspetto.
+- **Barra delle sezioni sul telefono**: con Pronostici le voci sono sei e scorrono in orizzontale (si fermano allineate, uno sfumato ai bordi indica che c'è altro, la voce aperta resta in vista).

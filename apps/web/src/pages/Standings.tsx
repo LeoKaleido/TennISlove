@@ -4,7 +4,7 @@ import type { PredictionStandingRow } from '@tentennis/shared';
 import type { SeasonOverview } from '../api';
 import { PredictionRules } from '../components/Predictions';
 import { RankingDivider, RankingList, RankingRow } from '../components/Ranking';
-import { Avatar, ErrorState, Loading, ZonePill } from '../components/ui';
+import { Avatar, ErrorState, HelpLink, Loading, ZonePill } from '../components/ui';
 import { playerIndex, useMe, useSeason, useSeasons } from '../data';
 
 const COLUMNS = [
@@ -43,7 +43,9 @@ export function StandingsPage() {
   return (
     <div className="screen standings" style={{ gap: 16 }}>
       <div className="page-head">
-        <h1 className="display">Classifica</h1>
+        <h1 className="display with-help">
+          Classifica <HelpLink to={predictionsView ? 'pronostici' : 'classifica'} label="classifica" />
+        </h1>
         <div className="sub">
           {played} partite su {total}
           {data.provisionalCount > 0 && `, include ${data.provisionalCount} ${data.provisionalCount === 1 ? 'risultato provvisorio' : 'risultati provvisori'}`}

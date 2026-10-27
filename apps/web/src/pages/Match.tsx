@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router';
 import { formatDayWithWeekday, romeDay, romeTime } from '@tentennis/shared';
 import { api, type MatchDetail } from '../api';
-import { Avatar, BackButton, ErrorState, Loading, Logo, ScoreTable, StatusPill, useClosing, useToast } from '../components/ui';
+import { Avatar, BackButton, ErrorState, HelpLink, Loading, Logo, ScoreTable, StatusPill, useClosing, useToast } from '../components/ui';
 import { PredictionPanel } from '../components/Predictions';
 import { Simulator } from '../components/Simulator';
 import { isMine, playerIndex, roundRange, today, useMe, useSeason } from '../data';
@@ -166,7 +166,9 @@ export function MatchPage() {
       {mine && myId && !r && m.phase === 'ROUND_ROBIN' && season.data.season.status === 'ACTIVE' && (
         <section style={{ padding: '22px 14px 0', display: 'flex', flexDirection: 'column', gap: 10 }}>
           <div className="section-head">
-            <h2 className="title">Cosa ti serve</h2>
+            <h2 className="title with-help">
+              Cosa ti serve <HelpLink to="simulatore" label="cosa ti serve" />
+            </h2>
           </div>
           <Simulator match={m} data={season.data} myId={myId} />
         </section>
@@ -186,7 +188,9 @@ export function MatchPage() {
       {(detail.data.photos.length > 0 || mine) && (
         <section style={{ padding: '22px 14px 0', display: 'flex', flexDirection: 'column', gap: 10 }}>
           <div className="section-head">
-            <h2 className="title">Foto della partita</h2>
+            <h2 className="title with-help">
+              Foto della partita <HelpLink to="foto" label="foto" />
+            </h2>
             <span className="faint" style={{ fontSize: 12.5 }}>
               {detail.data.photos.length === 1 ? '1 foto' : `${detail.data.photos.length} foto`}
             </span>

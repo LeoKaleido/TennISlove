@@ -7,7 +7,7 @@ import { BADGE_ORDER, BADGES, ONCE_PER_SEASON, type BadgeId, type BadgeState } f
 import { api, type SeasonOverview } from '../api';
 import { badgesFor, badgeSvg } from '../badges';
 import { opponentOf, playerIndex, useSeasons } from '../data';
-import { Collapse } from './ui';
+import { Collapse, HelpLink } from './ui';
 
 /** Medaglia del badge; dal secondo livello in su, il numero in un tondino */
 export function BadgeIcon({ id, size = 56, locked = false, level = 0 }: { id: BadgeId; size?: number; locked?: boolean; level?: number }) {
@@ -83,6 +83,8 @@ export function useBadgesAcrossSeasons(playerId: string) {
   const list: SeasonBadges[] = results
     .map((r) => r.data)
     .filter((d): d is SeasonOverview => !!d && d.players.some((p) => p.id === playerId))
+    // una stagione una volta sola, anche se due voci dell'elenco portano agli stessi dati
+    .filter((d, i, all) => all.findIndex((x) => x.season.id === d.season.id) === i)
     .map((data) => ({ data, badges: badgesFor(data, playerId) }));
   return { list, loading: seasons.isLoading || results.some((r) => r.isLoading) };
 }
@@ -100,7 +102,9 @@ export function BadgeSection({ playerId }: { playerId: string }) {
   return (
     <div style={{ padding: '0 14px', display: 'flex', flexDirection: 'column', gap: 10 }}>
       <div className="section-head">
-        <h2 className="title">Badge</h2>
+        <h2 className="title with-help">
+          Badge <HelpLink to="badge" label="badge" />
+        </h2>
         <span className="faint" style={{ fontSize: 12.5 }}>
           {total} su {BADGE_ORDER.length}
         </span>

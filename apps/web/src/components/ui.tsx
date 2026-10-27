@@ -1,7 +1,7 @@
 // Componenti di base riusati da tutte le schermate.
 
 import { createContext, useCallback, useContext, useEffect, useId, useRef, useState, useSyncExternalStore, type CSSProperties, type InputHTMLAttributes, type ReactNode } from 'react';
-import { NavLink, useNavigate } from 'react-router';
+import { Link, NavLink, useLocation, useNavigate } from 'react-router';
 import type { MatchStatus, Zone } from '@tentennis/shared';
 import type { Match, Player } from '../api';
 import { useLogout, useTheme } from '../account';
@@ -164,24 +164,12 @@ const TABS = [
     ),
   },
   {
-    // solo nella barra laterale su desktop: sul telefono ci si arriva dalla Home
     to: '/pronostici',
     label: 'Pronostici',
-    desktopOnly: true,
     icon: (
       <>
         <circle cx="12" cy="10.5" r="6.5" fill="none" stroke="currentColor" strokeWidth="2.2" />
         <path d="M7 20.5h10l-1.6-3.2H8.6z" fill="currentColor" />
-      </>
-    ),
-  },
-  {
-    to: '/gallery',
-    label: 'Gallery',
-    icon: (
-      <>
-        <rect x="4" y="4" width="16" height="16" rx="3.5" fill="none" stroke="currentColor" strokeWidth="2.2" />
-        <circle cx="12" cy="12" r="3.2" fill="currentColor" />
       </>
     ),
   },
@@ -195,17 +183,48 @@ const TABS = [
       </>
     ),
   },
+  {
+    to: '/gallery',
+    label: 'Gallery',
+    icon: (
+      <>
+        <rect x="4" y="4" width="16" height="16" rx="3.5" fill="none" stroke="currentColor" strokeWidth="2.2" />
+        <circle cx="12" cy="12" r="3.2" fill="currentColor" />
+      </>
+    ),
+  },
 ];
 
+/**
+ * Barra delle sezioni: in basso sul telefono, scorrevole in orizzontale (le voci non ci stanno tutte);
+ * laterale su desktop. Lo sfumato ai bordi dice che c'è altro da scorrere.
+ */
 export function TabBar() {
+  const ref = useRef<HTMLElement>(null);
+  const { pathname } = useLocation();
+  const [edges, setEdges] = useState({ start: true, end: false });
+  const updateEdges = useCallback(() => {
+    const el = ref.current;
+    if (!el) return;
+    setEdges({ start: el.scrollLeft <= 2, end: el.scrollLeft + el.clientWidth >= el.scrollWidth - 2 });
+  }, []);
+  // la voce della pagina aperta resta in vista
+  useEffect(() => {
+    ref.current?.querySelector('a.active')?.scrollIntoView({ inline: 'nearest', block: 'nearest', behavior: 'smooth' });
+    updateEdges();
+  }, [pathname, updateEdges]);
+  useEffect(() => {
+    window.addEventListener('resize', updateEdges);
+    return () => window.removeEventListener('resize', updateEdges);
+  }, [updateEdges]);
   return (
-    <nav className="tabbar">
+    <nav ref={ref} className={`tabbar${edges.start ? ' at-start' : ''}${edges.end ? ' at-end' : ''}`} onScroll={updateEdges}>
       <div className="tabbar-brand">
         <Logo size={34} inverted />
         <span className="title brand">TennIsLove</span>
       </div>
       {TABS.map((t) => (
-        <NavLink key={t.to} to={t.to} end={t.end} className={'desktopOnly' in t ? 'desktop-only' : undefined}>
+        <NavLink key={t.to} to={t.to} end={t.end}>
           <svg width="24" height="24" viewBox="0 0 24 24">
             {t.icon}
           </svg>
@@ -223,6 +242,13 @@ function TabBarFoot() {
   const logout = useLogout();
   return (
     <div className="tabbar-foot">
+      <NavLink to="/guida">
+        <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden>
+          <circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" strokeWidth="2" />
+          <path d="M9.6 9.6a2.5 2.5 0 114 2c-.9.6-1.6 1.1-1.6 2.2M12 17h.01" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+        </svg>
+        Guida
+      </NavLink>
       <button onClick={toggleTheme} aria-label={theme === 'dark' ? 'Passa al tema chiaro' : 'Passa al tema scuro'}>
         <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden>
           {theme === 'dark' ? (
@@ -436,4 +462,13 @@ export function lockPageScroll() {
     root.style.scrollbarGutter = '';
     root.style.paddingRight = '';
   };
+}
+
+/** Punto interrogativo accanto a una funzione: porta alla sua spiegazione nella guida (D-067) */
+export function HelpLink({ to, label, onDark = false }: { to: string; label: string; onDark?: boolean }) {
+  return (
+    <Link to={`/guida#${to}`} className={`help-link${onDark ? ' on-dark' : ''}`} aria-label={`Come funziona: ${label}`} title="Come funziona">
+      ?
+    </Link>
+  );
 }

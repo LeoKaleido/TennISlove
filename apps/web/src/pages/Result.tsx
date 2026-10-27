@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
 import { api, type MatchDetail } from '../api';
 import { PointsPreview } from '../components/PointsPreview';
-import { BackButton, ButtonLoader, ErrorState, Loading, useToast } from '../components/ui';
+import { BackButton, ButtonLoader, ErrorState, HelpLink, Loading, useToast } from '../components/ui';
 import { playerIndex, useMe, useSeason } from '../data';
 import { clearDraft, loadDraft, saveDraft } from '../drafts';
 import { evaluateForm, formFromResult, type Pair, type ScoreForm } from '../score-form';
@@ -78,8 +78,8 @@ function ResultForm({
       <div className="sticky-header">
         <BackButton />
         <div style={{ display: 'flex', flexDirection: 'column', gap: 1, minWidth: 0 }}>
-          <span className="title" style={{ fontSize: 21 }}>
-            Inserisci risultato
+          <span className="title with-help" style={{ fontSize: 21 }}>
+            Inserisci risultato <HelpLink to="risultato" label="inserire il risultato" />
           </span>
           <span className="muted ellipsis" style={{ fontSize: 12.5 }}>
             {a.shortName} vs {b.shortName}, giornata {m.round}

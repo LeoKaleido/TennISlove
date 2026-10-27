@@ -6,7 +6,7 @@ import type { Player, SeasonOverview } from '../api';
 import { BADGE_TIER, type BadgeTier } from '../badges';
 import { drawPlayerCard } from '../card';
 import { badgeLevel, useBadgesAcrossSeasons } from './Badges';
-import { ButtonLoader, HeartLoader, useClosing, useToast } from './ui';
+import { ButtonLoader, HeartLoader, HelpLink, useClosing, useToast } from './ui';
 
 /** Condividi e Scarica affiancati: stessa misura, anche se uno è pieno e l'altro bordato */
 const ACTION = { flex: 1, height: 50, fontSize: 15, borderRadius: 14 } as const;
@@ -78,8 +78,8 @@ function CardModal({ data, player, onClose }: { data: SeasonOverview; player: Pl
       <div className="modal-backdrop" onClick={close} />
       <div className="modal" style={{ width: 'min(440px, 100%)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <h2 className="display" style={{ fontSize: 32 }}>
-            La tua card
+          <h2 className="display with-help" style={{ fontSize: 32 }}>
+            La tua card <HelpLink to="card" label="la tua card" />
           </h2>
           <button type="button" className="icon-btn" aria-label="Chiudi" onClick={close}>
             ✕

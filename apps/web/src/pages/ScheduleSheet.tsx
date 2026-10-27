@@ -2,7 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { addDays, formatDayWithWeekday, romeDay, romeTime } from '@tentennis/shared';
 import { api, type Club, type Match, type Round } from '../api';
-import { ButtonLoader, useClosing, useToast } from '../components/ui';
+import { ButtonLoader, HelpLink, useClosing, useToast } from '../components/ui';
 import { clearDraft, loadDraft, saveDraft } from '../drafts';
 
 const TIMES = ['18:00', '18:30', '19:00', '19:30', '20:00', '20:30', '21:00'];
@@ -83,8 +83,8 @@ export function ScheduleSheet({
       <div className="sheet" role="dialog" aria-label="Programma partita">
         <div className="sheet-handle" />
         <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-          <span className="display" style={{ fontSize: 32, lineHeight: 0.95 }}>
-            Programma partita
+          <span className="display with-help" style={{ fontSize: 32, lineHeight: 0.95 }}>
+            Programma partita <HelpLink to="programmare" label="programmare una partita" />
           </span>
           <span className="muted" style={{ fontSize: 13.5 }}>
             {title}, entro {formatDayWithWeekday(round.endsOn)}

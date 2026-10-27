@@ -3,7 +3,7 @@ import { formatDayWithWeekday, romeDay } from '@tentennis/shared';
 import type { Match, SeasonOverview } from '../api';
 import { MatchRow } from '../components/MatchRow';
 import { WeatherLine } from '../components/Weather';
-import { Avatar, ErrorState, Loading, Logo, ScoreTable } from '../components/ui';
+import { Avatar, ErrorState, HelpLink, Loading, Logo, ScoreTable } from '../components/ui';
 import { currentRound, isMine, matchInfo, opponentOf, playerIndex, roundRange, STATUS_STYLE, today, useMe, useSeason } from '../data';
 
 /** La partita da mettere in evidenza per il giocatore */
@@ -121,7 +121,9 @@ export function HomePage() {
       {myId && predRow && (canPredict.length > 0 || predRow.played > 0) && (
         <section className="home-predict" style={{ display: 'flex', flexDirection: 'column', gap: 10, padding: '0 14px' }}>
           <div className="section-head">
-            <h2 className="title">Pronostici</h2>
+            <h2 className="title with-help">
+              Pronostici <HelpLink to="pronostici" label="pronostici" />
+            </h2>
             <Link to="/classifica?vista=pronostici" className="link-btn">
               Classifica
             </Link>
@@ -165,7 +167,9 @@ export function HomePage() {
 
       <section className="home-table" style={{ display: 'flex', flexDirection: 'column', gap: 10, padding: '0 14px' }}>
         <div className="section-head">
-          <h2 className="title">Classifica</h2>
+          <h2 className="title with-help">
+            Classifica <HelpLink to="classifica" label="classifica" />
+          </h2>
           <Link to="/classifica" className="link-btn">
             Completa
           </Link>

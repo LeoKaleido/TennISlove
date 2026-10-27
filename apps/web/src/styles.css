@@ -494,6 +494,9 @@ a {
   bottom: 0;
   margin-top: auto;
   z-index: 10;
+  /* sfondo e bordo stanno qui: lo sfumato della barra scorrevole tocca solo le voci */
+  background: var(--surface);
+  border-top: 1px solid var(--line);
 }
 
 .install-popup {
@@ -545,14 +548,37 @@ a {
 }
 
 .tabbar {
-  background: var(--surface);
-  border-top: 1px solid var(--line);
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  display: flex;
   padding: 6px 4px calc(10px + env(safe-area-inset-bottom));
+  /* le voci non ci stanno tutte: si scorrono, fermandosi allineate */
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+  /* sfumato ai bordi dove c'è altro da scorrere */
+  --fade-start: 18px;
+  --fade-end: 28px;
+  mask-image: linear-gradient(to right, transparent 0, #000 var(--fade-start), #000 calc(100% - var(--fade-end)), transparent 100%);
+  -webkit-mask-image: linear-gradient(to right, transparent 0, #000 var(--fade-start), #000 calc(100% - var(--fade-end)), transparent 100%);
+}
+
+.tabbar::-webkit-scrollbar {
+  display: none;
+}
+
+.tabbar.at-start {
+  --fade-start: 0px;
+}
+
+.tabbar.at-end {
+  --fade-end: 0px;
 }
 
 .tabbar a {
+  /* circa quattro voci e mezza in vista: si capisce che la barra scorre */
+  flex: 0 0 22%;
+  scroll-snap-align: start;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -568,10 +594,9 @@ a {
   color: var(--accent);
 }
 
-/* marchio, pronostici, tema ed esci della barra laterale: solo su desktop */
+/* marchio, guida, tema ed esci della barra laterale: solo su desktop */
 .tabbar-brand,
-.tabbar-foot,
-.tabbar a.desktop-only {
+.tabbar-foot {
   display: none;
 }
 
@@ -769,6 +794,8 @@ textarea.input {
 .sheet {
   position: relative;
   background: var(--surface);
+  /* il foglio può aprirsi dentro un riquadro scuro (intestazione del profilo): il testo non va ereditato */
+  color: var(--ink);
   border-radius: 28px 28px 0 0;
   padding: 10px 16px calc(16px + env(safe-area-inset-bottom));
   max-height: 92dvh;
@@ -993,6 +1020,7 @@ textarea.input {
 
 .modal {
   position: relative;
+  color: var(--ink);
   width: min(640px, 100%);
   max-height: calc(100dvh - 40px);
   overflow-y: auto;
@@ -1197,6 +1225,8 @@ textarea.input {
     top: 0;
     height: 100dvh;
     margin: 0;
+    background: #0b1a24;
+    border-top: 0;
   }
 
   .tabbar {
@@ -1207,6 +1237,10 @@ textarea.input {
     padding: 18px 14px;
     background: #0b1a24;
     border-top: 0;
+    /* barra laterale: niente scorrimento né sfumature */
+    overflow: visible;
+    mask-image: none;
+    -webkit-mask-image: none;
   }
 
   .tabbar-brand {
@@ -1218,9 +1252,8 @@ textarea.input {
     font-size: 19px;
   }
 
-  .tabbar a,
-  .tabbar a.desktop-only {
-    display: flex;
+  .tabbar a {
+    flex: none;
     flex-direction: row;
     gap: 12px;
     padding: 10px 12px;
@@ -1819,7 +1852,7 @@ textarea.input {
 /* Testa a testa (D-064) */
 .cmp-row {
   display: grid;
-  grid-template-columns: 56px 1fr 56px;
+  grid-template-columns: 52px 1fr 52px;
   align-items: center;
   gap: 8px;
   padding: 10px 14px;
@@ -1831,8 +1864,9 @@ textarea.input {
 
 .cmp-val {
   font-weight: 700;
-  font-size: 16px;
-  color: var(--ink2);
+  font-stretch: 75%;
+  font-size: 19px;
+  color: var(--ink3);
 }
 
 .cmp-val:last-child {
@@ -1841,8 +1875,6 @@ textarea.input {
 
 .cmp-val.lead {
   font-weight: 900;
-  font-stretch: 75%;
-  font-size: 20px;
   color: var(--ink);
 }
 
@@ -1939,6 +1971,11 @@ textarea.input {
 .settings-list .list-row {
   justify-content: space-between;
   min-height: 52px;
+}
+
+/* la linea tra le voci anche quando in mezzo c'è un pannello richiudibile (password, istruzioni) */
+.settings-list .list-row:not(:first-child) {
+  border-top: 1px solid var(--line);
 }
 
 .settings-label {
@@ -2158,4 +2195,104 @@ textarea.input {
 
 .sim-table-row.me {
   background: color-mix(in oklch, var(--mint) 40%, var(--surface));
+}
+
+/* Guida (D-067) */
+.help-link {
+  display: inline-grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  flex: none;
+  border-radius: 50%;
+  border: 1.5px solid var(--line2);
+  color: var(--ink3);
+  font-size: 12px;
+  font-weight: 800;
+  font-stretch: 100%;
+  line-height: 1;
+  text-decoration: none;
+  text-transform: none;
+  letter-spacing: 0;
+  vertical-align: middle;
+}
+
+.help-link:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* sui riquadri scuri (intestazioni del profilo e del testa a testa) */
+.help-link.on-dark {
+  border-color: rgba(198, 238, 219, 0.45);
+  color: #c6eedb;
+}
+
+/* titolo con il punto interrogativo accanto */
+.with-help {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.guide-index {
+  margin: 0 16px;
+  padding: 12px 16px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  font-size: 13.5px;
+  font-weight: 700;
+}
+
+.guide-index a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.guide-section {
+  padding: 0 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  scroll-margin-top: 16px;
+}
+
+.guide-section .title {
+  font-size: 24px;
+}
+
+.guide-body {
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--ink2);
+}
+
+.guide-body p,
+.guide-body ul {
+  margin: 0 0 8px;
+}
+
+.guide-body ul {
+  padding-left: 20px;
+}
+
+.guide-body a {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.guide-shots {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.guide-shots img {
+  width: min(100%, 320px);
+  height: auto;
+  border-radius: 18px;
+  border: 1px solid var(--line);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  background: var(--surface2);
 }

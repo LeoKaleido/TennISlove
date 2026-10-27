@@ -11,6 +11,7 @@ import { HomePage } from './pages/Home';
 import { LoginPage } from './pages/Login';
 import { MatchPage } from './pages/Match';
 import { ComparePage } from './pages/Compare';
+import { GuidePage } from './pages/Guide';
 import { PredictionsPage } from './pages/Predictions';
 import { ProfilePage } from './pages/Profile';
 import { ResultPage } from './pages/Result';
@@ -148,6 +149,7 @@ export function App() {
             <Route path="/giocatori/:id" element={<ProfilePage />} />
             <Route path="/confronto/:a/:b" element={<ComparePage />} />
             <Route path="/pronostici" element={<PredictionsPage />} />
+            <Route path="/guida" element={<GuidePage />} />
           </Route>
           <Route element={<Plain />}>
             <Route path="/partite/:id" element={<MatchPage />} />

@@ -5,7 +5,7 @@ import { COUNTS_IN_STANDINGS } from '@tentennis/shared';
 import type { Match, Player, SeasonOverview } from '../api';
 import { badgesFor } from '../badges';
 import { PositionChart } from '../components/PositionChart';
-import { Avatar, BackButton, ErrorState, Loading, ScoreTable, StatusPill } from '../components/ui';
+import { Avatar, BackButton, ErrorState, HelpLink, Loading, ScoreTable, StatusPill } from '../components/ui';
 import { isMine, playerIndex, timelineFor, useSeason } from '../data';
 
 const COLOR_A = 'var(--chart-a)';
@@ -86,8 +86,8 @@ export function ComparePage() {
       <div style={{ background: 'var(--hero)', color: '#fff', padding: '16px 16px 22px', display: 'flex', flexDirection: 'column', gap: 18, borderRadius: '0 0 28px 28px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', minHeight: 42 }}>
           <BackButton />
-          <span className="kicker" style={{ color: '#C6EEDB' }}>
-            Testa a testa
+          <span className="kicker with-help" style={{ color: '#C6EEDB' }}>
+            Testa a testa <HelpLink to="testa-a-testa" label="testa a testa" onDark />
           </span>
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', gap: 8 }}>

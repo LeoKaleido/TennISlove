@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router';
 import { formatDayWithWeekday, romeDay } from '@tentennis/shared';
 import { api, type MatchDetail } from '../api';
-import { BackButton, ErrorState, Loading, ScoreTable } from '../components/ui';
+import { BackButton, ErrorState, HelpLink, Loading, ScoreTable } from '../components/ui';
 import { playerIndex, useMe, useSeason } from '../data';
 import { clearDraft, loadDraft, saveDraft } from '../drafts';
 
@@ -57,8 +57,8 @@ export function ConfirmPage() {
           <span className="kicker" style={{ color: 'var(--accent)' }}>
             Giornata {m.round}
           </span>
-          <h1 className="display" style={{ fontSize: 40, lineHeight: 0.92 }}>
-            Confermi il risultato?
+          <h1 className="display with-help" style={{ fontSize: 40, lineHeight: 0.92 }}>
+            Confermi il risultato? <HelpLink to="conferma" label="confermare o contestare" />
           </h1>
           {r && (
             <span className="muted" style={{ fontSize: 14 }}>

@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import { Link } from 'react-router';
 import { api } from '../api';
-import { ErrorState, Loading, Logo } from '../components/ui';
+import { ErrorState, HelpLink, Loading, Logo } from '../components/ui';
 import { playerIndex, useMe, useSeason } from '../data';
 
 export interface GalleryPhoto {
@@ -33,7 +33,9 @@ export function GalleryPage() {
   return (
     <div className="screen" style={{ gap: 14 }}>
       <div className="page-head">
-        <h1 className="display">Gallery</h1>
+        <h1 className="display with-help">
+          Gallery <HelpLink to="foto" label="foto e gallery" />
+        </h1>
         <div className="sub">
           {gallery.data.photos.length} foto
         </div>

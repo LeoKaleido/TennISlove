@@ -6,7 +6,7 @@ import { MatchRow } from '../components/MatchRow';
 import { ShareCardButton } from '../components/PlayerCard';
 import { PositionChart } from '../components/PositionChart';
 import { SettingsButton, SettingsList } from '../components/Settings';
-import { Avatar, BackButton, ButtonLoader, ErrorState, Loading, useToast } from '../components/ui';
+import { Avatar, BackButton, ButtonLoader, ErrorState, HelpLink, Loading, useToast } from '../components/ui';
 import { compressImage, uploadImage } from '../photos';
 import { isMine, opponentOf, playerIndex, timelineFor, useMe, useSeason, ZONE_STYLE } from '../data';
 
@@ -152,7 +152,9 @@ export function ProfilePage() {
       {timeline.length > 1 && (
         <div style={{ padding: '0 14px', display: 'flex', flexDirection: 'column', gap: 10 }}>
           <div className="section-head">
-            <h2 className="title">Andamento in classifica</h2>
+            <h2 className="title with-help">
+              Andamento in classifica <HelpLink to="andamento" label="andamento" />
+            </h2>
           </div>
           <div className="card" style={{ padding: '14px 14px 8px' }}>
             <PositionChart timeline={timeline} series={[{ player: p, color: 'var(--chart-one)' }]} playerCount={data.players.length} qualifiers={data.season.qualifiers} />
@@ -204,8 +206,8 @@ export function ProfilePage() {
       </div>
 
       <div style={{ padding: '0 14px', display: 'flex', flexDirection: 'column', gap: 10 }}>
-        <h2 className="title" style={{ fontSize: 22, padding: '0 2px' }}>
-          Scontri diretti
+        <h2 className="title with-help" style={{ fontSize: 22, padding: '0 2px' }}>
+          Scontri diretti <HelpLink to="testa-a-testa" label="testa a testa" />
         </h2>
         <div className="card">
           {h2h.map(({ o, res, color }) => (

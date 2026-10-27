@@ -5,7 +5,7 @@ import { Link } from 'react-router';
 import { COUNTS_IN_STANDINGS } from '@tentennis/shared';
 import type { SeasonOverview } from '../api';
 import { PredictionPanel } from '../components/Predictions';
-import { Chevron, Collapse, ErrorState, Loading } from '../components/ui';
+import { Chevron, Collapse, ErrorState, HelpLink, Loading } from '../components/ui';
 import { currentRound, matchInfo, playerIndex, useMe, useSeason } from '../data';
 
 type SeasonMatch = SeasonOverview['matches'][number];
@@ -54,7 +54,9 @@ export function PredictionsPage() {
   return (
     <div className="screen" style={{ gap: 18 }}>
       <div className="page-head">
-        <h1 className="display">Pronostici</h1>
+        <h1 className="display with-help">
+          Pronostici <HelpLink to="pronostici" label="pronostici" />
+        </h1>
         <div className="sub">
           {row && row.played > 0 && <strong>{`Sei ${row.position}° con ${row.points} punti. `}</strong>}
           Scegli chi vince, e se vuoi come (+1). Dopo il voto vedi come hanno votato gli altri.

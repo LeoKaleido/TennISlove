@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { MatchRow } from '../components/MatchRow';
-import { Chevron, Collapse, ErrorState, Loading, useDesktop } from '../components/ui';
+import { Chevron, Collapse, ErrorState, HelpLink, Loading, useDesktop } from '../components/ui';
 import type { Match, Round, SeasonOverview } from '../api';
 import { currentRound, isMine, roundRange, today, useMe, useSeason } from '../data';
 
@@ -24,7 +24,9 @@ export function CalendarPage() {
   return (
     <div className="screen" style={{ gap: 14 }}>
       <div className="page-head">
-        <h1 className="display">Calendario</h1>
+        <h1 className="display with-help">
+          Calendario <HelpLink to="calendario" label="calendario" />
+        </h1>
         <div className="sub">
           {rounds.length} giornate, {data.matches.filter((m) => m.phase === 'ROUND_ROBIN').length} partite
         </div>

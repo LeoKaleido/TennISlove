@@ -3,6 +3,7 @@
 import { useQuery } from '@tanstack/react-query';
 import type { ReactNode } from 'react';
 import { api } from '../api';
+import { HelpLink } from './ui';
 
 type Kind = 'clear' | 'partly' | 'cloudy' | 'fog' | 'drizzle' | 'rain' | 'snow' | 'storm';
 
@@ -95,6 +96,11 @@ export function WeatherLine({ matchId, enabled, compact = false }: { matchId: st
       <span className="weather-sub">
         pioggia {w.rainChance}%{!compact && `, vento ${w.wind} km/h`}
       </span>
+      {!compact && (
+        <span style={{ marginLeft: 'auto' }}>
+          <HelpLink to="meteo" label="meteo" />
+        </span>
+      )}
     </div>
   );
 }

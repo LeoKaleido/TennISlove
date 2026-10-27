@@ -4,7 +4,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { PREDICTION_POINTS, type PredictionHow, type Side } from '@tentennis/shared';
 import { api, type Match, type MatchPredictions, type Player } from '../api';
-import { Avatar, useToast } from './ui';
+import { Avatar, HelpLink, useToast } from './ui';
 
 type Pick = { pick: Side; how: PredictionHow | null };
 
@@ -69,7 +69,10 @@ export function PredictionPanel({
     <div className="pred">
       <div className="pred-head">
         <span className="pred-title-row">
-          <span className="pred-title">{title ?? 'Pronostici'}</span>
+          <span className="pred-title with-help">
+            {title ?? 'Pronostici'}
+            {!title && <HelpLink to="pronostici" label="pronostici" />}
+          </span>
           {saved && (
             <span className="pred-saved" role="status">
               ✓ Salvato
