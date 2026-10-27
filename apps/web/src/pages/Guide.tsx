@@ -46,7 +46,7 @@ const SECTIONS: Section[] = [
       <>
         <p>Entri con l’email e la password che trovi nell’email di invito. Se non la ricordi, tocca “Password dimenticata? Ricevi un codice”: ti arriva un codice di 6 cifre per entrare.</p>
         <p>
-          Puoi installare TennIsLove come un’app sul telefono: dalle <a href="#impostazioni">impostazioni</a> tocca “Installa l’app”. Su Android si apre subito l’installazione; su iPhone si apre il menu Condividi: lì scegli “Aggiungi alla schermata Home”.
+          Puoi installare TennIsLove come un’app sul telefono: dalle <a href="#impostazioni">impostazioni</a> tocca “Installa l’app”. Su Android si apre subito l’installazione; su iPhone si fa da Safari: Condividi, poi “Aggiungi alla schermata Home”.
         </p>
       </>
     ),
@@ -336,7 +336,8 @@ export function GuidePage() {
   return (
     <div className="screen guide" style={{ gap: 18 }} onClick={onLink}>
       <div className="page-head" style={{ gap: 8 }}>
-        <BackButton />
+        {/* la freccia fissa sta sotto l'indice, che resta in alto */}
+        <BackButton floatTop={52} />
         <h1 className="display">Guida</h1>
         <div className="sub">Tutto quello che si può fare con TennIsLove. Il punto interrogativo accanto a ogni funzione porta qui, alla sua spiegazione.</div>
       </div>

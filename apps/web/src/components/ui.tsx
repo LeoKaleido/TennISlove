@@ -2,6 +2,7 @@
 
 import { createContext, useCallback, useContext, useEffect, useId, useRef, useState, useSyncExternalStore, type CSSProperties, type InputHTMLAttributes, type ReactNode } from 'react';
 import { Link, NavLink, useLocation, useNavigate } from 'react-router';
+import { createPortal } from 'react-dom';
 import type { MatchStatus, Zone } from '@tentennis/shared';
 import type { Match, Player } from '../api';
 import { useLogout } from '../account';
@@ -70,14 +71,44 @@ export function ZonePill({ zone, qualifiers, final = false }: { zone: Zone; qual
   );
 }
 
-export function BackButton({ to }: { to?: string }) {
+/**
+ * Freccia indietro. Sul telefono, quando scorrendo esce dallo schermo, ne compare una uguale fissa in alto a sinistra:
+ * nell'app installata non c'è la barra del browser e senza freccia non si tornerebbe indietro.
+ * `floatTop`: spazio in più sopra quella fissa, dove la pagina ha già qualcosa fermo in alto (l'indice della guida).
+ */
+export function BackButton({ to, floatTop = 0 }: { to?: string; floatTop?: number }) {
   const navigate = useNavigate();
+  const desktop = useDesktop();
+  const ref = useRef<HTMLButtonElement>(null);
+  const [out, setOut] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || desktop) return;
+    const io = new IntersectionObserver(([e]) => setOut(!e!.isIntersecting && e!.boundingClientRect.top < 0));
+    io.observe(el);
+    return () => io.disconnect();
+  }, [desktop]);
+  const back = () => (to ? navigate(to) : navigate(-1));
+  const arrow = (
+    <svg width="18" height="18" viewBox="0 0 18 18">
+      <path d="M11 3L5 9l6 6" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
   return (
-    <button className="icon-btn" aria-label="Indietro" onClick={() => (to ? navigate(to) : navigate(-1))}>
-      <svg width="18" height="18" viewBox="0 0 18 18">
-        <path d="M11 3L5 9l6 6" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
-    </button>
+    <>
+      <button ref={ref} className="icon-btn" aria-label="Indietro" onClick={back}>
+        {arrow}
+      </button>
+      {/* fuori dalla pagina (portal): le animazioni della pagina non la spostano */}
+      {out &&
+        !desktop &&
+        createPortal(
+          <button className="icon-btn back-float" aria-label="Indietro" onClick={back} style={{ top: `calc(${10 + floatTop}px + env(safe-area-inset-top))` }}>
+            {arrow}
+          </button>,
+          document.body,
+        )}
+    </>
   );
 }
 
@@ -412,6 +443,18 @@ export function useClosing(onClose: () => void, ms = 220) {
  * che compare poco dopo l'apertura: sopra la barra in basso, oppure in alto (login, per non coprire il modulo).
  * La × lo chiude solo per questa visita: a ogni apertura ricompare, finché l'app non è installata.
  */
+// Riquadro "Installa l'app" chiuso con la ×: non torna per una settimana (resta "Installa l'app" nelle impostazioni)
+const INSTALL_SNOOZE_KEY = 'tennislove:install-snoozed';
+const INSTALL_SNOOZE_MS = 7 * 24 * 60 * 60_000;
+
+function installSnoozed() {
+  try {
+    return Date.now() - Number(localStorage.getItem(INSTALL_SNOOZE_KEY) ?? 0) < INSTALL_SNOOZE_MS;
+  } catch {
+    return false;
+  }
+}
+
 export function InstallBanner({ aboveTabs = false, atTop = false }: { aboveTabs?: boolean; atTop?: boolean }) {
   const install = useInstall();
   const [help, setHelp] = useState(false);
@@ -421,25 +464,25 @@ export function InstallBanner({ aboveTabs = false, atTop = false }: { aboveTabs?
     const t = setTimeout(() => setReady(true), 1500);
     return () => clearTimeout(t);
   }, []);
-  const [hidden, setHidden] = useState(false);
+  const [hidden, setHidden] = useState(installSnoozed);
+  const snooze = () => {
+    setHidden(true);
+    try {
+      localStorage.setItem(INSTALL_SNOOZE_KEY, String(Date.now()));
+    } catch {
+      // storage non disponibile: resta chiuso finché la pagina è aperta
+    }
+  };
   if (!ready || hidden || !install.available || !isMobileDevice()) return null;
   return (
     <div className={`install-popup${aboveTabs ? ' above-tabs' : ''}${atTop ? ' at-top' : ''}`} role="dialog" aria-label="Installa l'app">
       <div className="install-row">
         <Logo size={34} />
         <span style={{ flex: 1, fontWeight: 800, fontSize: 14.5 }}>Installa l'app</span>
-        <button
-          className="btn btn-primary btn-sm"
-          onClick={() => {
-            if (install.prompt) return install.prompt();
-            // iPhone: si apre il menu Condividi e sotto resta scritto cosa scegliere
-            setHelp(install.share ? true : !help);
-            install.share?.();
-          }}
-        >
+        <button className="btn btn-primary btn-sm" onClick={() => (install.prompt ? install.prompt() : setHelp(!help))}>
           Installa
         </button>
-        <button className="icon-btn" aria-label="Chiudi" onClick={() => setHidden(true)} style={{ width: 32, height: 32 }}>
+        <button className="icon-btn" aria-label="Chiudi" onClick={snooze} style={{ width: 32, height: 32 }}>
           ×
         </button>
       </div>

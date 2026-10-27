@@ -35,16 +35,12 @@ export function SettingsList() {
 
   return (
     <div className="card settings-list">
-      {/* Android apre il prompt di sistema; su iPhone il menu Condividi, con sotto cosa scegliere */}
+      {/* Android apre il prompt di sistema; su iPhone si mostrano i passi da fare */}
       {install.available && (
         <>
           <button
             className="list-row"
-            onClick={() => {
-              if (install.prompt) return install.prompt();
-              setInstallHelp(install.share ? true : !installHelp);
-              install.share?.();
-            }}
+            onClick={() => (install.prompt ? install.prompt() : setInstallHelp(!installHelp))}
           >
             <span className="settings-label">Installa l'app</span>
           </button>
