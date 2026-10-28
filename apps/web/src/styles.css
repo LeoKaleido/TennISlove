@@ -1509,8 +1509,12 @@ textarea.input {
     border-top: 0;
     text-align: left;
     padding: 0 12px 30px 26px;
-    white-space: nowrap;
     color: rgba(255, 255, 255, 0.4);
+  }
+
+  /* nella barra laterale la dedica va a capo, sotto "Made with love by Kaleido" */
+  .made-by .made-for {
+    display: block;
   }
 
   /* nel gestionale la barra ha già il suo margine interno (e 4 px tra un elemento e l'altro):
