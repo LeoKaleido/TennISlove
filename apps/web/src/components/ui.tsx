@@ -281,7 +281,7 @@ export function MadeBy() {
       <a href="https://www.kalei.do" target="_blank" rel="noopener noreferrer">
         Kaleido
       </a>{' '}
-      for Giuseppe
+      for Giuseppe il presdiente
     </div>
   );
 }
