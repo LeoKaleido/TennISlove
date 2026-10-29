@@ -369,6 +369,17 @@ function Results({ data, picker, onEdit }: { data: SeasonOverview; picker: React
                       <td className="actions">
                         <span className="icon-actions">
                           <IconAction icon="add" tip="Inserisci risultato" onClick={() => onEdit(m.id)} />
+                          {m.scheduledAt && (
+                            <IconAction
+                              icon="unschedule"
+                              tip="Togli dal programma: torna da programmare, ai giocatori arriva l’email per il calendario"
+                              danger
+                              confirm
+                              url={`/api/matches/${m.id}/schedule`}
+                              method="DELETE"
+                              done="Partita tolta dal programma"
+                            />
+                          )}
                         </span>
                       </td>
                     </tr>

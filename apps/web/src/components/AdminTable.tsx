@@ -37,6 +37,12 @@ const ICONS: Record<string, ReactNode> = {
     </>
   ),
   delete: <path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3" />,
+  unschedule: (
+    <>
+      <rect x="3" y="5" width="18" height="16" rx="2" />
+      <path d="M3 10h18M8 3v4M16 3v4M10 13.5l4 4M14 13.5l-4 4" />
+    </>
+  ),
   add: (
     <>
       <circle cx="12" cy="12" r="9" />

@@ -364,6 +364,8 @@ a {
   justify-content: center;
   gap: 8px;
   text-decoration: none;
+  /* testo su due righe centrato anche nei link (i <button> lo centrano da soli) */
+  text-align: center;
   padding: 0 18px;
 }
 

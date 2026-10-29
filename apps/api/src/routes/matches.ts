@@ -1,4 +1,4 @@
-// Azioni dei giocatori sulle proprie partite: programmare, rinviare, inserire/confermare/contestare il risultato.
+// Azioni dei giocatori sulle proprie partite: programmare, togliere dal programma, rinviare, inserire/confermare/contestare il risultato.
 
 import type { FastifyInstance, FastifyReply } from 'fastify';
 import {
@@ -8,6 +8,8 @@ import {
   formatScore,
   fromRomeLocal,
   predictionsOpen,
+  romeDay,
+  romeTime,
   SURFACE_LABEL,
   SURFACES,
   type MatchScoreInput,
@@ -189,6 +191,33 @@ export async function matchRoutes(app: FastifyInstance) {
         subject: `${matchTitle(fresh)}: ${when}`,
         text: `La partita ${matchTitle(fresh)} è in programma ${when}${event.location ? ` a ${event.location}` : ''}.${surfaceText(fresh.surface)}\n\nAggiungila al calendario con il file allegato oppure su Google Calendar:\n${googleCalendarUrl(event)}\n\nDettagli nell'app:\n${env.appUrl}/partite/${fresh.id}`,
         attachments: [{ filename: `partita-${fresh.code}.ics`, content: toIcs(event), contentType: 'text/calendar; charset=utf-8; method=PUBLISH' }],
+      });
+    }
+    return { ok: true, scheduleSeq: updated.scheduleSeq };
+  });
+
+  /** Toglie la partita dal programma (D-076): torna da programmare e il calendario dei due giocatori la cancella */
+  app.delete<{ Params: { id: string } }>('/api/matches/:id/schedule', async (req, reply) => {
+    const m = await loadForAction(req.params.id, req.user!, reply);
+    if (!m) return;
+    if (m.result) return reply.code(409).send({ error: 'La partita è già stata giocata' });
+    if (!m.scheduledAt) return reply.code(409).send({ error: 'La partita non è programmata' });
+    const updated = await db.match.update({
+      where: { id: m.id },
+      data: { scheduledAt: null, clubId: null, venue: null, surface: null, postponedAt: null, scheduleSeq: { increment: 1 } },
+    });
+    await audit(req.user!.id, 'Match', m.id, 'unschedule', { scheduledAt: m.scheduledAt, clubId: m.clubId, venue: m.venue, surface: m.surface });
+
+    // l'evento com'era, con la nuova sequenza: il calendario lo riconosce dall'UID e lo cancella
+    const event = { ...calendarEvent(m)!, sequence: updated.scheduleSeq };
+    const when = `${formatDayWithWeekday(romeDay(m.scheduledAt))} alle ${romeTime(m.scheduledAt)}`;
+    for (const p of [m.playerA, m.playerB]) {
+      if (!p.user) continue;
+      await sendMail({
+        to: p.user.email,
+        subject: `${matchTitle(m)}: tolta dal programma`,
+        text: `La partita ${matchTitle(m)} di ${when} non è più in programma: è di nuovo da programmare.\n\nApri il file allegato per toglierla dal calendario.\n\nDettagli nell'app:\n${env.appUrl}/partite/${m.id}`,
+        attachments: [{ filename: `partita-${m.code}.ics`, content: toIcs(event, true), contentType: 'text/calendar; charset=utf-8; method=CANCEL' }],
       });
     }
     return { ok: true, scheduleSeq: updated.scheduleSeq };

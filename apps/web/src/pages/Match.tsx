@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router';
 import { formatDayWithWeekday, romeDay, romeTime, SURFACE_LABEL } from '@tentennis/shared';
 import { api, type MatchDetail } from '../api';
-import { Avatar, BackButton, ErrorState, HelpLink, Loading, Logo, ScoreTable, StatusPill, useClosing, useToast } from '../components/ui';
+import { Avatar, BackButton, ButtonLoader, ErrorState, HelpLink, Loading, Logo, ScoreTable, StatusPill, useClosing, useToast } from '../components/ui';
 import { PredictionPanel } from '../components/Predictions';
 import { Simulator } from '../components/Simulator';
 import { isMine, playerIndex, roundRange, today, useMe, useSeason } from '../data';
@@ -20,6 +20,7 @@ export function MatchPage() {
   const queryClient = useQueryClient();
   const toast = useToast();
   const [openPhoto, setOpenPhoto] = useState<string | null>(null);
+  const [unscheduleOpen, setUnscheduleOpen] = useState(false);
   const [photoClosing, closePhoto] = useClosing(() => setOpenPhoto(null));
 
   const postpone = useMutation({
@@ -144,6 +145,11 @@ export function MatchPage() {
                 Modifica programma
               </Link>
             )}
+            {canAct && !r && day && (
+              <button className="btn btn-outline" style={{ flex: '1 1 140px' }} onClick={() => setUnscheduleOpen(true)}>
+                Togli dal programma
+              </button>
+            )}
             {canAct && !r && m.status !== 'POSTPONED' && (
               <button className="btn btn-outline" style={{ flex: '1 1 140px' }} onClick={() => postpone.mutate()} disabled={postpone.isPending}>
                 Segna come rinviata
@@ -230,6 +236,15 @@ export function MatchPage() {
         </div>
       )}
 
+      {unscheduleOpen && day && m.scheduledAt && (
+        <UnscheduleSheet
+          matchId={m.id}
+          title={`${a.shortName} vs ${b.shortName}`}
+          when={`${formatDayWithWeekday(day)} alle ${romeTime(m.scheduledAt)}${club ? `, ${club.name}` : m.venue ? `, ${m.venue}` : ''}`}
+          onClose={() => setUnscheduleOpen(false)}
+        />
+      )}
+
       {sheetOpen && (
         <ScheduleSheet
           match={m}
@@ -242,6 +257,50 @@ export function MatchPage() {
           }}
         />
       )}
+    </div>
+  );
+}
+
+/** Bottom sheet "Togli dal programma" (D-076): la partita torna da programmare e il calendario dei due la cancella */
+function UnscheduleSheet({ matchId, title, when, onClose }: { matchId: string; title: string; when: string; onClose: () => void }) {
+  const queryClient = useQueryClient();
+  const toast = useToast();
+  const [closing, close] = useClosing(onClose);
+  const unschedule = useMutation({
+    mutationFn: () => api(`/api/matches/${matchId}/schedule`, { method: 'DELETE' }),
+    onSuccess: () => {
+      queryClient.invalidateQueries();
+      toast('Partita tolta dal programma');
+      close();
+    },
+    onError: (e) => toast(e.message),
+  });
+
+  return (
+    <div className={`sheet-wrap${closing ? ' closing' : ''}`}>
+      <div className="sheet-backdrop" onClick={close} />
+      <div className="sheet" role="dialog" aria-label="Togli dal programma">
+        <div className="sheet-handle" />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+          <span className="display" style={{ fontSize: 32, lineHeight: 0.95 }}>
+            Togli dal programma
+          </span>
+          <span className="muted" style={{ fontSize: 13.5 }}>
+            {title}, {when}
+          </span>
+        </div>
+        <p style={{ margin: 0, fontSize: 14.5, lineHeight: 1.45 }}>
+          La partita torna da programmare: data, ora e circolo si cancellano. A tutti e due arriva un’email per toglierla dal calendario. Quando potete giocare, la programmate di nuovo.
+        </p>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <button className="btn btn-danger" disabled={unschedule.isPending} onClick={() => unschedule.mutate()}>
+            {unschedule.isPending ? <ButtonLoader /> : 'Togli dal programma'}
+          </button>
+          <button className="btn btn-outline" onClick={close}>
+            Annulla
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
