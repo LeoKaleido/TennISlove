@@ -372,7 +372,7 @@ function Results({ data, picker, onEdit }: { data: SeasonOverview; picker: React
                           {m.scheduledAt && (
                             <IconAction
                               icon="unschedule"
-                              tip="Togli dal programma: torna da programmare, ai giocatori arriva l’email per il calendario"
+                              tip="Togli dal programma: torna da programmare"
                               danger
                               confirm
                               url={`/api/matches/${m.id}/schedule`}

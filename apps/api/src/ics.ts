@@ -14,26 +14,27 @@ export interface CalendarEvent {
   description: string;
 }
 
-/** `cancelled`: annulla l'evento già nel calendario (partita tolta dal programma) */
-export function toIcs(e: CalendarEvent, cancelled = false): string {
+export function toIcs(e: CalendarEvent): string {
   const end = new Date(e.start.getTime() + e.durationMinutes * 60_000);
-  const alarm = ['BEGIN:VALARM', 'TRIGGER:-PT2H', 'ACTION:DISPLAY', `DESCRIPTION:${escape(e.title)}`, 'END:VALARM'];
   return [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
     'PRODID:-//TennIsLove//IT',
-    cancelled ? 'METHOD:CANCEL' : 'METHOD:PUBLISH',
+    'METHOD:PUBLISH',
     'BEGIN:VEVENT',
     `UID:${e.uid}@tennislove`,
     `SEQUENCE:${e.sequence}`,
-    ...(cancelled ? ['STATUS:CANCELLED'] : []),
     `DTSTAMP:${stamp(new Date())}`,
     `DTSTART:${stamp(e.start)}`,
     `DTEND:${stamp(end)}`,
     `SUMMARY:${escape(e.title)}`,
     `LOCATION:${escape(e.location)}`,
     `DESCRIPTION:${escape(e.description)}`,
-    ...(cancelled ? [] : alarm),
+    'BEGIN:VALARM',
+    'TRIGGER:-PT2H',
+    'ACTION:DISPLAY',
+    `DESCRIPTION:${escape(e.title)}`,
+    'END:VALARM',
     'END:VEVENT',
     'END:VCALENDAR',
   ].join('\r\n');

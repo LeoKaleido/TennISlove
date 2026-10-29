@@ -261,7 +261,7 @@ export function MatchPage() {
   );
 }
 
-/** Bottom sheet "Togli dal programma" (D-076): la partita torna da programmare e il calendario dei due la cancella */
+/** Bottom sheet "Togli dal programma" (D-076): la partita torna da programmare */
 function UnscheduleSheet({ matchId, title, when, onClose }: { matchId: string; title: string; when: string; onClose: () => void }) {
   const queryClient = useQueryClient();
   const toast = useToast();
@@ -290,7 +290,7 @@ function UnscheduleSheet({ matchId, title, when, onClose }: { matchId: string; t
           </span>
         </div>
         <p style={{ margin: 0, fontSize: 14.5, lineHeight: 1.45 }}>
-          La partita torna da programmare: data, ora e circolo si cancellano. A tutti e due arriva un’email per toglierla dal calendario. Quando potete giocare, la programmate di nuovo.
+          La partita torna da programmare: data, ora e circolo si cancellano. Se l’avevi aggiunta al calendario del telefono, toglila da lì. Quando potete giocare, la programmate di nuovo.
         </p>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           <button className="btn btn-danger" disabled={unschedule.isPending} onClick={() => unschedule.mutate()}>

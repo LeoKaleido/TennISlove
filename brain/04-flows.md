@@ -22,7 +22,7 @@ Caso limite: un giocatore senza email resta in anagrafica ma senza accesso; l'ad
 2. Stato partita: `TO_SCHEDULE → SCHEDULED`.
 3. Effetti: compare in Home/Calendario con data e luogo; **entrambi** i giocatori ricevono un'email con allegato `.ics` e link "Aggiungi a Google Calendar"; vengono pianificati i promemoria (§7).
 4. Si può riprogrammare finché la partita non è giocata: nuova email con `.ics` aggiornato (stesso `UID`, `SEQUENCE` incrementata, così il calendario aggiorna l'evento invece di duplicarlo). Ogni modifica va nell'audit log.
-5. Si può anche **togliere dal programma** (D-076): data, ora, circolo e superficie si cancellano e la partita torna `TO_SCHEDULE` (o `TO_RECOVER` se la settimana è finita). Entrambi ricevono un'email con `.ics` di annullamento (`METHOD:CANCEL`, stesso `UID`, `SEQUENCE` incrementata) che toglie l'evento dal calendario.
+5. Si può anche **togliere dal programma** (D-076): data, ora, circolo e superficie si cancellano e la partita torna `TO_SCHEDULE` (o `TO_RECOVER` se la settimana è finita). Nessuna email: l'evento dal calendario lo tolgono i giocatori.
 
 Casi limite:
 - data fuori dalla settimana della giornata → la partita diventa **rinviata** (§2bis), con avviso esplicito nel form.
