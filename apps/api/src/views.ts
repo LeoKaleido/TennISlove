@@ -2,6 +2,7 @@
 
 import type { Club, Match, MatchPhoto, MatchResult, Player, Prediction, Round, Season } from '@prisma/client';
 import {
+  romeDay,
   computePredictionStandings,
   computeStandings,
   COUNTS_IN_STANDINGS,
@@ -139,11 +140,14 @@ export async function seasonOverview(season: Season, viewerPlayerId: string | nu
     ...toView(m),
     predictions: predictionsView(m, predsOf(m.id), viewerPlayerId, playerIds, season.status === 'ACTIVE'),
   }));
+  // a torneo concluso contano tutte; mentre è in corso quelle in anticipo aspettano la loro giornata (D-077)
+  const today = romeDay(new Date());
+  const ahead = (startsOn: string) => season.status === 'ACTIVE' && startsOn > today;
   const standings = computeStandings(
     players.map((p) => p.playerId),
     matches
       .filter((m) => m.round.phase === 'ROUND_ROBIN' && m.result && COUNTS_IN_STANDINGS.includes(m.result.status))
-      .map((m) => ({ playerAId: m.playerAId, playerBId: m.playerBId, score: scoreInput(m.result!) })),
+      .map((m) => ({ playerAId: m.playerAId, playerBId: m.playerBId, score: scoreInput(m.result!), ahead: ahead(m.round.startsOn) })),
     { qualifiers: season.qualifiers },
   );
   // classifica a parte: i pronostici non toccano i punti del torneo
@@ -192,5 +196,5 @@ export function playerView(p: Player) {
 }
 
 export function clubView(c: Club) {
-  return { id: c.id, name: c.name, city: c.city, description: c.description, mapsUrl: c.mapsUrl, surfaces: clubSurfaces(c.surfaces) };
+  return { id: c.id, name: c.name, city: c.city, description: c.description, mapsUrl: c.mapsUrl, phone: c.phone, surfaces: clubSurfaces(c.surfaces) };
 }

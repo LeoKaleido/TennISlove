@@ -33,7 +33,7 @@ L'app è **privata** (D-009): tutte le pagine richiedono il login. Il "sito pubb
 
 Area personale del giocatore, dopo il login:
 - **Le mie partite**: prossime partite e settimana in cui vanno giocate, partite giocate.
-- **Programma partita**: inserisce data, ora e circolo (dalla lista, oppure un campo non in lista scritto a mano, D-040). La partita compare in calendario; entrambi ricevono un'email con il link "aggiungi al calendario" (.ics / Google Calendar) e un promemoria prima della partita (D-013).
+- **Programma partita**: inserisce data, ora e circolo (dalla lista, con il telefono per prenotare il campo, oppure un campo non in lista scritto a mano, D-040, D-077). Qualunque data, anche prima della settimana della giornata (D-077). La partita compare in calendario; entrambi ricevono un'email con il link "aggiungi al calendario" (.ics / Google Calendar) e un promemoria prima della partita (D-013).
 - **Rinvia partita**: se la partita non si gioca nella sua settimana, viene segnata come rinviata e si può programmare più avanti (D-012).
 - **Carica selfie** (facoltativo ma incoraggiato, D-011): a inizio partita uno dei due carica la foto della coppia. Senza foto la copertina è l'immagine di default (logo dell'app).
 - **Inserisci risultato**: a fine partita uno dei due inserisce il punteggio (set 1, set 2, eventuale super tie break, oppure "tempo scaduto"). Il risultato è **provvisorio** finché l'avversario non lo conferma; dopo 2 giorni senza risposta si conferma da solo (D-010, D-016).
@@ -44,7 +44,7 @@ Area personale del giocatore, dopo il login:
 Per l'organizzatore (Giuseppe e chi gestisce l'app):
 - **Torneo/stagione**: crea il torneo, imposta le date, le pause e la fase (girone, fase finale).
 - **Giocatori**: anagrafica (nome, cognome, nome breve, email, foto), invito via email.
-- **Circoli**: lista dei circoli in cui si gioca (nome, indirizzo, link mappa).
+- **Circoli**: lista dei circoli in cui si gioca (nome, indirizzo, telefono, link mappa).
 - **Calendario**: importa/genera le giornate, sposta una partita da una settimana all'altra.
 - **Import Excel** (D-026): carica un file nello stesso formato dell'Excel del cliente (`ATP_Umbria_calendario_classifica_OK.xlsm`, foglio `Calendario`, ID partita `Gnn-mm`) per aggiornare risultati e calendario in blocco, con anteprima delle differenze prima di applicare.
 - **Risultati**: correzione o annullamento di qualsiasi risultato, risoluzione delle contestazioni, conferma forzata.

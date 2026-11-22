@@ -116,7 +116,7 @@ export async function matchRoutes(app: FastifyInstance) {
     return {
       seasonId: m.seasonId,
       match: toView(m),
-      club: m.club && { id: m.club.id, name: m.club.name, city: m.club.city, mapsUrl: m.club.mapsUrl },
+      club: m.club && { id: m.club.id, name: m.club.name, city: m.club.city, mapsUrl: m.club.mapsUrl, phone: m.club.phone },
       round: { number: m.round.number, startsOn: m.round.startsOn, endsOn: m.round.endsOn },
       photos: photos.map((p) => ({ id: p.id, url: `/api/photos/${p.id}`, uploadedById: p.uploadedById })),
       googleCalendarUrl: event ? googleCalendarUrl(event) : null,

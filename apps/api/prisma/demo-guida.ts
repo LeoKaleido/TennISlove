@@ -186,6 +186,21 @@ async function create() {
       const otherDay = addDays(today, 3) <= endsOn ? addDays(today, 3) : endsOn;
       if (withAndrea(m)) await db.match.update({ where: { id: m.id }, data: { scheduledAt: andreaAt, clubId: cus.id } });
       else if (m.code.endsWith('-02')) await db.match.update({ where: { id: m.id }, data: { scheduledAt: fromRomeLocal(otherDay, '20:00'), clubId: club.id } });
+    } else if (r === ROUNDS_PLAYED + 2 && !withAndrea(m) && m.code.endsWith('-03')) {
+      // una partita della prossima giornata giocata ieri, in anticipo: in classifica i suoi punti stanno a parte (D-077)
+      const at = fromRomeLocal(addDays(today, -1), '19:00');
+      await db.match.update({ where: { id: m.id }, data: { scheduledAt: at, clubId: club.id } });
+      await db.matchResult.create({
+        data: {
+          matchId: m.id,
+          ...resultData(OTHERS[0]!),
+          status: 'CONFIRMED',
+          submittedById: userOf(m.playerAId),
+          submittedAt: new Date(at.getTime() + 3 * 3_600_000),
+          autoConfirmAt: null,
+          confirmedAt: new Date(at.getTime() + 20 * 3_600_000),
+        },
+      });
     }
   }
 

@@ -22,4 +22,10 @@ describe('standingsTimeline', () => {
     expect(t[1]!.rows.find((r) => r.playerId === 'p3')!.points).toBe(15);
     expect(t[0]!.rows.find((r) => r.playerId === 'p3')!.played).toBe(0);
   });
+
+  it('una partita in anticipo conta dalla settimana della sua giornata (D-077)', () => {
+    const early = { ...win('p1', 'p2', '2026-10-14'), roundStartsOn: '2026-10-26' };
+    const t = standingsTimeline(['p1', 'p2'], [early], ROUNDS, '2026-10-28');
+    expect(t.map((p) => p.rows.find((r) => r.playerId === 'p1')!.played)).toEqual([0, 0, 1]);
+  });
 });

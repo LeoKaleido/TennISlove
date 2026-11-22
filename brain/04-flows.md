@@ -24,8 +24,11 @@ Caso limite: un giocatore senza email resta in anagrafica ma senza accesso; l'ad
 4. Si può riprogrammare finché la partita non è giocata: nuova email con `.ics` aggiornato (stesso `UID`, `SEQUENCE` incrementata, così il calendario aggiorna l'evento invece di duplicarlo). Ogni modifica va nell'audit log.
 5. Si può anche **togliere dal programma** (D-076): data, ora, circolo e superficie si cancellano e la partita torna `TO_SCHEDULE` (o `TO_RECOVER` se la settimana è finita). Nessuna email: l'evento dal calendario lo tolgono i giocatori.
 
+Il form mostra il telefono dei circoli che ce l'hanno (D-077): si tocca e si chiama per prenotare il campo.
+
 Casi limite:
-- data fuori dalla settimana della giornata → la partita diventa **rinviata** (§2bis), con avviso esplicito nel form.
+- data dopo la settimana della giornata → la partita diventa **rinviata** (§2bis), con avviso esplicito nel form.
+- data prima della settimana della giornata → si può (D-077): il form avvisa che conta in classifica da quando inizia la giornata (§5.4).
 
 ## 2bis. Rinvio di una partita (D-012)
 **Attori**: uno dei due giocatori; admin.
@@ -134,6 +137,7 @@ Solo le partite "OK":
 - game fatti, game subiti, differenza game;
 - bonus e compensazioni (somma dei +3 e delle compensazioni);
 - **punti = game fatti + bonus e compensazioni**.
+- Partite **in anticipo** (giornata non ancora iniziata, torneo in corso, D-077): fuori da tutto il conteggio, scontri diretti compresi; i loro punti vanno in `aheadPoints` (e `aheadPlayed`). Il totale "Tot" della classifica è `points + aheadPoints`.
 
 ### 5.5 Ordinamento e parità
 1. Ordine per punti decrescenti.

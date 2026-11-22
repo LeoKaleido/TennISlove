@@ -116,6 +116,8 @@ model Club {
   city        String?
   description String?
   mapsUrl     String?
+  /// telefono per prenotare il campo, scritto come lo si vuole vedere
+  phone       String?
   /// posizione per il meteo (D-065), ricavata dal link Maps o, in mancanza, dalla città
   latitude    Float?
   longitude   Float?

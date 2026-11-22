@@ -48,6 +48,8 @@ export interface Club {
   city: string | null;
   description: string | null;
   mapsUrl: string | null;
+  /** telefono per prenotare il campo */
+  phone: string | null;
   /** superfici dei campi (D-075) */
   surfaces: Surface[];
 }
@@ -132,7 +134,7 @@ export interface SeasonOverview {
 export interface MatchDetail {
   seasonId: string;
   match: Match;
-  club: Pick<Club, 'id' | 'name' | 'city' | 'mapsUrl'> | null;
+  club: Pick<Club, 'id' | 'name' | 'city' | 'mapsUrl' | 'phone'> | null;
   round: Pick<Round, 'number' | 'startsOn' | 'endsOn'>;
   photos: { id: string; url: string; uploadedById: string }[];
   googleCalendarUrl: string | null;

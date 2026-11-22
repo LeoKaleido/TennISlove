@@ -34,6 +34,7 @@ const clubBody = z.object({
   name: z.string().trim().min(1).max(80),
   city: z.string().trim().max(80).optional().nullable(),
   mapsUrl: z.string().trim().url().regex(/^https?:\/\//i, 'Il link deve iniziare con https://').optional().nullable().or(z.literal('')),
+  phone: z.string().trim().max(40).regex(/^[0-9+ ()./-]*$/, 'Il telefono può contenere solo numeri, spazi e +').optional().nullable(),
   active: z.boolean().default(true),
   /** superfici dei campi (D-075) */
   surfaces: z.array(z.enum(SURFACES)).default([]),
@@ -140,7 +141,8 @@ export async function adminSeasonRoutes(app: FastifyInstance) {
   app.post<{ Params: { id: string } }>('/api/admin/seasons/:id/archive', async (req, reply) => {
     const season = await db.season.findUnique({ where: { id: req.params.id } });
     if (!season) return reply.code(404).send({ error: 'Torneo non trovato' });
-    const { standings } = await seasonOverview(season);
+    // la classifica finale, con tutte le partite (anche quelle giocate in anticipo, D-077)
+    const { standings } = await seasonOverview({ ...season, status: 'ARCHIVED' });
     const leaders = standings.filter((s) => s.position === 1);
     const championPlayerId = leaders.length === 1 && leaders[0]!.points > 0 ? leaders[0]!.playerId : null;
     await db.season.update({ where: { id: season.id }, data: { status: 'ARCHIVED', championPlayerId } });
@@ -155,6 +157,7 @@ export async function adminSeasonRoutes(app: FastifyInstance) {
       name: c.name,
       city: c.city,
       mapsUrl: c.mapsUrl,
+      phone: c.phone,
       active: c.active,
       surfaces: clubSurfaces(c.surfaces),
       matches: c._count.matches,
@@ -164,7 +167,7 @@ export async function adminSeasonRoutes(app: FastifyInstance) {
 
   app.post('/api/admin/clubs', async (req) => {
     const body = clubBody.parse(req.body);
-    const club = await db.club.create({ data: { ...body, mapsUrl: body.mapsUrl || null } });
+    const club = await db.club.create({ data: { ...body, mapsUrl: body.mapsUrl || null, phone: body.phone || null } });
     relocate(req.log);
     // un nuovo circolo è subito disponibile nel torneo in corso
     const current = await db.season.findFirst({ where: { status: 'ACTIVE' }, orderBy: { createdAt: 'desc' } });
@@ -181,7 +184,7 @@ export async function adminSeasonRoutes(app: FastifyInstance) {
     // link o città cambiati: la posizione per il meteo si ricava di nuovo
     await db.club.update({
       where: { id: club.id },
-      data: { ...body, mapsUrl: body.mapsUrl || null, ...(moved ? { latitude: null, longitude: null } : {}) },
+      data: { ...body, mapsUrl: body.mapsUrl || null, phone: body.phone || null, ...(moved ? { latitude: null, longitude: null } : {}) },
     });
     if (moved) relocate(req.log);
     await audit(req.user!.id, 'Club', club.id, 'update', club, body);

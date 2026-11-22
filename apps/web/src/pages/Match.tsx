@@ -126,7 +126,9 @@ export function MatchPage() {
           <Info label="Data" value={day ? formatDayWithWeekday(day) : 'Da decidere'} />
           <Info label="Ora" value={m.scheduledAt ? romeTime(m.scheduledAt) : 'Da decidere'} />
           <Info label="Circolo" value={club ? club.name : (m.venue ?? 'Da decidere')} href={club?.mapsUrl ?? undefined} />
-          {m.surface && <Info label="Superficie" value={SURFACE_LABEL[m.surface]} wide />}
+          {/* superficie e telefono del circolo affiancati; se ce n'è uno solo, a tutta larghezza (D-077) */}
+          {m.surface && <Info label="Superficie" value={SURFACE_LABEL[m.surface]} wide={!club?.phone} />}
+          {club?.phone && <Info label="Telefono" value={club.phone} href={`tel:${club.phone.replace(/[^0-9+]/g, '')}`} wide={!m.surface} />}
         </div>
 
         <WeatherLine matchId={m.id} enabled={!!m.scheduledAt && !!club && !r} />
@@ -305,7 +307,7 @@ function UnscheduleSheet({ matchId, title, when, onClose }: { matchId: string; t
   );
 }
 
-/** `wide`: su tutta la larghezza della griglia (la quinta casella, la superficie) */
+/** `wide`: su tutta la larghezza della griglia (superficie o telefono, quando c'è uno solo dei due) */
 function Info({ label, value, href, wide = false }: { label: string; value: string; href?: string; wide?: boolean }) {
   return (
     <div style={{ background: 'var(--surface)', padding: '10px 12px', display: 'flex', flexDirection: 'column', gap: 2, gridColumn: wide ? '1 / -1' : undefined }}>
@@ -313,7 +315,7 @@ function Info({ label, value, href, wide = false }: { label: string; value: stri
         {label}
       </span>
       {href ? (
-        <a href={href} target="_blank" rel="noreferrer" style={{ fontWeight: 700, fontSize: 14 }}>
+        <a href={href} {...(href.startsWith('tel:') ? {} : { target: '_blank', rel: 'noreferrer' })} style={{ fontWeight: 700, fontSize: 14 }}>
           {value}
         </a>
       ) : (

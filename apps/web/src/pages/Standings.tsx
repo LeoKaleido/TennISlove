@@ -37,6 +37,8 @@ export function StandingsPage() {
   const archived = data.season.status === 'ARCHIVED';
   const champion = data.season.championPlayerId ? players.get(data.season.championPlayerId) : undefined;
   const q = data.season.qualifiers;
+  // partite giocate in anticipo (D-077): fuori dall'ordine finché non inizia la loro giornata, i punti a parte
+  const anyAhead = data.standings.some((r) => r.aheadPlayed > 0);
 
   return (
     <div className="screen standings" style={{ gap: 16 }}>
@@ -86,6 +88,11 @@ export function StandingsPage() {
                     <th style={{ padding: '14px 10px' }}>
                       <ColumnTip label="Pt" title="Punti" />
                     </th>
+                    {anyAhead && (
+                      <th style={{ padding: '14px 10px' }}>
+                        <ColumnTip label="Tot" title="Punti con le partite in anticipo" />
+                      </th>
+                    )}
                     {COLUMNS.map((c, i) => (
                       <th key={c.key} style={{ padding: i === COLUMNS.length - 1 ? '14px 18px 14px 10px' : '14px 10px', fontWeight: 700 }}>
                         <ColumnTip label={c.label} title={c.title} end={i >= COLUMNS.length - 3} />
@@ -109,6 +116,9 @@ export function StandingsPage() {
                           </Link>
                         </td>
                         <td style={{ textAlign: 'center', padding: '0 10px', fontWeight: 900, fontStretch: '70%', fontSize: 20 }}>{r.points}</td>
+                        {anyAhead && (
+                          <td style={{ textAlign: 'center', padding: '0 10px', color: 'var(--ink2)', fontWeight: r.aheadPlayed > 0 ? 800 : 400 }}>{r.points + r.aheadPoints}</td>
+                        )}
                         {COLUMNS.map((c, i) => (
                           <td key={c.key} style={{ textAlign: 'center', color: 'var(--ink2)', padding: i === COLUMNS.length - 1 ? '0 18px 0 10px' : '0 10px' }}>
                             {c.key === 'gamesDiff' && r.gamesDiff > 0 ? `+${r.gamesDiff}` : r[c.key]}
@@ -133,7 +143,18 @@ export function StandingsPage() {
                     player={p}
                     position={r.position}
                     points={r.points}
-                    sub={q > 0 && <ZonePill zone={r.zone} qualifiers={q} final={archived} />}
+                    sub={
+                      (q > 0 || r.aheadPlayed > 0) && (
+                        <span style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 8 }}>
+                          {q > 0 && <ZonePill zone={r.zone} qualifiers={q} final={archived} />}
+                          {r.aheadPlayed > 0 && (
+                            <span className="faint" style={{ fontSize: 12.5 }}>
+                              +{r.aheadPoints} pt in anticipo, {r.points + r.aheadPoints} in tutto
+                            </span>
+                          )}
+                        </span>
+                      )
+                    }
                     highlight={r.playerId === myId}
                     open={expanded === r.playerId}
                     onToggle={() => setExpanded(expanded === r.playerId ? null : r.playerId)}
@@ -169,7 +190,8 @@ export function StandingsPage() {
         </div>
         <div style={{ fontSize: 12.5, lineHeight: 1.45, color: 'rgba(255,255,255,.75)', borderTop: '1px solid rgba(255,255,255,.14)', paddingTop: 10 }}>
           Compensazione: se chi vince al super tie break ha fatto meno game, riceve la differenza. Es. 0-6 6-4 10-8: vincitore 13, sconfitto 10. A pari
-          punti conta lo scontro diretto; tra tre o più, i punti negli scontri tra loro e poi la differenza game.{q > 0 && ` I primi ${q} vanno alla fase finale.`}
+          punti conta lo scontro diretto; tra tre o più, i punti negli scontri tra loro e poi la differenza game. Una partita giocata in anticipo
+          entra in classifica quando inizia la sua giornata.{q > 0 && ` I primi ${q} vanno alla fase finale.`}
         </div>
       </div>
         </>

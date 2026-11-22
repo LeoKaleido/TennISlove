@@ -28,6 +28,7 @@ Il dettaglio algoritmico (formule, validazione, esempi verificati) sta in `04-fl
 - **Chi decide**: i due giocatori concordano giorno e ora e scelgono il circolo più comodo per entrambi. *(PDF)*
 - **Circoli**: quelli in elenco, ma si può giocare anche in **campi non in lista**. *(G-26/10, D-040)*
   - Elenco 2026/27: Tennis Country (ex 3T), Tennis Training School, Sporting Club Torgiano, ASD Mariquita Sporting Club, Gryphus Sporting Club, Pattol Club, Centro Sportivo Tennis Chiugiana, Circolo Tennis Foligno, CUS Perugia. Dettagli e link in `reference/torneo-2026-27.md`.
+- **Anticipi**: liberi, una partita si può giocare prima della settimana della sua giornata (per la classifica vedi §5). *(D-077)*
 - **Rinvii**: liberi, li gestiscono i giocatori. Nessuna approvazione, scadenza o penalità. *(D-012, D-018)*
 - **Partita mai giocata**: resta senza risultato e non assegna punti. *(D-018)*
 
@@ -70,6 +71,7 @@ Il dettaglio algoritmico (formule, validazione, esempi verificati) sta in `04-fl
   2. se la parità persiste, differenza game complessiva.
   - Se il criterio 1 separa solo alcuni, quelli rimasti pari passano direttamente al criterio 2, senza tornare allo scontro diretto.
 - **Parità dopo tutti i criteri**: stessa posizione. *(G-26/10)*
+- **Partite giocate in anticipo**: si possono giocare prima della loro settimana, ma entrano in classifica solo quando inizia la loro giornata; fino ad allora i punti si vedono a parte. A torneo concluso contano tutte. *(D-077, da confermare con Giuseppe)*
 - **Quando conta**: gli spareggi pesano davvero a campionato concluso; durante il torneo servono solo a leggere la classifica. *(G-26/10)*
 
 ## 6. Risultati: inserimento e conferma

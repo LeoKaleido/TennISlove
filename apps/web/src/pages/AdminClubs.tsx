@@ -12,6 +12,7 @@ interface ClubRow {
   name: string;
   city: string | null;
   mapsUrl: string | null;
+  phone: string | null;
   active: boolean;
   matches: number;
   /** posizione per il meteo ricavata dal link o dalla città (D-065) */
@@ -43,7 +44,7 @@ export function AdminClubs() {
           <thead>
             <tr>
               <th>Circolo</th>
-              <th>Città</th>
+              <th>Telefono</th>
               <th>Superfici</th>
               <th>Meteo</th>
               <th>Partite</th>
@@ -54,14 +55,20 @@ export function AdminClubs() {
           <tbody>
             {clubs.data.map((c) => (
               <tr key={c.id} style={{ opacity: c.active ? 1 : 0.55 }}>
-                <td style={{ fontWeight: 700 }}>{c.name}</td>
-                <td className="muted" style={{ fontSize: 13 }}>
-                  {c.city ?? '-'}
+                {/* la città sotto il nome: con il telefono (D-077) la tabella non sta più in larghezza */}
+                <td style={{ whiteSpace: 'normal', minWidth: 150 }}>
+                  <div style={{ fontWeight: 700 }}>{c.name}</div>
+                  {c.city && (
+                    <div className="muted" style={{ fontSize: 12.5, marginTop: 2 }}>
+                      {c.city}
+                    </div>
+                  )}
                 </td>
-                <td style={{ fontSize: 12.5, color: c.surfaces.length ? 'var(--ink2)' : 'var(--warnFg)', fontWeight: c.surfaces.length ? 400 : 600 }}>
+                <td style={{ fontSize: 13, whiteSpace: 'nowrap', color: c.phone ? 'var(--ink2)' : 'var(--warnFg)', fontWeight: c.phone ? 400 : 600 }}>{c.phone ?? 'Da indicare'}</td>
+                <td style={{ whiteSpace: 'normal', minWidth: 110, fontSize: 12.5, color: c.surfaces.length ? 'var(--ink2)' : 'var(--warnFg)', fontWeight: c.surfaces.length ? 400 : 600 }}>
                   {c.surfaces.length ? c.surfaces.map((s) => SURFACE_LABEL[s]).join(', ') : 'Da indicare'}
                 </td>
-                <td style={{ fontSize: 12.5, fontWeight: 600, color: c.located ? 'var(--accent)' : 'var(--warnFg)' }}>
+                <td style={{ whiteSpace: 'normal', minWidth: 90, fontSize: 12.5, fontWeight: 600, color: c.located ? 'var(--accent)' : 'var(--warnFg)' }}>
                   {c.located ? 'Disponibile' : 'Posizione non trovata'}
                 </td>
                 <td style={{ fontSize: 13 }}>{c.matches}</td>
@@ -94,6 +101,7 @@ function ClubDialog({ club, onClose }: { club: ClubRow | null; onClose: () => vo
   const [name, setName] = useState(club?.name ?? '');
   const [city, setCity] = useState(club?.city ?? '');
   const [mapsUrl, setMapsUrl] = useState(club?.mapsUrl ?? '');
+  const [phone, setPhone] = useState(club?.phone ?? '');
   const [active, setActive] = useState(club?.active ?? true);
   const [surfaces, setSurfaces] = useState<Surface[]>(club?.surfaces ?? []);
 
@@ -105,7 +113,7 @@ function ClubDialog({ club, onClose }: { club: ClubRow | null; onClose: () => vo
 
   const save = useMutation({
     mutationFn: () => {
-      const body = { name, city: city || null, mapsUrl: mapsUrl || null, active, surfaces };
+      const body = { name, city: city || null, mapsUrl: mapsUrl || null, phone: phone.trim() || null, active, surfaces };
       return club ? api(`/api/admin/clubs/${club.id}`, { method: 'PATCH', body }) : api('/api/admin/clubs', { method: 'POST', body });
     },
     onSuccess: () => {
@@ -139,6 +147,7 @@ function ClubDialog({ club, onClose }: { club: ClubRow | null; onClose: () => vo
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12 }}>
           <TextField label="Nome" style={{ height: 48 }} value={name} onChange={(e) => setName(e.target.value)} autoFocus />
           <TextField label="Città" style={{ height: 48 }} value={city} onChange={(e) => setCity(e.target.value)} />
+          <TextField label="Telefono" style={{ height: 48 }} type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="075 123 4567" />
         </div>
         <TextField label="Link Google Maps" style={{ height: 48 }} type="url" value={mapsUrl} onChange={(e) => setMapsUrl(e.target.value)} placeholder="https://maps.google.com/…" />
         <span className="faint" style={{ fontSize: 12.5, marginTop: -6 }}>

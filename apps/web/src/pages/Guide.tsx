@@ -69,8 +69,8 @@ const SECTIONS: Section[] = [
     images: ['programma'],
     body: (
       <>
-        <p>Ogni giornata dura una settimana: tu e il tuo avversario decidete giorno, ora e circolo. Dalla partita tocca “Programma la partita”, scegli il giorno (o “Altra data” se giocate dopo la settimana), l’ora e il circolo, oppure scrivi tu dove giocate se il campo non è in lista. Se il circolo ha campi diversi (terra, cemento, erba sintetica…) scegli anche la superficie; se ne ha uno solo è già indicata.</p>
-        <p>Salvando, a entrambi arriva un’email con il file da aggiungere al calendario del telefono. Se non riuscite a giocare, “Segna come rinviata”: la partita si recupera quando volete. Se invece volete solo ripartire da zero, “Togli dal programma” la riporta da programmare; se l’avevate aggiunta al calendario del telefono, toglietela da lì.</p>
+        <p>Ogni giornata dura una settimana: tu e il tuo avversario decidete giorno, ora e circolo. Dalla partita tocca “Programma la partita”, scegli il giorno (o “Altra data” se giocate in un’altra settimana, anche prima), l’ora e il circolo, oppure scrivi tu dove giocate se il campo non è in lista. Accanto ai circoli c’è il numero di telefono: toccalo per chiamare e prenotare il campo. Se il circolo ha campi diversi (terra, cemento, erba sintetica…) scegli anche la superficie; se ne ha uno solo è già indicata.</p>
+        <p>Salvando, a entrambi arriva un’email con il file da aggiungere al calendario del telefono. Finché non c’è il risultato puoi cambiare giorno, ora o circolo con “Modifica programma”. Se non riuscite a giocare, “Segna come rinviata”: la partita si recupera quando volete. Se invece volete solo ripartire da zero, “Togli dal programma” la riporta da programmare; se l’avevate aggiunta al calendario del telefono, toglietela da lì.</p>
       </>
     ),
   },
@@ -81,7 +81,7 @@ const SECTIONS: Section[] = [
     body: (
       <p>
         Tocca una partita ovunque nell’app per aprirla: chi gioca, quando e dove, il <a href="#meteo">meteo</a>, il risultato con i punti, le foto e i <a href="#pronostici">pronostici</a> degli altri. Sulle tue partite da giocare c’è anche{' '}
-        <a href="#simulatore">“Cosa ti serve”</a>. Il nome del circolo apre la mappa.
+        <a href="#simulatore">“Cosa ti serve”</a>. Il nome del circolo apre la mappa, il suo telefono lo chiama.
       </p>
     ),
   },
@@ -137,7 +137,7 @@ const SECTIONS: Section[] = [
     images: ['classifica'],
     body: (
       <p>
-        I giocatori in ordine di punti. A pari punti conta lo scontro diretto; tra tre o più, i punti negli scontri tra loro e poi la differenza game. Tocca un giocatore per vedere i dettagli. La linea segna chi andrebbe alla fase finale. In alto puoi passare alla classifica dei{' '}
+        I giocatori in ordine di punti. A pari punti conta lo scontro diretto; tra tre o più, i punti negli scontri tra loro e poi la differenza game. Una partita giocata in anticipo, prima della settimana della sua giornata, entra in classifica quando quella settimana inizia: fino ad allora i suoi punti si vedono a parte (“+ pt in anticipo” e, su computer, la colonna “Tot”). Tocca un giocatore per vedere i dettagli. La linea segna chi andrebbe alla fase finale. In alto puoi passare alla classifica dei{' '}
         <a href="#pronostici">pronostici</a>.
       </p>
     ),

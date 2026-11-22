@@ -8,6 +8,11 @@ export interface StandingsMatch {
   playerAId: string;
   playerBId: string;
   score: MatchScoreInput;
+  /**
+   * giocata in anticipo, prima che inizi la sua giornata (D-077): non conta in classifica
+   * finché non arriva la sua settimana; i punti finiscono solo in `aheadPoints`
+   */
+  ahead?: boolean;
 }
 
 export type Zone = 'TOP' | 'CUT_TIE' | 'OUT' | 'TBD';
@@ -27,6 +32,10 @@ export interface StandingRow {
   /** bonus vittoria + compensazioni */
   bonus: number;
   zone: Zone;
+  /** partite giocate in anticipo, non ancora in classifica (D-077) */
+  aheadPlayed: number;
+  /** punti di quelle partite: con `points` fanno i punti di tutte le partite giocate */
+  aheadPoints: number;
 }
 
 export interface StandingsOptions {
@@ -59,6 +68,8 @@ export function computeStandings(
       gamesDiff: 0,
       bonus: 0,
       zone: 'TBD',
+      aheadPlayed: 0,
+      aheadPoints: 0,
     });
   }
 
@@ -78,6 +89,13 @@ export function computeStandings(
     const a = rows.get(match.playerAId);
     const b = rows.get(match.playerBId);
     if (!a || !b) continue;
+    if (match.ahead) {
+      a.aheadPlayed++;
+      b.aheadPlayed++;
+      a.aheadPoints += ev.pointsA;
+      b.aheadPoints += ev.pointsB;
+      continue;
+    }
 
     a.played++;
     b.played++;

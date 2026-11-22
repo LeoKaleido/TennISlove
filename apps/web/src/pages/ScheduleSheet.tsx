@@ -65,13 +65,14 @@ export function ScheduleSheet({
 
   const date = otherOn ? otherDate || null : day;
   const outside = !!date && date > round.endsOn;
-  const before = !!date && date < round.startsOn;
+  // prima della settimana si può (partita anticipata): conta in classifica da quando inizia la sua giornata (D-077)
+  const ahead = !!date && date < round.startsOn;
   const place = venueOn ? venue.trim().length >= 2 : !!clubId;
   // superfici tra cui scegliere: quelle del circolo; con un campo fuori lista tutte (facoltativa)
   const club = venueOn ? undefined : clubs.find((c) => c.id === clubId);
   const offered: readonly Surface[] = venueOn ? SURFACES : (club?.surfaces ?? []);
   const chosen = offered.length === 1 && !venueOn ? offered[0]! : surface && offered.includes(surface) ? surface : null;
-  const ready = !!date && !!time && place && !before && (venueOn || offered.length <= 1 || !!chosen);
+  const ready = !!date && !!time && place && (venueOn || offered.length <= 1 || !!chosen);
 
   const save = useMutation({
     mutationFn: () =>
@@ -141,11 +142,11 @@ export function ScheduleSheet({
               Altra data
             </button>
             {otherOn && (
-              <input className="input" type="date" value={otherDate} min={round.startsOn} onChange={(e) => setOtherDate(e.target.value)} style={{ height: 40, borderRadius: 12, fontSize: 14 }} />
+              <input className="input" type="date" value={otherDate} onChange={(e) => setOtherDate(e.target.value)} style={{ height: 40, borderRadius: 12, fontSize: 14 }} />
             )}
           </div>
           {outside && <div className="note note-warn">È dopo la settimana della giornata {round.number}: la partita risulterà rinviata.</div>}
-          {before && <div className="note note-err">La giornata {round.number} inizia {formatDayWithWeekday(round.startsOn)}.</div>}
+          {ahead && <div className="note note-info">Partita in anticipo: conta in classifica da {formatDayWithWeekday(round.startsOn)}, quando inizia la giornata {round.number}.</div>}
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -172,24 +173,37 @@ export function ScheduleSheet({
           <div className="card" style={{ borderRadius: 16 }}>
             {clubs.map((c) => {
               const on = !venueOn && clubId === c.id;
+              // il telefono sta fuori dal pulsante di scelta: si chiama il circolo prima di decidere (D-077)
               return (
-                <button
-                  key={c.id}
-                  className="list-row"
-                  onClick={() => {
-                    setClubId(c.id);
-                    setVenueOn(false);
-                  }} style={{ padding: '11px 14px', background: on ? 'color-mix(in oklch, var(--mint) 35%, transparent)' : undefined }}>
-                  <span style={{ width: 20, height: 20, borderRadius: '50%', flex: 'none', border: on ? '6px solid var(--accent)' : '2px solid var(--line2)', background: 'var(--surface)' }} />
-                  <span style={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                    <span style={{ fontWeight: 700, fontSize: 14.5 }}>{c.name}</span>
-                    {c.city && (
-                      <span className="muted" style={{ fontSize: 12 }}>
-                        {c.city}
-                      </span>
-                    )}
-                  </span>
-                </button>
+                <div key={c.id} className="list-row" style={{ padding: 0, gap: 0, background: on ? 'color-mix(in oklch, var(--mint) 35%, transparent)' : undefined }}>
+                  <button
+                    className="list-row"
+                    onClick={() => {
+                      setClubId(c.id);
+                      setVenueOn(false);
+                    }}
+                    style={{ flex: 1, minWidth: 0, padding: '11px 14px' }}
+                  >
+                    <span style={{ width: 20, height: 20, borderRadius: '50%', flex: 'none', border: on ? '6px solid var(--accent)' : '2px solid var(--line2)', background: 'var(--surface)' }} />
+                    <span style={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                      <span style={{ fontWeight: 700, fontSize: 14.5 }}>{c.name}</span>
+                      {c.city && (
+                        <span className="muted" style={{ fontSize: 12 }}>
+                          {c.city}
+                        </span>
+                      )}
+                    </span>
+                  </button>
+                  {c.phone && (
+                    <a
+                      href={`tel:${c.phone.replace(/[^0-9+]/g, '')}`}
+                      aria-label={`Chiama ${c.name}, ${c.phone}`}
+                      style={{ flex: 'none', margin: '0 12px 0 4px', padding: '6px 10px', borderRadius: 10, border: '1.5px solid var(--line2)', color: 'var(--accent)', fontWeight: 700, fontSize: 12.5, whiteSpace: 'nowrap', textDecoration: 'none' }}
+                    >
+                      {c.phone}
+                    </a>
+                  )}
+                </div>
               );
             })}
             <button className="list-row" onClick={() => {

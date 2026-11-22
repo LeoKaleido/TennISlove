@@ -119,3 +119,27 @@ describe('spareggi', () => {
     expect(rows.every((r) => r.points === 19 && r.position === 1)).toBe(true);
   });
 });
+
+describe('partite giocate in anticipo (D-077)', () => {
+  // giuseppe gioca e perde in anticipo tre partite di giornate future: i game fatti non lo portano in testa
+  const ahead = (m: StandingsMatch): StandingsMatch => ({ ...m, ahead: true });
+  const rows = computeStandings(PLAYERS, [
+    match('marco', 'michele', [6, 1], [6, 3]),
+    ahead(match('giuseppe', 'luca', [4, 6], [4, 6])),
+    ahead(match('giuseppe', 'federico', [5, 7], [4, 6])),
+    ahead(match('giuseppe', 'gennaro', [4, 6], [3, 6])),
+  ]);
+  const by = (id: string) => rows.find((r) => r.playerId === id)!;
+
+  it('non contano in punti, partite e scontri diretti', () => {
+    expect(by('giuseppe')).toMatchObject({ points: 0, played: 0, gamesWon: 0, position: 3 });
+    expect(by('luca')).toMatchObject({ points: 0, played: 0 });
+    expect(by('marco')).toMatchObject({ points: 15, position: 1 });
+  });
+
+  it('i loro punti restano a parte', () => {
+    expect(by('giuseppe')).toMatchObject({ aheadPlayed: 3, aheadPoints: 24 });
+    expect(by('luca')).toMatchObject({ aheadPlayed: 1, aheadPoints: 15 });
+    expect(by('marco')).toMatchObject({ aheadPlayed: 0, aheadPoints: 0 });
+  });
+});
