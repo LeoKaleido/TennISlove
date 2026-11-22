@@ -6,6 +6,7 @@ import { InstallBanner, lockPageScroll, MadeBy, Splash, TabBar, useClosing, useD
 import { useMe, useSeason } from './data';
 import { AdminPage } from './pages/Admin';
 import { CalendarPage } from './pages/Calendar';
+import { ClubsPage } from './pages/Clubs';
 import { ConfirmPage } from './pages/Confirm';
 import { GalleryPage } from './pages/Gallery';
 import { HomePage } from './pages/Home';
@@ -150,6 +151,7 @@ export function App() {
             <Route path="/classifica" element={<StandingsPage />} />
             <Route path="/calendario" element={<CalendarPage />} />
             <Route path="/gallery" element={<GalleryPage />} />
+            <Route path="/circoli" element={<ClubsPage />} />
             <Route path="/profilo" element={<ProfilePage />} />
             <Route path="/giocatori/:id" element={<ProfilePage />} />
             <Route path="/confronto/:a/:b" element={<ComparePage />} />

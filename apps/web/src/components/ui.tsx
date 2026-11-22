@@ -227,6 +227,16 @@ const TABS = [
       </>
     ),
   },
+  {
+    to: '/circoli',
+    label: 'Circoli',
+    icon: (
+      <>
+        <path d="M12 21s-7-6.2-7-11.5a7 7 0 0114 0C19 14.8 12 21 12 21z" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinejoin="round" />
+        <circle cx="12" cy="9.5" r="2.6" fill="currentColor" />
+      </>
+    ),
+  },
 ];
 
 /**

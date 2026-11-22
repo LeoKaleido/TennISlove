@@ -44,7 +44,7 @@ Area personale del giocatore, dopo il login:
 Per l'organizzatore (Giuseppe e chi gestisce l'app):
 - **Torneo/stagione**: crea il torneo, imposta le date, le pause e la fase (girone, fase finale).
 - **Giocatori**: anagrafica (nome, cognome, nome breve, email, foto), invito via email.
-- **Circoli**: lista dei circoli in cui si gioca (nome, indirizzo, telefono, link mappa).
+- **Circoli**: lista dei circoli in cui si gioca (nome, indirizzo, telefono, link mappa); nel sito la pagina "Circoli" li mostra con superfici, partite del torneo, "Chiama" e "Mappa" (D-079).
 - **Calendario**: importa/genera le giornate, sposta una partita da una settimana all'altra.
 - **Import Excel** (D-026): carica un file nello stesso formato dell'Excel del cliente (`ATP_Umbria_calendario_classifica_OK.xlsm`, foglio `Calendario`, ID partita `Gnn-mm`) per aggiornare risultati e calendario in blocco, con anteprima delle differenze prima di applicare.
 - **Risultati**: correzione o annullamento di qualsiasi risultato, risoluzione delle contestazioni, conferma forzata.

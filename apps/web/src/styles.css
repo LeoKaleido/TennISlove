@@ -2867,3 +2867,10 @@ textarea.input {
     transform: scale(0.85);
   }
 }
+
+/* Circoli (D-079): una colonna sul telefono, più colonne quando c'è spazio */
+.clubs-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+  gap: 12px;
+}
