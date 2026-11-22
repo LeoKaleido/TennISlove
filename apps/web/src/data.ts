@@ -174,19 +174,13 @@ export function playedOn(m: Match, rounds: Round[]): string | null {
   return endsOn && endsOn < submitted ? endsOn : submitted;
 }
 
-/** Partita della giornata non ancora iniziata (giocata in anticipo): fuori classifica finché non arriva la sua settimana (D-077) */
-export function isAhead(m: Pick<Match, 'round' | 'phase'>, data: Pick<SeasonOverview, 'rounds' | 'season'>) {
-  const startsOn = data.rounds.find((r) => r.number === m.round && r.phase === m.phase)?.startsOn;
-  return data.season.status === 'ACTIVE' && !!startsOn && startsOn > today();
-}
-
 /** Classifica a fine di ogni giornata del girone iniziata finora (D-064) */
 export function timelineFor(data: SeasonOverview) {
   const matches = data.matches.flatMap((m) => {
     const r = m.result;
     const day = playedOn(m, data.rounds);
     return m.phase === 'ROUND_ROBIN' && r && day && COUNTS_IN_STANDINGS.includes(r.status)
-      ? [{ playerAId: m.playerAId, playerBId: m.playerBId, score: r, playedOn: day, roundStartsOn: data.rounds.find((x) => x.number === m.round && x.phase === m.phase)?.startsOn }]
+      ? [{ playerAId: m.playerAId, playerBId: m.playerBId, score: r, playedOn: day }]
       : [];
   });
   return standingsTimeline(

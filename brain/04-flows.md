@@ -28,7 +28,7 @@ Il form mostra il telefono dei circoli che ce l'hanno (D-077): si tocca e si chi
 
 Casi limite:
 - data dopo la settimana della giornata → la partita diventa **rinviata** (§2bis), con avviso esplicito nel form.
-- data prima della settimana della giornata → si può (D-077): il form avvisa che conta in classifica da quando inizia la giornata (§5.4).
+- data prima della settimana della giornata → si può (D-077): il form avvisa che è una partita in anticipo.
 
 ## 2bis. Rinvio di una partita (D-012)
 **Attori**: uno dei due giocatori; admin.
@@ -137,7 +137,7 @@ Solo le partite "OK":
 - game fatti, game subiti, differenza game;
 - bonus e compensazioni (somma dei +3 e delle compensazioni);
 - **punti = game fatti + bonus e compensazioni**.
-- Partite **in anticipo** (giornata non ancora iniziata, torneo in corso, D-077): fuori da tutto il conteggio, scontri diretti compresi; i loro punti vanno in `aheadPoints` (e `aheadPlayed`). Il totale "Tot" della classifica è `points + aheadPoints`.
+- Partite **in anticipo** (giornata non ancora iniziata, torneo in corso, D-077, D-078): contano come le altre; i loro punti si sommano anche in `aheadPoints` (e `aheadPlayed`). I punti "a oggi" della colonna "Pt" sono `points - aheadPoints`; l'ordine è sul totale "Tot".
 
 ### 5.5 Ordinamento e parità
 1. Ordine per punti decrescenti.

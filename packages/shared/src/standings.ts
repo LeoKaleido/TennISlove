@@ -9,8 +9,8 @@ export interface StandingsMatch {
   playerBId: string;
   score: MatchScoreInput;
   /**
-   * giocata in anticipo, prima che inizi la sua giornata (D-077): non conta in classifica
-   * finché non arriva la sua settimana; i punti finiscono solo in `aheadPoints`
+   * giocata in anticipo, prima che inizi la sua giornata (D-077): conta in classifica come le altre,
+   * e i suoi punti si contano anche in `aheadPoints` (i punti "a oggi" sono `points - aheadPoints`)
    */
   ahead?: boolean;
 }
@@ -32,9 +32,9 @@ export interface StandingRow {
   /** bonus vittoria + compensazioni */
   bonus: number;
   zone: Zone;
-  /** partite giocate in anticipo, non ancora in classifica (D-077) */
+  /** partite giocate in anticipo, di giornate non ancora iniziate (D-077), già comprese nei totali */
   aheadPlayed: number;
-  /** punti di quelle partite: con `points` fanno i punti di tutte le partite giocate */
+  /** punti di quelle partite, già compresi in `points` */
   aheadPoints: number;
 }
 
@@ -94,7 +94,6 @@ export function computeStandings(
       b.aheadPlayed++;
       a.aheadPoints += ev.pointsA;
       b.aheadPoints += ev.pointsB;
-      continue;
     }
 
     a.played++;

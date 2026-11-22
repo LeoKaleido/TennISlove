@@ -71,7 +71,7 @@ Il dettaglio algoritmico (formule, validazione, esempi verificati) sta in `04-fl
   2. se la parità persiste, differenza game complessiva.
   - Se il criterio 1 separa solo alcuni, quelli rimasti pari passano direttamente al criterio 2, senza tornare allo scontro diretto.
 - **Parità dopo tutti i criteri**: stessa posizione. *(G-26/10)*
-- **Partite giocate in anticipo**: si possono giocare prima della loro settimana, ma entrano in classifica solo quando inizia la loro giornata; fino ad allora i punti si vedono a parte. A torneo concluso contano tutte. *(D-077, da confermare con Giuseppe)*
+- **Partite giocate in anticipo**: contano in classifica subito, come le altre. Finché la loro giornata non è iniziata, accanto al totale si vedono anche i punti "a oggi", senza di loro. *(D-078)*
 - **Quando conta**: gli spareggi pesano davvero a campionato concluso; durante il torneo servono solo a leggere la classifica. *(G-26/10)*
 
 ## 6. Risultati: inserimento e conferma

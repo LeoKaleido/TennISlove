@@ -140,7 +140,7 @@ export async function seasonOverview(season: Season, viewerPlayerId: string | nu
     ...toView(m),
     predictions: predictionsView(m, predsOf(m.id), viewerPlayerId, playerIds, season.status === 'ACTIVE'),
   }));
-  // a torneo concluso contano tutte; mentre è in corso quelle in anticipo aspettano la loro giornata (D-077)
+  // la classifica conta tutte le partite giocate; quelle in anticipo hanno anche un conto a parte, per i punti "a oggi" (D-077)
   const today = romeDay(new Date());
   const ahead = (startsOn: string) => season.status === 'ACTIVE' && startsOn > today;
   const standings = computeStandings(

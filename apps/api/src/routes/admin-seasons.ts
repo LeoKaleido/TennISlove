@@ -141,8 +141,7 @@ export async function adminSeasonRoutes(app: FastifyInstance) {
   app.post<{ Params: { id: string } }>('/api/admin/seasons/:id/archive', async (req, reply) => {
     const season = await db.season.findUnique({ where: { id: req.params.id } });
     if (!season) return reply.code(404).send({ error: 'Torneo non trovato' });
-    // la classifica finale, con tutte le partite (anche quelle giocate in anticipo, D-077)
-    const { standings } = await seasonOverview({ ...season, status: 'ARCHIVED' });
+    const { standings } = await seasonOverview(season);
     const leaders = standings.filter((s) => s.position === 1);
     const championPlayerId = leaders.length === 1 && leaders[0]!.points > 0 ? leaders[0]!.playerId : null;
     await db.season.update({ where: { id: season.id }, data: { status: 'ARCHIVED', championPlayerId } });

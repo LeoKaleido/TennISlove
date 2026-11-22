@@ -137,7 +137,7 @@ const SECTIONS: Section[] = [
     images: ['classifica'],
     body: (
       <p>
-        I giocatori in ordine di punti. A pari punti conta lo scontro diretto; tra tre o più, i punti negli scontri tra loro e poi la differenza game. Una partita giocata in anticipo, prima della settimana della sua giornata, entra in classifica quando quella settimana inizia: fino ad allora i suoi punti si vedono a parte (“+ pt in anticipo” e, su computer, la colonna “Tot”). Tocca un giocatore per vedere i dettagli. La linea segna chi andrebbe alla fase finale. In alto puoi passare alla classifica dei{' '}
+        I giocatori in ordine di punti. A pari punti conta lo scontro diretto; tra tre o più, i punti negli scontri tra loro e poi la differenza game. Una partita giocata in anticipo, prima della settimana della sua giornata, conta subito; finché quella settimana non inizia vedi anche i punti “a oggi”, senza le partite in anticipo (sotto il nome e, su computer, nella colonna “Pt” accanto al totale “Tot”). Tocca un giocatore per vedere i dettagli. La linea segna chi andrebbe alla fase finale. In alto puoi passare alla classifica dei{' '}
         <a href="#pronostici">pronostici</a>.
       </p>
     ),

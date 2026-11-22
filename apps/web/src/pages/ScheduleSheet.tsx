@@ -65,7 +65,7 @@ export function ScheduleSheet({
 
   const date = otherOn ? otherDate || null : day;
   const outside = !!date && date > round.endsOn;
-  // prima della settimana si può (partita anticipata): conta in classifica da quando inizia la sua giornata (D-077)
+  // prima della settimana si può: partita in anticipo (D-077)
   const ahead = !!date && date < round.startsOn;
   const place = venueOn ? venue.trim().length >= 2 : !!clubId;
   // superfici tra cui scegliere: quelle del circolo; con un campo fuori lista tutte (facoltativa)
@@ -146,7 +146,7 @@ export function ScheduleSheet({
             )}
           </div>
           {outside && <div className="note note-warn">È dopo la settimana della giornata {round.number}: la partita risulterà rinviata.</div>}
-          {ahead && <div className="note note-info">Partita in anticipo: conta in classifica da {formatDayWithWeekday(round.startsOn)}, quando inizia la giornata {round.number}.</div>}
+          {ahead && <div className="note note-info">Partita in anticipo: la giornata {round.number} inizia {formatDayWithWeekday(round.startsOn)}.</div>}
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>

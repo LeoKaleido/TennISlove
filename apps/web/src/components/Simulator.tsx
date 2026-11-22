@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { COUNTS_IN_STANDINGS, evaluateMatch, SCENARIOS, scenarioScore, standingsIf } from '@tentennis/shared';
 import type { Match, SeasonOverview } from '../api';
-import { isAhead, opponentOf, playerIndex } from '../data';
+import { opponentOf, playerIndex } from '../data';
 import { Avatar, Collapse } from './ui';
 
 /** Freccia e numero di posizioni guadagnate o perse */
@@ -22,7 +22,7 @@ export function Simulator({ match, data, myId }: { match: Match; data: SeasonOve
   const opts = { qualifiers: data.season.qualifiers };
   const played = data.matches
     .filter((m) => m.phase === 'ROUND_ROBIN' && m.result && COUNTS_IN_STANDINGS.includes(m.result.status))
-    .map((m) => ({ playerAId: m.playerAId, playerBId: m.playerBId, score: m.result!, ahead: isAhead(m, data) }));
+    .map((m) => ({ playerAId: m.playerAId, playerBId: m.playerBId, score: m.result! }));
   const now = (id: string) => data.standings.find((r) => r.playerId === id)!;
 
   const rows = SCENARIOS.map((s) => {
